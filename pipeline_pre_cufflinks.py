@@ -22,7 +22,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 bamout = '%s/bamout.bam' %C.outdir;
 
-cmds = [ 'bamtools merge %s -out %s' % (' -in '.join([''] + C.star_al_output()), bamout),
+cmds = [ 'bamtools merge %s -out %s' % (' -in '.join([''] + C.post_star_al_output()), bamout),
          'bamtools sort -in %s -out %s' % (bamout, C.pre_cufflinks_output()),
          'rm %s' % (bamout) ];
 

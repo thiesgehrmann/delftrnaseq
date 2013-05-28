@@ -9,7 +9,7 @@ import shlex, subprocess
 
 class PIPELINECONF:
 
-  inst_loc = "/home/nfs/thiesgehrmann/groups/w/phd/tasks/rnaseq_pipeline/python" 
+  inst_loc = None;
 
   #############################################################################
   # DATA                                                                      #
@@ -25,13 +25,13 @@ class PIPELINECONF:
   sample_names   = []
   genome         = []
   genome_annot   = None;
-  guide_annot    = None;
+  genome_guide   = None;
 
   #############################################################################
   # INTERNALS                                                                 #
   #############################################################################
 
-  __pipeline_email__       = 'delftrnaseq@gmail.com';;
+  __pipeline_email__       = 'delftrnaseq@gmail.com';
   __pipeline_mail_user__   = 'delftrnaseq';
   __pipeline_mail_pass__   = 'thiesgehrmann';
   __pipeline_main_server__ = 'smtp.gmail.com:587';
@@ -65,21 +65,26 @@ class PIPELINECONF:
   #############################################################################
 
   star_al_opts="--runThreadN 16";
-  
 
-  def star_al_output_name(self):
-    return [ self.outdir + "/%s.sort_name.bam" % sn for sn in self.sample_names ];
-  #edef
-  def star_al_output_chr(self):
-    return [ self.outdir + "/%s.sort_chr.bam"  % sn for sn in self.sample_names ];
+  def star_al_output_sam(self):
+    return [ self.outdir + '/%s.star_align.sam' % sn for sn in self.sample_names ];
   #edef
   def star_al_output_unmapped(self):
     return [ (self.outdir + "/%s.star_align_unmapped_R1.fastq" % sn, self.outdir + "/%s.star_align_unmapped_R2.fastq" % sn) for sn in self.sample_names ];
   #edef
 
   #############################################################################
+  # POST STAR AL STUFF                                                        #
+  #############################################################################
+
+  def post_star_al_output(self):
+    return [ self.outdir + "/%s.star_align_sort_name.bam" % sn for sn in self.sample_names ];
+  #edef
+
+  #############################################################################
   # GENOME GENERATION STUFF                                                   #
   #############################################################################
+
   def genome_gen_output(self):
     return self.outdir + '/genome.gff';
   #edef
@@ -111,7 +116,7 @@ class PIPELINECONF:
 
   cuffdiff_opts = "";
   def cuffdiff_output(self):
-    return "somethingidontknow"
+    return ["somethingidontknow"];
   #edef
 
   #############################################################################
@@ -180,8 +185,8 @@ class PIPELINECONF:
     #efor
     self.genome = genome
 
-    self.genome_annot = wd + '/' + self.genome_annot;
-    self.genome_guide = wd + '/' + self.genome_guide;
+    self.genome_annot = wd + '/' + self.genome_annot if self.genome_annot else None;
+    self.genome_guide = wd + '/' + self.genome_guide if self.genome_guide else None;
   #edef
 
   #############################################################################
@@ -191,7 +196,7 @@ class PIPELINECONF:
     errors   = 0
     warnings = 0
 
-    if self.genome_annot == None && self.genome_guide == None:
+    if (self.genome_annot == None) and (self.genome_guide == None):
       warnings = warnings + 1;
       warning("No Genome annotation given, please set 'genome_annot' or 'genome_guide' variables");
     #fi

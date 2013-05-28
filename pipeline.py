@@ -65,7 +65,7 @@ class makefile:
 execfile(os.sys.argv[1]);
 
 C = config()
-
+C.inst_loc = install_loc;
 C.wd_correct()
 C.data_check()
 C.location = C.pickle();
@@ -78,15 +78,15 @@ M.add_var('outdir', C.outdir);
 M.add_step("TRIMMOMATIC", (' '.join(flatten(C.samples))), (' '.join(flatten(C.trimmomatic_output()))), 'pipeline_trimmomatic.py');
 M.add_step("STAR_GG", (' '.join(flatten(C.genome))),  C.star_gg_output(), 'pipeline_star_genome_generate.py');
 
-M.add_var("STAR_AL_OUTPUT_NAME", ' '.join(C.star_al_output_name()));
-M.add_var("STAR_AL_OUTPUT_CHR", ' '.join(C.star_al_output_chr()));
+M.add_var("STAR_AL_OUTPUT_SAM", ' '.join(C.star_al_output_sam()));
 M.add_var("STAR_AL_OUTPUT_UNMAPPED", ' '.join(flatten(C.star_al_output_unmapped())));
-M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_NAME} ${STAR_AL_OUTPUT_CHR} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');
+M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_SAM} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');
+M.add_step("POST_STAR_AL", "${STAR_AL_OUTPUT_SAM}", ' '.join(C.post_star_al_output()), 'pipeline_post_star_al.py');
 
-M.add_step("PRE_CUFFLINKS", "${STAR_AL_OUTPUT_NAME}", C.pre_cufflinks_output(), 'pipeline_pre_cufflinks.py');
+M.add_step("PRE_CUFFLINKS", "${POST_STAR_AL_OUTPUT}", C.pre_cufflinks_output(), 'pipeline_pre_cufflinks.py');
 M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_OUT} %s" % C.genome_annot, ' '.join(C.cufflinks_output()), 'pipeline_cufflinks.py');
 
-M.add_step("CUFFDIFF", "${STAR_AL_OUTPUT_NAME} ${CUFFLINKS_OUT}", ' '.join(C.cuffdiff_output()), 'pipeline_cuffdiff.py');
+M.add_step("CUFFDIFF", "${POST_STAR_AL_OUTPUT} ${CUFFLINKS_OUT}", ' '.join(C.cuffdiff_output()), 'pipeline_cuffdiff.py');
 
 M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.trinity_output()), 'pipeline_trinity.py');
 M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.trinity_orf_output()), 'pipeline_trinity_orf.py');
