@@ -13,7 +13,7 @@ def usage(a1):
 
 if len(os.sys.argv) != 2:
   usage(os.sys.argv[0]);
-  os.sys.exit(1)
+  os.sys.exit(1);
 #fi
 
 C = PIPELINECONF(os.sys.argv[1]);

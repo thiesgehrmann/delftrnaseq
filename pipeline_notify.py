@@ -10,10 +10,10 @@ from pipeline_common import *;
 ###############################################################################
 
 def usage(a1):
-  print "Usage:  %s <config file> <step> <log file>" % a1;
+  print "Usage:  %s <config file> <step> <log file> <status>" % a1;
 #edef
 
-if len(os.sys.argv) != 4:
+if len(os.sys.argv) != 5:
   usage(os.sys.argv[0]);
   os.sys.exit(1);
 #fi
@@ -23,10 +23,12 @@ if len(os.sys.argv) != 4:
 C = PIPELINECONF(os.sys.argv[1]);
 step = os.sys.argv[2];
 logf = os.sys.argv[3];
+stat = os.sys.argv[4];
+#stat = "COMPLETED" if stat == "0" else "FAILED";
 
 try:
-  msg = MIMEText("Step [%s] in '%s' has completed. You can find the standard output in %s.\n" % (step, C.jobname, logf));
-  msg['Subject'] = "%s: [%s] Complete" % (C.jobname, step);
+  msg = MIMEText("Step [%s] in '%s' has %s. You can find the standard output in %s.\n" % (step, C.jobname, stat, logf));
+  msg['Subject'] = "%s: [%s] %s" % (C.jobname, step, stat);
   msg['From']    = C.email;
   msg['To']      = C.email;
 

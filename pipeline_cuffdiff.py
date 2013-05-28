@@ -27,6 +27,7 @@ gtf = "%s/transcripts.gtf" % C.outdir;
 
 
 cmd = "cuffdiff " \
+    + "-L '%s' " % ','.join([str(l) for l in C.sample_labels]), 
     + "%s " % gtf \
     + "%s " % ' '.join(bf);
 

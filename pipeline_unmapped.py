@@ -22,31 +22,30 @@ if len(os.sys.argv) != 2:
   os.sys.exit(1);
 #fi
 
-#C = PIPELINECONF(os.sys.argv[1]);
-#run_cmd('mkdir -p %s' % C.outdir);
+C = PIPELINECONF(os.sys.argv[1]);
+run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-Entrez.email = 'thiesgehrmann@gmail.com' #C.pipeline_email;
+Entrez.email = C.__pipeline_email__;
 
-#ORF = C.trinity_orf_output();
-ORF = [ 'test.fasta' ];
-oo = [ {} for x in ORF ];
+ORF = C.trinity_orf_output();
 
 for i in xrange(len(ORF)):
   fa = ORF[i];
-  sn = ''#C.sample_names[i];
+  sn = C.sample_names[i];
   fo = {};
 
-  print "Reading Fasta File"  
+  print "Finding contaminations for sample %s" % sn;
+  print "Reading Fasta File"; sys.stdout.flush();
   fd = open(fa, 'r');
   S = fd.read();
   fd.close();
 
-  print "Performing BLAST query"
+  print "Performing BLAST query"; sys.stdout.flush();
   handle = NCBIWWW.qblast('blastn', 'nr', S);
 
-  print "Parsing BLAST output";
+  print "Parsing BLAST output"; sys.stdout.flush();
   blastres = NCBIXML.parse(handle);
   gids = [];
   for q in blastres:
@@ -59,7 +58,7 @@ for i in xrange(len(ORF)):
     #fi
   #efor
 
-  print "Determining source organism of hits"
+  print "Determining source organism of hits"; sys.stdout.flush();
   gi_str = ','.join(gids);
   handle  = Entrez.efetch(db="nuccore", id=gi_str, rettype="gb");
   records = SeqIO.parse(handle, "gb");
@@ -73,10 +72,6 @@ for i in xrange(len(ORF)):
     #fi
   #efor
 
-  print i
-  oo[i] = fo;
-  print oo[i];
-
-  pickle.dump(oo, open('otherorgs.py', 'w'));
+  pickle.dump(fo, open('%s/%s.unmapped_orgs.dat' % (C.outdir, sn), 'w'));
 #efor
 

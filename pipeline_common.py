@@ -21,9 +21,10 @@ class PIPELINECONF:
   outdir         = "./"
   makefile       = "Makefile";
   location       = "";
-  samples        = []
-  sample_names   = []
-  genome         = []
+  samples        = [];
+  sample_names   = [];
+  sample_labels  = [];
+  genome         = [];
   genome_annot   = None;
   genome_guide   = None;
 
@@ -34,7 +35,7 @@ class PIPELINECONF:
   __pipeline_email__       = 'delftrnaseq@gmail.com';
   __pipeline_mail_user__   = 'delftrnaseq';
   __pipeline_mail_pass__   = 'thiesgehrmann';
-  __pipeline_main_server__ = 'smtp.gmail.com:587';
+  __pipeline_mail_server__ = 'smtp.gmail.com:587';
  
 
 
@@ -42,7 +43,7 @@ class PIPELINECONF:
   # TRIMM-O-MATIC STUFF                                                       #
   #############################################################################
 
-  trimmomatic_opts="-threads 12 -phred33";
+  trimmomatic_opts="-threads 12";
   trimmomatic_trim="LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36";
 
   def trimmomatic_output(self):
@@ -116,7 +117,7 @@ class PIPELINECONF:
 
   cuffdiff_opts = "";
   def cuffdiff_output(self):
-    return ["somethingidontknow"];
+    return ["somethingidontknow_cd"];
   #edef
 
   #############################################################################
@@ -135,7 +136,7 @@ class PIPELINECONF:
 
   trinity_orf_opts = "";
   def trinity_orf_output(self):
-    return [ ];
+    return [ self.outdir + '/%s.trinity_orfs.fasta' % sn for sn in self.sample_names ];
   #edef
 
   #############################################################################
@@ -144,7 +145,7 @@ class PIPELINECONF:
   
   unmapped_opts = "";
   def unmapped_output(self):
-    return [ ];
+    return [ self.outdir + '/%s.unmapped_orgs.dat' % sn for sn in self.sample_names ];
   #edef
 
   #############################################################################
@@ -210,8 +211,13 @@ class PIPELINECONF:
     if not len(self.samples) == len(self.sample_names):
       warnings = warnings + 1
       self.sample_names = [ "%d" %(i+1) for i in xrange(len(self.samples)) ]
-      warning("Samples names are incorrect")
+      warning("Samples names are set incorrectly. Please set 'sample_names' variable.");
     #fi
+
+    if not len(self.sample_labels) == len(self.samples):
+      warnings = warnings + 1;
+      self.sample_labels = self.sample_names;
+      warning("Sample labels are set incorrectly. Please set 'sample_labels' variable.");
 
       # Check if sample files are there
     for (r1, r2) in self.samples:

@@ -20,7 +20,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-ALN = C.star_al_output();
+ALN = C.star_al_output_sam();
 
 for i in xrange(len(ALN)):
   a  = ALN[i];
@@ -33,6 +33,14 @@ for i in xrange(len(ALN)):
 
   cmds.append("samtools view -Sb '%s' -o '%s'" % (a, nfname));
   cmds.append("samtools sort -n -m 100000000000 '%s' '%s'" % (nfname, sfpref));
+
+  print "Sorting sample %s" % sn;
+  sys.stdout.flush();
+
+  retval = run_seq_cmds(cmds);
+  if retval != 0:
+    sys.exit(retval);
+  #fi
 
 #efor
 
