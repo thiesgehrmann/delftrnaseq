@@ -22,6 +22,9 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ALN = C.star_al_output_sam();
 
+cmds_v = [];
+cmds_s = []
+
 for i in xrange(len(ALN)):
   a  = ALN[i];
   sn = C.sample_names[i];
@@ -29,22 +32,19 @@ for i in xrange(len(ALN)):
   nfname = '%s/%s.star_align.bam' % (C.outdir, sn);
   sfpref = '%s/%s.star_align_sort_name' % (C.outdir, sn);
 
-  cmds = [];
-
-  cmds.append("samtools view -Sb '%s' -o '%s'" % (a, nfname));
-  cmds.append("samtools sort -n -m 100000000000 '%s' '%s'" % (nfname, sfpref));
-
-  print "Sorting sample %s" % sn;
-  sys.stdout.flush();
-
-  retval = run_seq_cmds(cmds);
-  if retval != 0:
-    sys.exit(retval);
-  #fi
+  cmds_v.append("samtools view -Sb '%s' -o '%s'" % (a, nfname));
+  cmds_s.append("samtools sort -n -m 100000000000 '%s' '%s'" % (nfname, sfpref));
 
 #efor
 
-retval = run_seq_cmds(cmds);
+print "Converting SAM to BAM"; sys.stdout.flush();
+retval = run_par_cmds(cmds_v);
+if retval != 0:
+ sys.exit(retval);
+#fi 
+
+print "Sorting BAM files by name"; sys.stdout.flush();
+retval = run_par_cmds(cmds_s);
 if retval != 0:
   sys.exit(retval);
 #fi

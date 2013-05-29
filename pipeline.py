@@ -39,7 +39,6 @@ class makefile:
     #efor
 
     fd.write('\n\n');
-    fd.write('.PHONY : all\n');
     fd.write('all: %s\n\n' % end)
     fd.write('.PHONY : clean\n');
     fd.write('clean : %s\n' % workdir)

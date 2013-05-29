@@ -317,33 +317,48 @@ def error(str):
 
 ###############################################################################
 
-def run_par_cmds(cmd_list):
-
-  for cmd in [ x for x in cmd_list if x ]:
-    subprocess.Popen(shlex.split(cmd));
-  #efor
-  for cmd in [ x for x in cmd_list if x ]:
-    os.wait();
-  #efor
+def run_cmd(cmd, bg=False, stdin=None, stdout=None, stderr=None):
+  p = subprocess.Popen(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr);
+  if bg:
+    return p;
+  else:
+    (pid, r) = os.waitpid(p.pid, 0);
+    return r;
+  #fi
 #edef
 
 ###############################################################################
 
-def run_cmd(cmd, stdin=None, stdout=None, stderr=None):
-  return subprocess.call(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr)
+def run_par_cmds(cmd_list, stdin=None, stdout=None, stderr=None):
+  
+  p = [];
+  retval = 0;
+  
+  for cmd in [ x for x in cmd_list if x ]:
+    p.append(run_cmd(cmd, bg=True, stdin=stdin, stdout=stdout, stderr=stderr));
+  #efor
+
+  for cmd in p:
+    (pid, r) = os.waitpid(cmd.pid, 0);
+    retval = retval + r; 
+  #efor
+  
+  return retval;
 #edef
 
 ###############################################################################
 
-def run_seq_cmds(cmd_list):
+def run_seq_cmds(cmd_list, stdin=None, stdout=None, stderr=None):
+
   for cmd in [ x for x in cmd_list if x ]:
-    retval = run_cmd(cmd);
+    retval = run_cmd(cmd, stdin=stdin, stdout=stdout, stderr=stderr);
     if retval != 0:
       return retval;
     #fi
   #efor
 
   return 0;
+#edef
 
 ###############################################################################
 
