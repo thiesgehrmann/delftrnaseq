@@ -1,15 +1,17 @@
 #!/usr/bin/python
 
-import os
-import types
-import pickle
-import tempfile
-import shlex, subprocess
+import os;
+import sys;
+import types;
+import pickle;
+import tempfile;
+import shlex, subprocess;
+import multiprocessing;
+import time;
+
 ###############################################################################
 
 class PIPELINECONF:
-
-  inst_loc = None;
 
   #############################################################################
   # DATA                                                                      #
@@ -31,6 +33,9 @@ class PIPELINECONF:
   #############################################################################
   # INTERNALS                                                                 #
   #############################################################################
+
+  inst_loc    = None;
+  max_threads = multiprocessing.cpu_count();
 
   __pipeline_email__       = 'delftrnaseq@gmail.com';
   __pipeline_mail_user__   = 'delftrnaseq';
@@ -240,8 +245,6 @@ class PIPELINECONF:
   def pickle(self):
     isfunc = lambda obj, attr: hasattr(obj, attr) and type(getattr(obj, attr)) == types.MethodType;
     p = [ (attr, getattr(self, attr)) for attr in dir(self) if not(isfunc(self, attr)) ];
-    print p;
-
 
     fd = None;
     if self.location == "":
@@ -329,19 +332,34 @@ def run_cmd(cmd, bg=False, stdin=None, stdout=None, stderr=None):
 
 ###############################################################################
 
-def run_par_cmds(cmd_list, stdin=None, stdout=None, stderr=None):
+def run_par_cmds(cmd_list, max_threads=PIPELINECONF.max_threads, stdin=None, stdout=None, stderr=None):
   
   p = [];
+  i = 0;
   retval = 0;
-  
-  for cmd in [ x for x in cmd_list if x ]:
-    p.append(run_cmd(cmd, bg=True, stdin=stdin, stdout=stdout, stderr=stderr));
-  #efor
 
-  for cmd in p:
-    (pid, r) = os.waitpid(cmd.pid, 0);
-    retval = retval + r; 
-  #efor
+  while i < len(cmd_list):
+    while len(p) < max_threads:
+      print "RUNNING: %s" % cmd_list[i]; sys.stdout.flush();
+      p.append( (run_cmd(cmd_list[i], bg=True, stdin=stdin, stdout=stdout, stderr=stderr),i) );
+      i = i + 1;
+    #ewhile
+
+    time.sleep(0.5);
+
+    running   = [ (j, k) for (j,k) in p if j.poll() == None ];
+    completed = [ (j, k) for (j,k) in p if j.poll() != None ];
+
+    for (j,k) in completed:
+      if j.returncode != 0:
+        retval = retval + j.returncode;
+        print "ERROR: Failed in cmd: %s" % cmd_list[k]; sys.stdout.flush();
+      else:
+        print "COMPLETED: cmd : %s" % cmd_list[k]; sys.stdout.flush();
+      #fi
+    #efor
+    p = running;
+  #ewhile
   
   return retval;
 #edef
@@ -353,6 +371,7 @@ def run_seq_cmds(cmd_list, stdin=None, stdout=None, stderr=None):
   for cmd in [ x for x in cmd_list if x ]:
     retval = run_cmd(cmd, stdin=stdin, stdout=stdout, stderr=stderr);
     if retval != 0:
+      print "ERROR: Failed on cmd: %s" % cmd;
       return retval;
     #fi
   #efor
@@ -368,10 +387,10 @@ def flatten(l):
   for el in l:
     if isinstance(el, collections.Iterable) and not isinstance(el, basestring):
       for sub in flatten(el):
-        yield sub
+        yield sub;
       #efor
     else:
-      yield el
+      yield el;
     #fi
   #efor
 #edef

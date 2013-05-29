@@ -38,13 +38,13 @@ for i in xrange(len(ALN)):
 #efor
 
 print "Converting SAM to BAM"; sys.stdout.flush();
-retval = run_par_cmds(cmds_v);
+retval = run_par_cmds(cmds_v, max_threads=C.max_threads);
 if retval != 0:
  sys.exit(retval);
 #fi 
 
 print "Sorting BAM files by name"; sys.stdout.flush();
-retval = run_par_cmds(cmds_s);
+retval = run_par_cmds(cmds_s, max_threads=C.max_threads);
 if retval != 0:
   sys.exit(retval);
 #fi

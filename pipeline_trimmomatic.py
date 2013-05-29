@@ -34,4 +34,3 @@ for i in xrange(len(C.samples)):
 
 sys.exit(run_seq_cmds(cmds));
 
-

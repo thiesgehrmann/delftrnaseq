@@ -48,10 +48,10 @@ class makefile:
     fd.write('status: \n');
     for (step, script) in self.steps:
       fd.write('\t@printf "%%-20s" "[%s]: "; ' % step);
-      fd.write('ls ${%s_OUT} &>/dev/null; if [ $$? -eq 0 ]; then echo "COMPLETE"; else echo "INCOMPLETE"; fi\n' % step);
+      fd.write('ls ${%s_OUT} &>/dev/null; if [ $$? -eq 0 ]; then echo "COMPLETE"; elif [ -n "`ps aux | grep \'${inst_loc}/%s %s\' | grep -v \'grep\'`" ]; then echo "RUNNING"; else echo "INCOMPLETE"; fi\n' % (step, script, loc));
     #efor
     fd.write('.PHONY : touch\n');
-    fd.write('touch: \n');
+    fd.write('touch: status\n');
     for (step, script) in self.steps:
       fd.write('\t@ls ${%s_OUT} &>/dev/null; if [ $$? -eq 0 ]; then touch ${%s_OUT}; fi\n' % (step, step));
     #efor

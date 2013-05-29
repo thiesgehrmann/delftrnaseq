@@ -26,8 +26,5 @@ cmds = [ 'bamtools merge %s -out %s' % (' -in '.join([''] + C.post_star_al_outpu
          'bamtools sort -in %s -out %s' % (bamout, C.pre_cufflinks_output()),
          'rm %s' % (bamout) ];
 
-print cmds
-
 sys.exit(run_seq_cmds(cmds));
-
 

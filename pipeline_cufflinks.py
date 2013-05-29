@@ -31,8 +31,6 @@ cmd = ("cufflinks -o %s " % C.outdir) + \
 stdout = open(C.outdir + '/cufflinks_stdout.log', 'w');
 stderr = open(C.outdir + '/cufflinks_stderr.log', 'w');
 
-print cmd
-
 retval = run_cmd(cmd, stderr=stderr, stdout=stdout);
 
 stdout.close();
