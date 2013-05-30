@@ -48,7 +48,16 @@ class makefile:
     fd.write('status: \n');
     for (step, script) in self.steps:
       fd.write('\t@printf "%%-20s" "[%s]: "; ' % step);
-      fd.write('ls ${%s_OUT} &>/dev/null; if [ $$? -eq 0 ]; then echo "COMPLETE"; elif [ -n "`ps aux | grep \'${inst_loc}/%s %s\' | grep -v \'grep\'`" ]; then echo "RUNNING"; else echo "INCOMPLETE"; fi\n' % (step, script, loc));
+      fd.write('ls ${%s_OUT} &>/dev/null; ' % step);
+      fd.write('if [ $$? -eq 0 ]; then');
+      fd.write('  echo "COMPLETE";');
+      fd.write('elif [ -n "`ps aux | grep \'${inst_loc}/%s %s\' | grep -v \'grep\'`" ]; then' % (script, loc));
+      fd.write('  c=`ls ${%s_OUT} 2> /dev/null | wc -l`;' % step);
+      fd.write('  t=`echo ${%s_OUT} | tr \' \' \'\\n\' | wc -l`;' % step);
+      fd.write('  echo "RUNNING $$c / $$t";');
+      fd.write('else');
+      fd.write('  echo "INCOMPLETE";');
+      fd.write('fi\n');
     #efor
     fd.write('.PHONY : touch\n');
     fd.write('touch: status\n');
@@ -87,22 +96,23 @@ M = makefile();
 M.add_var('inst_loc', C.inst_loc);
 M.add_var('outdir', C.outdir);
 
-M.add_step("TRIMMOMATIC", (' '.join(flatten(C.samples))), (' '.join(flatten(C.trimmomatic_output()))), 'pipeline_trimmomatic.py');
-M.add_step("STAR_GG", (' '.join(flatten(C.genome))),  C.star_gg_output(), 'pipeline_star_genome_generate.py');
+M.add_step("TRIMMOMATIC", (' '.join(flatten(C.samples))), (' '.join(flatten(C.__trimmomatic_output__()))), 'pipeline_trimmomatic.py');
+M.add_step("STAR_GG", (' '.join(flatten(C.genome))),  C.__star_gg_output__(), 'pipeline_star_genome_generate.py');
 
-M.add_var("STAR_AL_OUTPUT_SAM", ' '.join(C.star_al_output_sam()));
-M.add_var("STAR_AL_OUTPUT_UNMAPPED", ' '.join(flatten(C.star_al_output_unmapped())));
+M.add_var("STAR_AL_OUTPUT_SAM", ' '.join(C.__star_al_output_sam__()));
+M.add_var("STAR_AL_OUTPUT_UNMAPPED", ' '.join(flatten(C.__star_al_output_unmapped__())));
 M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_SAM} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');
-M.add_step("POST_STAR_AL", "${STAR_AL_OUTPUT_SAM}", ' '.join(C.post_star_al_output()), 'pipeline_post_star_al.py');
+M.add_step("POST_STAR_AL", "${STAR_AL_OUTPUT_SAM}", ' '.join(C.__post_star_al_output__()), 'pipeline_post_star_al.py');
 
-M.add_step("PRE_CUFFLINKS", "${POST_STAR_AL_OUT}", C.pre_cufflinks_output(), 'pipeline_pre_cufflinks.py');
-M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_OUT} %s" % C.genome_annot, ' '.join(C.cufflinks_output()), 'pipeline_cufflinks.py');
+M.add_step("PRE_CUFFLINKS", "${POST_STAR_AL_OUT}", C.__pre_cufflinks_output__(), 'pipeline_pre_cufflinks.py');
+M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_OUT} %s" % C.genome_annot, ' '.join(C.__cufflinks_output__()), 'pipeline_cufflinks.py');
 
-M.add_step("CUFFDIFF", "${POST_STAR_AL_OUT} ${CUFFLINKS_OUT}", ' '.join(C.cuffdiff_output()), 'pipeline_cuffdiff.py');
+M.add_step("CUFFDIFF", "${POST_STAR_AL_OUT} ${CUFFLINKS_OUT}", ' '.join(C.__cuffdiff_output__()), 'pipeline_cuffdiff.py');
 
-M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.trinity_output()), 'pipeline_trinity.py');
-M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.trinity_orf_output()), 'pipeline_trinity_orf.py');
-M.add_step("UNMAPPED", "${TRINITY_ORF_OUT}", ' '.join(C.unmapped_output()), 'pipeline_unmapped.py');
+M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.__trinity_output__()), 'pipeline_trinity.py');
+M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.__trinity_orf_output__()), 'pipeline_trinity_orf.py');
+M.add_step("UNMAPPED_BLAST", "${TRINITY_ORF_OUT} %s" % (C.blast_db if C.blast_db != None else ""), ' '.join(C.__unmapped_blast_output__()), 'pipeline_unmapped_blast.py');
+M.add_step("UNMAPPED", "${UNMAPPED_BLAST}", ' '.join(C.__unmapped_output__()), 'pipeline_unmapped.py');
 
 M.write(C.makefile, C.location, "${CUFFLINKS_OUT}", C.outdir);
 

@@ -35,7 +35,7 @@ class PIPELINECONF:
   #############################################################################
 
   inst_loc    = None;
-  max_threads = multiprocessing.cpu_count();
+  __max_threads__ = multiprocessing.cpu_count();
 
   __pipeline_email__       = 'delftrnaseq@gmail.com';
   __pipeline_mail_user__   = 'delftrnaseq';
@@ -51,7 +51,7 @@ class PIPELINECONF:
   trimmomatic_opts="-threads 12";
   trimmomatic_trim="LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36";
 
-  def trimmomatic_output(self):
+  def __trimmomatic_output__(self):
     return [ (self.outdir + '/' + self.sample_names[i] + '_R1.fastq', self.outdir + '/' + self.sample_names[i] + '_R2.fastq') for i in xrange(len(self.sample_names)) ];
   #edef
 
@@ -59,10 +59,10 @@ class PIPELINECONF:
   # STAR GENOME GENERATION STUFF                                              #
   #############################################################################
 
-  star_gg_opts = "--runThreadN 16";
+  star_gg_opts = "--runThreadN %d" % __max_threads__;
   star_gg_gdir = "genome"
 
-  def star_gg_output(self):
+  def __star_gg_output__(self):
     return "%s/%s" %(self.outdir, self.star_gg_gdir);
   #edef
 
@@ -70,12 +70,12 @@ class PIPELINECONF:
   # STAR ALIGNMENT STUFF                                                      #
   #############################################################################
 
-  star_al_opts="--runThreadN 16";
+  star_al_opts="--runThreadN %d" % __max_threads__;
 
-  def star_al_output_sam(self):
+  def __star_al_output_sam__(self):
     return [ self.outdir + '/%s.star_align.sam' % sn for sn in self.sample_names ];
   #edef
-  def star_al_output_unmapped(self):
+  def __star_al_output_unmapped__(self):
     return [ (self.outdir + "/%s.star_align_unmapped_R1.fastq" % sn, self.outdir + "/%s.star_align_unmapped_R2.fastq" % sn) for sn in self.sample_names ];
   #edef
 
@@ -83,7 +83,7 @@ class PIPELINECONF:
   # POST STAR AL STUFF                                                        #
   #############################################################################
 
-  def post_star_al_output(self):
+  def __post_star_al_output__(self):
     return [ self.outdir + "/%s.star_align_sort_name.bam" % sn for sn in self.sample_names ];
   #edef
 
@@ -91,7 +91,7 @@ class PIPELINECONF:
   # GENOME GENERATION STUFF                                                   #
   #############################################################################
 
-  def genome_gen_output(self):
+  def __genome_gen_output__(self):
     return self.outdir + '/genome.gff';
   #edef
 
@@ -101,7 +101,7 @@ class PIPELINECONF:
   
   pre_cufflinks_opts="";
   
-  def pre_cufflinks_output(self):
+  def __pre_cufflinks_output__(self):
     return self.outdir + '/cufflinks_prep.bam';
   #edef
 
@@ -109,10 +109,10 @@ class PIPELINECONF:
   # CUFFLINKS STUFF                                                           #
   #############################################################################
 
-  cufflinks_opts="-p 12 -u --max-intron-length 5000 --min-intron-length 25 --overlap-radius 25 --max-bundle-length 250000";
+  cufflinks_opts="-p %d -u --max-intron-length 5000 --min-intron-length 25 --overlap-radius 25 --max-bundle-length 250000" % __max_threads__;
   cufflinks_bias_corr="";
 
-  def cufflinks_output(self):
+  def __cufflinks_output__(self):
     return [ self.outdir + f for f in [ '/transcripts.gtf', '/skipped.gtf', '/isoforms.fpkm_tracking', '/genes.fpkm_tracking' ] ]
   #edef
 
@@ -121,7 +121,7 @@ class PIPELINECONF:
   #############################################################################
 
   cuffdiff_opts = "";
-  def cuffdiff_output(self):
+  def __cuffdiff_output__(self):
     return ["somethingidontknow_cd"];
   #edef
 
@@ -129,10 +129,10 @@ class PIPELINECONF:
   # TRINITY STUFF                                                             #
   #############################################################################
 
-  trinity_opts = "--CPU 6 --jaccard_clip --min_contig_length=100 -bflyCalculateCPU";
+  trinity_opts = "--CPU %d --jaccard_clip --min_contig_length=100 -bflyCalculateCPU" % __max_threads__;
 
-  def trinity_output(self):
-    return [ self.outdir + "/%s_trinity_assembled.fasta" % sn for sn in self.sample_names ];
+  def __trinity_output__(self):
+    return [ self.outdir + "/%s.trinity_assembled.fasta" % sn for sn in self.sample_names ];
   #edef
 
   #############################################################################
@@ -140,8 +140,21 @@ class PIPELINECONF:
   #############################################################################
 
   trinity_orf_opts = "";
-  def trinity_orf_output(self):
+
+  def __trinity_orf_output__(self):
     return [ self.outdir + '/%s.trinity_orfs.fasta' % sn for sn in self.sample_names ];
+  #edef
+
+  #############################################################################
+  # UNMAPPED BLAST STUFF                                                      #
+  #############################################################################
+
+  blast_db = None;
+  unmapped_blast_opts = "-num_threads %d" % __max_threads__;
+  __unmapped_blast_fields__  = "qseqid sseqid slen length mismatch gapopen pident evalue bitscore";
+
+  def __unmapped_blast_output__(self):
+    return [ self.outdir + '/%s.unmapped_blast.tsv' % sn for sn in self.sample_names ];
   #edef
 
   #############################################################################
@@ -149,7 +162,9 @@ class PIPELINECONF:
   #############################################################################
   
   unmapped_opts = "";
-  def unmapped_output(self):
+  __unmapped_blast_select_by__ = len(__unmapped_blast_fields__.split(' ')) - 1;
+
+  def __unmapped_output__(self):
     return [ self.outdir + '/%s.unmapped_orgs.dat' % sn for sn in self.sample_names ];
   #edef
 
@@ -332,7 +347,7 @@ def run_cmd(cmd, bg=False, stdin=None, stdout=None, stderr=None):
 
 ###############################################################################
 
-def run_par_cmds(cmd_list, max_threads=PIPELINECONF.max_threads, stdin=None, stdout=None, stderr=None):
+def run_par_cmds(cmd_list, max_threads=PIPELINECONF.__max_threads__, stdin=None, stdout=None, stderr=None):
   
   p = [];
   i = 0;

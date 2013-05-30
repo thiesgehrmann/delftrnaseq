@@ -20,7 +20,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-ALN = C.star_al_output_sam();
+ALN = C.__star_al_output_sam__();
 
 cmds_v = [];
 cmds_s = []
@@ -38,13 +38,13 @@ for i in xrange(len(ALN)):
 #efor
 
 print "Converting SAM to BAM"; sys.stdout.flush();
-retval = run_par_cmds(cmds_v, max_threads=C.max_threads);
+retval = run_par_cmds(cmds_v, max_threads=C.__max_threads__);
 if retval != 0:
  sys.exit(retval);
 #fi 
 
 print "Sorting BAM files by name"; sys.stdout.flush();
-retval = run_par_cmds(cmds_s, max_threads=C.max_threads);
+retval = run_par_cmds(cmds_s, max_threads=C.__max_threads__);
 if retval != 0:
   sys.exit(retval);
 #fi

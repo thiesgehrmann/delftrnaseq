@@ -21,7 +21,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-ASM = C.trinity_output();
+ASM = C.__trinity_output__();
 
 prg = "/opt/insy/env/sys_enhance/opt/trinity/trinity-plugins/transdecoder/transcripts_to_best_scoring_ORFs.pl -t ${file}_trinity.fasta";
 pwd = os.getcwd();

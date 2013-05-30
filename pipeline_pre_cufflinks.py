@@ -22,8 +22,8 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 bamout = '%s/bamout.bam' %C.outdir;
 
-cmds = [ 'bamtools merge %s -out %s' % (' -in '.join([''] + C.post_star_al_output()), bamout),
-         'bamtools sort -in %s -out %s' % (bamout, C.pre_cufflinks_output()),
+cmds = [ 'bamtools merge %s -out %s' % (' -in '.join([''] + C.__post_star_al_output__()), bamout),
+         'bamtools sort -in %s -out %s' % (bamout, C.__pre_cufflinks_output__()),
          'rm %s' % (bamout) ];
 
 sys.exit(run_seq_cmds(cmds));

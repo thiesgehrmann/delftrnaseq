@@ -21,7 +21,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-bf  = C.star_al_output_name();
+bf  = C.__star_al_output_name__();
 
 gtf = "%s/transcripts.gtf" % C.outdir;
 

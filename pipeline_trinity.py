@@ -22,7 +22,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 ###############################################################################
 
 prg = "Trinity.pl";
-UMR = C.star_al_output_unmapped();
+UMR = C.__star_al_output_unmapped__();
 
 for i in xrange(len(UMR)):
   l, r = UMR[i];
@@ -37,7 +37,7 @@ for i in xrange(len(UMR)):
 
   cmds = [];
   cmds.append(cmd);
-  cmds.append("mv 'trinity_out_dir/Trinity.fasta' '%s/%s_trinity_assembled.fasta'" % (C.outdir, C.sample_names[i]));
+  cmds.append("mv 'trinity_out_dir/Trinity.fasta' '%s/%s.trinity_assembled.fasta'" % (C.outdir, C.sample_names[i]));
   cmds.append("rm -rf trinity_out_dir");
 
   print "Assembling unmapped reads for sample %s." % sn;

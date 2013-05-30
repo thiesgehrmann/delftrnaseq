@@ -23,8 +23,8 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 prg="STAR"
 
-cmds = [ "mkdir -p %s " % C.star_gg_output(),
-         "%s --runMode genomeGenerate --genomeDir %s %s --genomeFastaFiles %s" % (prg, C.star_gg_output(), C.star_gg_opts, ' '.join(flatten(C.genome))) ]
+cmds = [ "mkdir -p %s " % C.__star_gg_output__(),
+         "%s --runMode genomeGenerate --genomeDir %s %s --genomeFastaFiles %s" % (prg, C.__star_gg_output__(), C.star_gg_opts, ' '.join(flatten(C.genome))) ]
 
 sys.exit(run_seq_cmds(cmds));
 

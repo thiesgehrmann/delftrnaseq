@@ -20,7 +20,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-TR = C.trimmomatic_output();
+TR = C.__trimmomatic_output__();
 
 for i in xrange(len(TR)):
   L, R = TR[i];
@@ -29,7 +29,7 @@ for i in xrange(len(TR)):
 
   sname = '%s/%s' % (C.outdir, C.sample_names[i])
 
-  cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s %s --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx" % (C.star_al_opts, C.star_gg_output(), L, R);
+  cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s %s --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx" % (C.star_al_opts, C.__star_gg_output__(), L, R);
   run_cmd(cmd);
 
   cmds = [];

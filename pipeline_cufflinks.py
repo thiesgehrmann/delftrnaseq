@@ -26,14 +26,12 @@ cmd = ("cufflinks -o %s " % C.outdir) + \
       ("-G %s " % C.genome_annot) if C.genome_annot else ("-g %s " % C.genome_guide)  + \
       ("-v ") + \
       ("-b %s " % C.cufflinks_bias_corr if C.cufflinks_bias_corr else "") + \
-      ("%s" % C.pre_cufflinks_output());
+      ("%s" % C.__pre_cufflinks_output__());
 
-stdout = open(C.outdir + '/cufflinks_stdout.log', 'w');
 stderr = open(C.outdir + '/cufflinks_stderr.log', 'w');
 
-retval = run_cmd(cmd, stderr=stderr, stdout=stdout);
+retval = run_cmd(cmd, stderr=stderr);
 
-stdout.close();
 stderr.close();
 
 sys.exit(retval);
