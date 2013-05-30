@@ -117,6 +117,11 @@ M.add_var('outdir', C.outdir);
   # Quality step
 M.add_step("TRIMMOMATIC", (' '.join(flatten(C.samples))), (' '.join(flatten(C.__trimmomatic_output__()))), 'pipeline_trimmomatic.py');
 
+  # Genome annotation step
+if C.genome_annot == None && C.genome_guide == None:
+  M.add_step("GENOME_ANNOT", "${TRIMMOMATIC} %s" % (' '.join(flatten(C.genome))), C.__genome_annot_output__(), 'pipeline_genome_annot.py');
+#fi
+
   # STAR alignment steps
 M.add_step("STAR_GG", (' '.join(flatten(C.genome))),  C.__star_gg_output__(), 'pipeline_star_genome_generate.py');
 M.add_var("STAR_AL_OUTPUT_SAM", ' '.join(C.__star_al_output_sam__()));
