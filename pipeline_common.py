@@ -96,13 +96,23 @@ class PIPELINECONF:
   #edef
 
   #############################################################################
-  # PRE-CUFFLINKS STUFF                                                       #
+  # PRE-CUFFLINKS MERGE STUFF                                                 #
   #############################################################################
   
-  pre_cufflinks_opts="";
+  pre_cufflinks_merge_opts="";
   
-  def __pre_cufflinks_output__(self):
-    return self.outdir + '/cufflinks_prep.bam';
+  def __pre_cufflinks_merge_output__(self):
+    return self.outdir + '/%s.bamtools_merged.bam' % self.jobname;
+  #edef
+
+  #############################################################################
+  # PRE-CUFFLINKS SORT STUFF                                                  #
+  #############################################################################
+
+  pre_cufflinks_sort_opts="";
+
+  def __pre_cufflinks_sort_output__(self):
+    return self.outdir + '/%s.bamtools_sorted.bam' % self.jobname;
   #edef
 
   #############################################################################

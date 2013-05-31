@@ -46,8 +46,9 @@ class makefile:
 
     fd.write('.PHONY : status\n');
     fd.write('status: \n');
+    maxl = max([len(n) + 4 for (n,s) in self.steps]);
     for (step, script) in self.steps:
-      fd.write('\t@printf "%%-20s" "[%s]: "; ' % step);
+      fd.write('\t@printf "%%-*s" %d "[%s]: "; ' % (maxl, step));
       fd.write('ls ${%s_OUT} &>/dev/null; ' % step);
       fd.write('if [ $$? -eq 0 ]; then');
       fd.write('  echo "COMPLETE";');
@@ -118,7 +119,7 @@ M.add_var('outdir', C.outdir);
 M.add_step("TRIMMOMATIC", (' '.join(flatten(C.samples))), (' '.join(flatten(C.__trimmomatic_output__()))), 'pipeline_trimmomatic.py');
 
   # Genome annotation step
-if C.genome_annot == None && C.genome_guide == None:
+if (C.genome_annot == None) and (C.genome_guide == None):
   M.add_step("GENOME_ANNOT", "${TRIMMOMATIC} %s" % (' '.join(flatten(C.genome))), C.__genome_annot_output__(), 'pipeline_genome_annot.py');
 #fi
 
@@ -130,7 +131,8 @@ M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_SAM
 M.add_step("POST_STAR_AL", "${STAR_AL_OUTPUT_SAM}", ' '.join(C.__post_star_al_output__()), 'pipeline_post_star_al.py');
 
   # CUFF steps
-M.add_step("PRE_CUFFLINKS", "${POST_STAR_AL_OUT}", C.__pre_cufflinks_output__(), 'pipeline_pre_cufflinks.py');
+M.add_step("PRE_CUFFLINKS_MERGE", "${POST_STAR_AL_OUT}", C.__pre_cufflinks_merge_output__(), 'pipeline_pre_cufflinks_merge.py');
+M.add_step("PRE_CUFFLINKS_SORT", "${PRE_CUFFLINKS_MERGE_OUT}", C.__pre_cufflinks_sort_output__(), 'pipeline_pre_cufflinks_sort.py');
 M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_OUT} %s" % C.genome_annot, ' '.join(C.__cufflinks_output__()), 'pipeline_cufflinks.py');
 M.add_step("CUFFDIFF", "${POST_STAR_AL_OUT} ${CUFFLINKS_OUT}", ' '.join(C.__cuffdiff_output__()), 'pipeline_cuffdiff.py');
 
