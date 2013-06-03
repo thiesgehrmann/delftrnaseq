@@ -69,20 +69,33 @@ for i in xrange(len(BO)):
   gi_list = [ fh[k][0] for k in fh.keys() ];
 
   print "Determining source organism of hits"; sys.stdout.flush();
-  gi_str = ','.join(gi_list);
-
-  handle  = Entrez.efetch(db="nuccore", id=gi_str, rettype="gb");
-  records = SeqIO.parse(handle, "gb");
 
   k = 0;
-  for r in records:
-    org = r.annotations['organism'];
-    if org in fo:
-      fo[org] = (fo[org][0] + 1, fo[org][1] + [ fh[fh.keys()[k]] ] );
-    else:
-      fo[org] = (1, [ fh[fh.keys()[k]] ]);
-    #fi
-    k = k + 1;
+  for j in xrange(0,len(gi_list), 100):
+    gi_str = ','.join(gi_list[j:(j+100)]);
+
+    print "Sending query %d" % (k/300); sys.stdout.flush();
+    print gi_str;
+    handle  = Entrez.efetch(db="nuccore", id=gi_str, rettype="gb");
+    print "Parsing query"; sys.stdout.flush();
+
+    l = '\n';
+    while l != '':
+      l = handle.readline();
+      print l
+      if l[2:10] != 'ORGANISM':
+        continue;
+      #fi
+      print k;
+      org = l[10:];
+      print org; sys.stdout.flush();
+      if org in fo:
+        fo[org] = (fo[org][0] + 1, fo[org][1] + [ fh[fh.keys()[k]] ] );
+      else:
+        fo[org] = (1, [ fh[fh.keys()[k]] ]);
+      #fi
+      k = k + 1;
+    #efor
   #efor
 
   ll   = [ (k[0], k[1][0]) for k in sorted(fo.items(), key=lambda x: x[1][0], reverse=True) ];

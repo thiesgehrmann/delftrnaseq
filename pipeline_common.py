@@ -26,6 +26,7 @@ class PIPELINECONF:
   samples        = [];
   sample_names   = [];
   sample_labels  = [];
+  sample_comp    = [];
   genome         = [];
   genome_annot   = None;
   genome_guide   = None;
@@ -226,6 +227,12 @@ class PIPELINECONF:
 
     errors   = 0
     warnings = 0
+
+    if self.jobname == None or self.jobname == "":
+      self.jobname = 'UNDEFINED';
+      warnings = warnings + 1;
+      warning("No job name given, please set 'jobname' appropriately. Using '%s'." % self.jobname);
+    #fi
 
     if (self.genome_annot == None) and (self.genome_guide == None):
       warnings = warnings + 1;

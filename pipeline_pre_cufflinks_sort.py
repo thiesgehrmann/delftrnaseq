@@ -23,7 +23,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 bamin  = C.__pre_cufflinks_merge_output__();
 bamout = C.__pre_cufflinks_merge_output__();
 
-cmd = 'bamtools sort -in %s -out %s' % (bamin, bamout);
+cmd = 'bamtools sort -byname -in %s -out %s' % (bamin, bamout);
 
 sys.exit(run_cmd(cmd));
 
