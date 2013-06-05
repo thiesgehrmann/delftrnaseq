@@ -21,7 +21,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 ###############################################################################
 
 bamin  = ' -in '.join([''] + C.__post_star_al_output__());
-bamout = '%s/%s.bamtools_merged.bam' % (C.outdir, C.jobname);
+bamout = C.__pre_cufflinks_merge_output__();
 
 cmd = 'bamtools merge %s -out %s' % (bamin, bamout);
 

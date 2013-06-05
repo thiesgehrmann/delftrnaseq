@@ -24,11 +24,10 @@ C = PIPELINECONF(os.sys.argv[1]);
 step = os.sys.argv[2];
 logf = os.sys.argv[3];
 stat = os.sys.argv[4];
-#stat = "COMPLETED" if stat == "0" else "FAILED";
 
 try:
-  msg = MIMEText("Step [%s] in '%s' has %s. You can find the standard output in %s.\n" % (step, C.jobname, stat, logf));
-  msg['Subject'] = "%s: [%s] %s" % (C.jobname, step, stat);
+  msg = MIMEText("Step [%s] in <%s> has %s. You can find the standard output in %s.\n" % (step, C.jobname, stat, logf));
+  msg['Subject'] = "DELFT RNA-SEQ PIPELINE: <%s> update" % (C.jobname);
   msg['From']    = C.email;
   msg['To']      = C.email;
 

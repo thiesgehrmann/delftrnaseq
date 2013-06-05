@@ -50,12 +50,13 @@ class makefile:
     for (step, script) in self.steps:
       fd.write('\t@printf "%%-*s" %d "[%s]: "; ' % (maxl, step));
       fd.write('ls ${%s_OUT} &>/dev/null; ' % step);
-      fd.write('if [ $$? -eq 0 ]; then');
-      fd.write('  echo "COMPLETE";');
-      fd.write('elif [ -n "`ps aux | grep \'${inst_loc}/%s %s\' | grep -v \'grep\'`" ]; then' % (script, loc));
+      fd.write('res=$$?; ');
+      fd.write('if [ -n "`ps aux | grep \'${inst_loc}/%s %s\' | grep -v \'grep\'`" ]; then' % (script, loc));
       fd.write('  c=`ls ${%s_OUT} 2> /dev/null | wc -l`;' % step);
       fd.write('  t=`echo ${%s_OUT} | tr \' \' \'\\n\' | wc -l`;' % step);
       fd.write('  printf "RUNNING %3s / %3s\\n" "$$c" "$$t";');
+      fd.write('elif [ $$res -eq 0 ]; then');
+      fd.write('  echo "COMPLETE";');
       fd.write('else');
       fd.write('  echo "INCOMPLETE";');
       fd.write('fi\n');
@@ -71,9 +72,9 @@ class makefile:
     fd.write('\n\n');
 
     for (step, script) in self.steps[::-1]:
-      #fd.write('.PHONY : %s\n' % step);
       fd.write('%s ${%s_OUT} : ${%s_IN}\n' % (step, step, step));
       fd.write('\t@echo [%s] Starting\n' % step);
+      fd.write('\t@rm -rf ${%s_OUT}\n' % step);
       fd.write('\t@${inst_loc}/%s "%s" 2>&1 | tee "${outdir}/%s.std.log ";' % (script, loc, step));
       fd.write('ps=$${PIPESTATUS[0]}; ');
       fd.write('if [ $$ps -eq 0 ]; then ');
@@ -133,7 +134,8 @@ M.add_step("POST_STAR_AL", "${STAR_AL_OUTPUT_SAM}", ' '.join(C.__post_star_al_ou
   # CUFF steps
 M.add_step("PRE_CUFFLINKS_MERGE", "${POST_STAR_AL_OUT}", C.__pre_cufflinks_merge_output__(), 'pipeline_pre_cufflinks_merge.py');
 M.add_step("PRE_CUFFLINKS_SORT", "${PRE_CUFFLINKS_MERGE_OUT}", C.__pre_cufflinks_sort_output__(), 'pipeline_pre_cufflinks_sort.py');
-M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_OUT} %s" % C.genome_annot, ' '.join(C.__cufflinks_output__()), 'pipeline_cufflinks.py');
+M.add_step("GENOME_ANNOT_FORMAT", C.genome_annot, C.__genome_annot_format_output__(), 'pipeline_genome_annot_format.py');
+M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__cufflinks_output__()), 'pipeline_cufflinks.py');
 M.add_step("CUFFDIFF", "${POST_STAR_AL_OUT} ${CUFFLINKS_OUT}", ' '.join(C.__cuffdiff_output__()), 'pipeline_cuffdiff.py');
 
   # Contamination steps

@@ -21,18 +21,24 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-cmd = ("cufflinks -o %s " % C.outdir) + \
-      ("%s " % C.cufflinks_opts) + \
-      ("-G %s " % C.genome_annot) if C.genome_annot else ("-g %s " % C.genome_guide)  + \
-      ("-v ") + \
-      ("-b %s " % C.cufflinks_bias_corr if C.cufflinks_bias_corr else "") + \
-      ("%s" % C.__pre_cufflinks_output__());
+outputs = zip([ "genes.fpkm_tracking", "isoforms.fpkm_tracking", "transcripts.gtf", "skipped.gtf" ], C.__cufflinks_output__() );
+cmds = [];
 
-stderr = open(C.outdir + '/cufflinks_stderr.log', 'w');
+cmds.append(("cufflinks -o %s " % C.outdir) + \
+            ("%s " % C.cufflinks_opts) + \
+            (("-G %s " % C.__genome_annot_format_output__()) if C.genome_annot else ("-g %s " % C.genome_guide))  + \
+            ("-v ") + \
+            ("-b %s " % C.cufflinks_bias_corr if C.cufflinks_bias_corr else "") + \
+            ("%s" % C.__pre_cufflinks_sort_output__()) ) ;
 
-retval = run_cmd(cmd, stderr=stderr);
+for (o , n) in outputs:
+  cmds.append("mv '%s/%s' '%s'" % C.outdir, o, n);
+#efor
 
-stderr.close();
+retval = run_seq_cmds(cmds);
+if retval != 0:
+  sys.exit(retval);
+#fi
 
 sys.exit(retval);
 

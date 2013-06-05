@@ -21,9 +21,12 @@ run_cmd('mkdir -p %s' % C.outdir);
 ###############################################################################
 
 bamin  = C.__pre_cufflinks_merge_output__();
-bamout = C.__pre_cufflinks_merge_output__();
+bamout = C.__pre_cufflinks_sort_output__()[0:-4];
 
-cmd = 'bamtools sort -byname -in %s -out %s' % (bamin, bamout);
+print bamin, bamout;
+sys.stdout.flush();
+
+cmd = "samtools sort -m 100000000000 '%s' '%s'" % (bamin, bamout);
 
 sys.exit(run_cmd(cmd));
 

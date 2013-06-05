@@ -97,13 +97,21 @@ class PIPELINECONF:
   #edef
 
   #############################################################################
+  # GENOME ANNOT FORMAT STUFF                                                 #
+  #############################################################################
+
+  def __genome_annot_format_output__(self):
+    return "%s/%s.cleaned.gff" % (self.outdir, self.jobname);
+  #edef
+
+  #############################################################################
   # PRE-CUFFLINKS MERGE STUFF                                                 #
   #############################################################################
   
   pre_cufflinks_merge_opts="";
   
   def __pre_cufflinks_merge_output__(self):
-    return self.outdir + '/%s.bamtools_merged.bam' % self.jobname;
+    return self.outdir + '/%s.pre_cufflinks_merged.bam' % self.jobname;
   #edef
 
   #############################################################################
@@ -113,7 +121,7 @@ class PIPELINECONF:
   pre_cufflinks_sort_opts="";
 
   def __pre_cufflinks_sort_output__(self):
-    return self.outdir + '/%s.bamtools_sorted.bam' % self.jobname;
+    return self.outdir + '/%s.pre_cufflinks_sorted.bam' % self.jobname;
   #edef
 
   #############################################################################
@@ -124,7 +132,7 @@ class PIPELINECONF:
   cufflinks_bias_corr="";
 
   def __cufflinks_output__(self):
-    return [ self.outdir + f for f in [ '/transcripts.gtf', '/skipped.gtf', '/isoforms.fpkm_tracking', '/genes.fpkm_tracking' ] ]
+    return [ "%s/%s.cufflinks.%s" % (self.outdir, self.jobname, f) for f in [ "genes.fpkm_tracking", "isoforms.fpkm_tracking", "transcripts.gtf", "skipped.gtf" ] ];
   #edef
 
   #############################################################################
