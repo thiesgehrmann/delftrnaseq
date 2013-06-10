@@ -136,6 +136,31 @@ class PIPELINECONF:
   #edef
 
   #############################################################################
+  # PRE-CUFFLINKS_INDIV SORT STUFF                                            #
+  #############################################################################
+
+  pre_cufflinks_sort_opts="";
+
+  def __pre_cufflinks_indiv_sort_output__(self):
+    return [ self.outdir + '/%s.pre_cufflinks_indiv_sorted.bam' % sn for sn in self.sample_names ];
+  #edef
+
+  #############################################################################
+  # CUFFLINKS INDIV STUFF                                                     #
+  #############################################################################
+
+  cufflinks_indiv_opts="-p %d -u --max-intron-length 5000 --min-intron-length 25 --overlap-radius 25 --max-bundle-length 250000" % __max_threads__;
+  cufflinks_bias_corr="";
+
+  def __cufflinks_indiv_output__(self):
+    r = [];
+    for sn in self.sample_names:
+      r.append([ "%s/%s.cufflinks_indiv.%s" % (self.outdir, sn, f) for f in [ "genes.fpkm_tracking", "isoforms.fpkm_tracking", "transcripts.gtf", "skipped.gtf" ] ]);
+    #efor
+    return r;
+  #edef
+
+  #############################################################################
   # CUFFDIFF STUFF                                                            #
   #############################################################################
 

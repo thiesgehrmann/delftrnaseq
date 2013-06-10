@@ -32,7 +32,7 @@ cmds.append(("cufflinks -o %s " % C.outdir) + \
             ("%s" % C.__pre_cufflinks_sort_output__()) ) ;
 
 for (o , n) in outputs:
-  cmds.append("mv '%s/%s' '%s'" % C.outdir, o, n);
+  cmds.append("mv '%s/%s' '%s'" % (C.outdir, o, n));
 #efor
 
 retval = run_seq_cmds(cmds);

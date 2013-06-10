@@ -138,6 +138,10 @@ M.add_step("GENOME_ANNOT_FORMAT", C.genome_annot, C.__genome_annot_format_output
 M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__cufflinks_output__()), 'pipeline_cufflinks.py');
 M.add_step("CUFFDIFF", "${POST_STAR_AL_OUT} ${CUFFLINKS_OUT}", ' '.join(C.__cuffdiff_output__()), 'pipeline_cuffdiff.py');
 
+  # CUFF_INDIV steps
+M.add_step("PRE_CUFFLINKS_INDIV_SORT", "${POST_STAR_AL_OUT}", ' '.join(C.__pre_cufflinks_indiv_sort_output__()), 'pipeline_pre_cufflinks_indiv_sort.py');
+M.add_step("CUFFLINKS_INDIV", "${PRE_CUFFLINKS_INDIV_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(flatten(C.__cufflinks_indiv_output__())), 'pipeline_cufflinks_indiv.py');
+
   # Contamination steps
 M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.__trinity_output__()), 'pipeline_trinity.py');
 M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.__trinity_orf_output__()), 'pipeline_trinity_orf.py');
