@@ -21,33 +21,23 @@ run_cmd('mkdir -p %s' % C.outdir);
 ###############################################################################
 
 ALN = C.__star_al_output_sam__();
+BAM = C.__post_star_al_bam_output__();
 
-cmds_v = [];
-cmds_s = []
+cmds = [];
 
 for i in xrange(len(ALN)):
-  a  = ALN[i];
-  sn = C.sample_names[i];
+  a = ALN[i];
+  b = BAM[i];
 
-  nfname = '%s/%s.star_align.bam' % (C.outdir, sn);
-  sfpref = '%s/%s.star_align_sort_name' % (C.outdir, sn);
-
-  cmds_v.append("samtools view -Sb '%s' -o '%s'" % (a, nfname));
-  cmds_s.append("samtools sort -n -m 100000000000 '%s' '%s'" % (nfname, sfpref));
+  cmds_v.append("samtools view -Sb '%s' -o '%s'" % (a, b));
 
 #efor
 
 print "Converting SAM to BAM"; sys.stdout.flush();
-retval = run_par_cmds(cmds_v, max_threads=C.__max_threads__);
+retval = run_par_cmds(cmds, max_threads=C.__max_threads__);
 if retval != 0:
  sys.exit(retval);
 #fi 
-
-print "Sorting BAM files by name"; sys.stdout.flush();
-retval = run_par_cmds(cmds_s, max_threads=C.__max_threads__);
-if retval != 0:
-  sys.exit(retval);
-#fi
 
 sys.exit(0);
 

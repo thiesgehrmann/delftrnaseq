@@ -57,7 +57,7 @@ for i in xrange(len(ORF)):
   outf = '%s/%s.unmapped_blast.tsv' % (C.outdir, sn);
 
   cmds.append("echo 'Running BLAST for sample %s'." % sn);
-  cmds.append(BLAST_cmd(fa, blast_db, outf, C.__unmapped_blast_fields__, C.unmapped_blast_opts));
+  cmds.append(BLAST_cmd(fa, blast_db, outf, C.__unmapped_blast_fields__, cor(C.unmapped_blast_opts)));
 #efor
 
 

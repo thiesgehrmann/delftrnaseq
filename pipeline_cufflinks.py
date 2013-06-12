@@ -25,7 +25,7 @@ outputs = zip([ "genes.fpkm_tracking", "isoforms.fpkm_tracking", "transcripts.gt
 cmds = [];
 
 cmds.append(("cufflinks -o %s " % C.outdir) + \
-            ("%s " % C.cufflinks_opts) + \
+            ("%s " % cor(C.cufflinks_opts)) + \
             (("-G %s " % C.__genome_annot_format_output__()) if C.genome_annot else ("-g %s " % C.genome_guide))  + \
             ("-v ") + \
             ("-b %s " % C.cufflinks_bias_corr if C.cufflinks_bias_corr else "") + \

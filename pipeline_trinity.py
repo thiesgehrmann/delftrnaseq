@@ -33,7 +33,7 @@ for i in xrange(len(UMR)):
       (" --JM 100G") + \
       (" --left %s" % l) + \
       (" --right %s" % r) + \
-      (" " + C.trinity_opts);
+      (" " + cor(C.trinity_opts));
 
   cmds = [];
   cmds.append(cmd);

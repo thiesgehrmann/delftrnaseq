@@ -22,8 +22,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 ###############################################################################
 
 bf  = C.__star_al_output_name__();
-
-gtf = "%s/transcripts.gtf" % C.outdir;
+gtf = C.__cufflinks_output__()[2];
 
 
 cmd = "cuffdiff " \

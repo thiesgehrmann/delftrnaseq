@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
+import os;
 import sys;
-
 from pipeline_common import *;
 
 ###############################################################################
@@ -20,10 +20,24 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-bamin  = C.__post_star_al_bam_output__();
-bamout = C.__pre_cufflinks_merge_output__();
+BAM  = C.__post_star_al_bam_output__();
+SORT = C.__post_star_al_sort_output__();
 
-cmd = 'bamtools merge %s -out %s' % (' -in '.join([' '] + bamin), bamout);
+cmds = []
 
-sys.exit(run_cmd(cmd));
+for i in xrange(len(BAM)):
+  b  = ALN[i];
+  s  = SORT[i];
+
+  cmds_s.append("samtools sort -n -m 100000000000 '%s' '%s'" % (b, s));
+
+#efor
+
+print "Sorting BAM files by name"; sys.stdout.flush();
+retval = run_par_cmds(cmds, max_threads=C.__max_threads__);
+if retval != 0:
+  sys.exit(retval);
+#fi
+
+sys.exit(0);
 

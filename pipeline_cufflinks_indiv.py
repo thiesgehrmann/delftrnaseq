@@ -31,7 +31,7 @@ cmds = [];
 for i in xrange(len(bamin)):
 
   cmds.append(("cufflinks -o %s " % C.outdir) + \
-              ("%s " % C.cufflinks_opts) + \
+              ("%s " % cor(C.cufflinks_indiv_opts)) + \
               (("-G %s " % C.__genome_annot_format_output__()) if C.genome_annot else ("-g %s " % C.genome_guide))  + \
               ("-v ") + \
               ("-b %s " % C.cufflinks_bias_corr if C.cufflinks_bias_corr else "") + \

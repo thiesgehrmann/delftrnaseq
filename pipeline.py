@@ -129,17 +129,18 @@ M.add_step("STAR_GG", (' '.join(flatten(C.genome))),  C.__star_gg_output__(), 'p
 M.add_var("STAR_AL_OUTPUT_SAM", ' '.join(C.__star_al_output_sam__()));
 M.add_var("STAR_AL_OUTPUT_UNMAPPED", ' '.join(flatten(C.__star_al_output_unmapped__())));
 M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_SAM} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');
-M.add_step("POST_STAR_AL", "${STAR_AL_OUTPUT_SAM}", ' '.join(C.__post_star_al_output__()), 'pipeline_post_star_al.py');
+M.add_step("POST_STAR_AL_BAM", "${STAR_AL_OUTPUT_SAM}", ' '.join(C.__post_star_al_bam_output__()), 'pipeline_post_star_al_bam.py');
+M.add_step("POST_STAR_AL_SORT", "${POST_STAR_AL_BAM_OUT}", ' '.join(C.__post_star_al_sort_output__()), 'pipeline_post_star_al_sort.py');
 
   # CUFF steps
-M.add_step("PRE_CUFFLINKS_MERGE", "${POST_STAR_AL_OUT}", C.__pre_cufflinks_merge_output__(), 'pipeline_pre_cufflinks_merge.py');
+M.add_step("PRE_CUFFLINKS_MERGE", "${POST_STAR_AL_BAM_OUT}", C.__pre_cufflinks_merge_output__(), 'pipeline_pre_cufflinks_merge.py');
 M.add_step("PRE_CUFFLINKS_SORT", "${PRE_CUFFLINKS_MERGE_OUT}", C.__pre_cufflinks_sort_output__(), 'pipeline_pre_cufflinks_sort.py');
 M.add_step("GENOME_ANNOT_FORMAT", C.genome_annot, C.__genome_annot_format_output__(), 'pipeline_genome_annot_format.py');
 M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__cufflinks_output__()), 'pipeline_cufflinks.py');
-M.add_step("CUFFDIFF", "${POST_STAR_AL_OUT} ${CUFFLINKS_OUT}", ' '.join(C.__cuffdiff_output__()), 'pipeline_cuffdiff.py');
+M.add_step("CUFFDIFF", "${POST_STAR_AL_SORT_OUT} ${CUFFLINKS_OUT}", ' '.join(C.__cuffdiff_output__()), 'pipeline_cuffdiff.py');
 
   # CUFF_INDIV steps
-M.add_step("PRE_CUFFLINKS_INDIV_SORT", "${POST_STAR_AL_OUT}", ' '.join(C.__pre_cufflinks_indiv_sort_output__()), 'pipeline_pre_cufflinks_indiv_sort.py');
+M.add_step("PRE_CUFFLINKS_INDIV_SORT", "${POST_STAR_AL_BAM_OUT}", ' '.join(C.__pre_cufflinks_indiv_sort_output__()), 'pipeline_pre_cufflinks_indiv_sort.py');
 M.add_step("CUFFLINKS_INDIV", "${PRE_CUFFLINKS_INDIV_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(flatten(C.__cufflinks_indiv_output__())), 'pipeline_cufflinks_indiv.py');
 
   # Contamination steps
