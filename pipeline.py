@@ -74,7 +74,7 @@ class makefile:
     for (step, script) in self.steps[::-1]:
       fd.write('%s ${%s_OUT} : ${%s_IN}\n' % (step, step, step));
       fd.write('\t@echo [%s] Starting\n' % step);
-      fd.write('\t@rm -rf ${%s_OUT}\n' % step);
+      #fd.write('\t@rm -rf ${%s_OUT}\n' % step);
       fd.write('\t@${inst_loc}/%s "%s" 2>&1 | tee "${outdir}/%s.std.log ";' % (script, loc, step));
       fd.write('ps=$${PIPESTATUS[0]}; ');
       fd.write('if [ $$ps -eq 0 ]; then ');
@@ -121,11 +121,11 @@ M.add_step("TRIMMOMATIC", (' '.join(flatten(C.samples))), (' '.join(flatten(C.__
 
   # Genome annotation step
 if (C.genome_annot == None) and (C.genome_guide == None):
-  M.add_step("GENOME_ANNOT", "${TRIMMOMATIC} %s" % (' '.join(flatten(C.genome))), C.__genome_annot_output__(), 'pipeline_genome_annot.py');
+  M.add_step("GENOME_ANNOT", "${TRIMMOMATIC} %s" % C.genome, C.__genome_annot_output__(), 'pipeline_genome_annot.py');
 #fi
 
   # STAR alignment steps
-M.add_step("STAR_GG", (' '.join(flatten(C.genome))),  C.__star_gg_output__(), 'pipeline_star_genome_generate.py');
+M.add_step("STAR_GG", C.genome,  C.__star_gg_output__(), 'pipeline_star_genome_generate.py');
 M.add_var("STAR_AL_OUTPUT_SAM", ' '.join(C.__star_al_output_sam__()));
 M.add_var("STAR_AL_OUTPUT_UNMAPPED", ' '.join(flatten(C.__star_al_output_unmapped__())));
 M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_SAM} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');
@@ -140,8 +140,8 @@ M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", 
 M.add_step("CUFFDIFF", "${POST_STAR_AL_SORT_OUT} ${CUFFLINKS_OUT}", ' '.join(C.__cuffdiff_output__()), 'pipeline_cuffdiff.py');
 
   # CUFF_INDIV steps
-M.add_step("PRE_CUFFLINKS_INDIV_SORT", "${POST_STAR_AL_BAM_OUT}", ' '.join(C.__pre_cufflinks_indiv_sort_output__()), 'pipeline_pre_cufflinks_indiv_sort.py');
-M.add_step("CUFFLINKS_INDIV", "${PRE_CUFFLINKS_INDIV_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(flatten(C.__cufflinks_indiv_output__())), 'pipeline_cufflinks_indiv.py');
+#M.add_step("PRE_CUFFLINKS_INDIV_SORT", "${POST_STAR_AL_BAM_OUT}", ' '.join(C.__pre_cufflinks_indiv_sort_output__()), 'pipeline_pre_cufflinks_indiv_sort.py');
+M.add_step("CUFFLINKS_INDIV", "${POST_STAR_AL_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(flatten(C.__cufflinks_indiv_output__())), 'pipeline_cufflinks_indiv.py');
 
   # Contamination steps
 M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.__trinity_output__()), 'pipeline_trinity.py');

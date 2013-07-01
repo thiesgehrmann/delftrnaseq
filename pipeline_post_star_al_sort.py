@@ -29,11 +29,11 @@ for i in xrange(len(BAM)):
   b  = ALN[i];
   s  = SORT[i];
 
-  cmds_s.append("samtools sort -n -m 100000000000 '%s' '%s'" % (b, s));
+  cmds_s.append("samtools sort -m 100000000000 '%s' '%s'" % (b, s));
 
 #efor
 
-print "Sorting BAM files by name"; sys.stdout.flush();
+print "Sorting BAM files"; sys.stdout.flush();
 retval = run_par_cmds(cmds, max_threads=C.__max_threads__);
 if retval != 0:
   sys.exit(retval);

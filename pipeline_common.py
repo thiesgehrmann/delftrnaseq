@@ -98,7 +98,7 @@ class PIPELINECONF:
   #############################################################################
 
   def __post_star_al_sort_output__(self):
-    return [ self.outdir + "/%s.star_align_sort_name.bam" % sn for sn in self.sample_names ];
+    return [ self.outdir + "/%s.star_align_sort.bam" % sn for sn in self.sample_names ];
   #edef
 
   #############################################################################
@@ -183,7 +183,10 @@ class PIPELINECONF:
   # CUFFDIFF STUFF                                                            #
   #############################################################################
 
-  cuffdiff_opts = "";
+  def cuffdiff_opts(self):
+    return "-p %s --upper-quartile-norm" % self.__max_threads__;
+  #edef
+
   def __cuffdiff_output__(self):
     return ["somethingidontknow_cd"];
   #edef
@@ -268,11 +271,7 @@ class PIPELINECONF:
     #efor
     self.samples = samples
 
-    genome = []
-    for f in self.genome:
-      genome = genome + [ wd + '/' + f ];
-    #efor
-    self.genome = genome
+    self.genome = wd + '/' + genome;
 
     self.genome_annot = wd + '/' + self.genome_annot if self.genome_annot else None;
     self.genome_guide = wd + '/' + self.genome_guide if self.genome_guide else None;
@@ -410,6 +409,10 @@ def error(str):
 ###############################################################################
 
 def cor(obj):
+  """ Call or return.
+      Returns obj() if obj is callable, otherwise returns obj.
+  """
+
   if hasattr(obj, '__call__'):
     return obj();
   else:

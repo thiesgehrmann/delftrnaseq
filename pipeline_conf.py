@@ -15,7 +15,7 @@ class config(PIPELINECONF):
   samples=[("my_data/102020-01_R1.short.fastq", "my_data/102020-01_R2.short.fastq")];
   sample_names = [ "sample1"];
 
-  genome = [ '/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/assembly/n402_atcc.unpadded.fasta' ] 
+  genome = '/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/assembly/n402_atcc.unpadded.fasta' 
   genome_annot = '/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/annotations/n402_annotation.gff'
 
   #############################################################################

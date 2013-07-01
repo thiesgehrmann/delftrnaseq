@@ -21,14 +21,31 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-bf  = C.__star_al_output_name__();
+bf  = C.__post_star_al_sort_output__();
 gtf = C.__cufflinks_output__()[2];
 
+cmds = [];
 
-cmd = "cuffdiff " \
-    + "-L '%s' " % ','.join([str(l) for l in C.sample_labels]), 
-    + "%s " % gtf \
-    + "%s " % ' '.join(bf);
+for (a,b) in C.cuffdiff_cmp:
+  a_reps = [ bf[i] for i in xrange(len(bf)) if C.sample_labels[i] == a ];
+  b_reps = [ bf[i] for i in xrange(len(bf)) if C.sample_labels[i] == b ];
+  
 
-sys.exit(run_cmd(cmd));
+  cmd = "cuffdiff " \
+      + "%s " % cor(C.cuffdiff_opts) \
+      + "-L '%s,%s' " % (a, b) \
+      + "-b '%s' " % C.genome \
+      + "%s " % gtf \
+      + "%s " % ','.join(a_reps) \
+      + "%s " % ','.join(b_reps);
 
+  cmds.append(cmd);
+
+#efor
+
+#retval = run_seq_cmds(cmds);
+
+print cmds[0];
+
+
+sys.exit(retval);

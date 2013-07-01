@@ -24,7 +24,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 outputs = [ "genes.fpkm_tracking", "isoforms.fpkm_tracking", "transcripts.gtf", "skipped.gtf" ];
 rnames  = C.__cufflinks_indiv_output__();
-bamin = C.__pre_cufflinks_indiv_sort_output__();
+bamin = C.__post_star_al_sort_output__();
 
 cmds = [];
 
