@@ -137,7 +137,7 @@ M.add_step("PRE_CUFFLINKS_MERGE", "${POST_STAR_AL_BAM_OUT}", C.__pre_cufflinks_m
 M.add_step("PRE_CUFFLINKS_SORT", "${PRE_CUFFLINKS_MERGE_OUT}", C.__pre_cufflinks_sort_output__(), 'pipeline_pre_cufflinks_sort.py');
 M.add_step("GENOME_ANNOT_FORMAT", C.genome_annot, C.__genome_annot_format_output__(), 'pipeline_genome_annot_format.py');
 M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__cufflinks_output__()), 'pipeline_cufflinks.py');
-M.add_step("CUFFDIFF", "${POST_STAR_AL_SORT_OUT} ${CUFFLINKS_OUT}", ' '.join(C.__cuffdiff_output__()), 'pipeline_cuffdiff.py');
+M.add_step("CUFFDIFF", "${POST_STAR_AL_SORT_OUT} ${CUFFLINKS_OUT}", ' '.join(flatten(C.__cuffdiff_output__())), 'pipeline_cuffdiff.py');
 
   # CUFF_INDIV steps
 #M.add_step("PRE_CUFFLINKS_INDIV_SORT", "${POST_STAR_AL_BAM_OUT}", ' '.join(C.__pre_cufflinks_indiv_sort_output__()), 'pipeline_pre_cufflinks_indiv_sort.py');
