@@ -30,7 +30,7 @@ for i in xrange(len(TR)):
   sname = '%s/%s' % (C.outdir, C.sample_names[i])
 
   cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s %s --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx" % (cor(C.star_al_opts), C.__star_gg_output__(), L, R);
-
+  
   run_cmd(cmd);
 
   cmds = [];

@@ -29,7 +29,7 @@ for i in xrange(len(ALN)):
   a = ALN[i];
   b = BAM[i];
 
-  cmds_v.append("samtools view -Sb '%s' -o '%s'" % (a, b));
+  cmds.append("samtools view -Sb '%s' -o '%s'" % (a, b));
 
 #efor
 

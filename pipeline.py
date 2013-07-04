@@ -73,16 +73,17 @@ class makefile:
 
     for (step, script) in self.steps[::-1]:
       fd.write('%s ${%s_OUT} : ${%s_IN}\n' % (step, step, step));
-      fd.write('\t@echo [%s] Starting\n' % step);
-      #fd.write('\t@rm -rf ${%s_OUT}\n' % step);
-      fd.write('\t@${inst_loc}/%s "%s" 2>&1 | tee "${outdir}/%s.std.log ";' % (script, loc, step));
+      fd.write('\t@echo [%s] Starting at `date`\n' % step);
+      fd.write('\t@rm -rf ${%s_OUT}\n' % step);
+      fd.write('\t@ds=`date`; ');
+      fd.write('${inst_loc}/%s "%s" 2>&1 | tee "${outdir}/%s.std.log";' % (script, loc, step));
       fd.write('ps=$${PIPESTATUS[0]}; ');
       fd.write('if [ $$ps -eq 0 ]; then ');
       fd.write('  stat="COMPLETED"; ');
       fd.write('else ');
       fd.write('  stat="FAILED"; ');
       fd.write('fi; ');
-      fd.write('${inst_loc}/pipeline_notify.py "%s" "%s" "${outdir}/%s.std.log" "$$stat"; echo "[%s] $$stat" ; exit "$$ps";\n' % (loc, step, step, step));
+      fd.write('${inst_loc}/pipeline_notify.py "%s" "%s" "${outdir}/%s.std.log" "$$stat" "$$ds" "`date`"; echo "[%s] $$stat at `date`" ; exit $$ps;\n' % (loc, step, step, step));
     #efor
 
     fd.close();
