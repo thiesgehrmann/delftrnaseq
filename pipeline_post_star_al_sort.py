@@ -26,10 +26,10 @@ SORT = C.__post_star_al_sort_output__();
 cmds = []
 
 for i in xrange(len(BAM)):
-  b  = ALN[i];
-  s  = SORT[i];
+  b  = BAM[i];
+  s  = SORT[i][:-4];
 
-  cmds_s.append("samtools sort -m 100000000000 '%s' '%s'" % (b, s));
+  cmds.append("samtools sort -m 100000000000 '%s' '%s'" % (b, s));
 
 #efor
 
