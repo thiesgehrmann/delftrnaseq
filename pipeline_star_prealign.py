@@ -29,7 +29,9 @@ R = ",".join([filepair[1] for filepair in TR])
 print "Starting splice site discovery"; sys.stdout.flush();
 
 cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s %s --outSAMstrandField intronMotif --outSAMattributes All --outFilterIntronMotifs RemoveNoncanonical" % (cor(C.star_preal_opts), C.__star_pregg_output__(), L, R);
-run_cmd(cmd);
+pid, retval = run_cmd(cmd);
+if retval != 0:
+   sys.exit(retval);
 
 #splice site filtering
 x = Read('SJ.out.tab').Detect()
@@ -38,12 +40,15 @@ x = x[((_.max_overhang >= C.splice_sites_minmax_overhang) & ((_.unique_reads >= 
 x = x.Get(_.chromosome, _.intron_start, _.intron_stop, _.strand.Each(lambda x: '+' if x==1 else '-',dtype=bytes))
 Save(x,'splice_junction_db.tsv')
 
+retval = run_shell("sed 1d splice_junction_db.tsv > splice_junction_db_nohead.tsv")
+if retval != 0:
+   sys.exit(retval);
+
 cmds = [];
-cmds.append("sed 1d splice_junction_db.tsv > splice_junction_db_nohead.tsv")
-cmds.append("mv Log.out 'star_prealign.log'" %sname );
-cmds.append("mv Log.progress.out 'star_prealign.progress.log'" % sname );
-cmds.append("mv Log.final.out 'star_prealign.final.log'" % sname );
-cmds.append("mv SJ.out.tab 'star_prealign.SJ.tab'" % sname );
+cmds.append("mv Log.out star_prealign.log");
+cmds.append("mv Log.progress.out star_prealign.progress.log");
+cmds.append("mv Log.final.out star_prealign.final.log");
+cmds.append("mv SJ.out.tab star_prealign.SJ.tab");
 
 retval = run_seq_cmds(cmds);
 if retval != 0:

@@ -99,7 +99,7 @@ class PIPELINECONF:
   #edef
   
   def __star_preal_output__(self):
-    return self.outdir + "/splice_junction_db_nohead.tsv"
+    return "./splice_junction_db_nohead.tsv"
 
   def __star_al_output_sam__(self):
     return [ self.outdir + '/%s.star_align.sam' % sn for sn in self.sample_names ];
@@ -458,6 +458,12 @@ def run_cmd(cmd, bg=False, stdin=None, stdout=None, stderr=None):
     return r;
   #fi
 #edef
+
+
+def run_shell(cmd):
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    res = p.communicate()[0]
+    return p.returncode
 
 ###############################################################################
 
