@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import os
 import inspect
@@ -126,7 +126,12 @@ if (C.genome_annot == None) and (C.genome_guide == None):
 #fi
 
   # STAR alignment steps
-M.add_step("STAR_GG", C.genome,  C.__star_gg_output__(), 'pipeline_star_genome_generate.py');
+
+M.add_step("STAR_PREGG", C.genome,  C.__star_pregg_output__(), 'pipeline_star_pregenome_generate.py');
+M.add_var("STAR_PREAL_OUTPUT", C.__star_preal_output__());
+M.add_step("STAR_PREAL", "${STAR_PREGG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_PREAL_OUTPUT}", 'pipeline_star_prealign.py');
+
+M.add_step("STAR_GG", "${STAR_PREAL_OUT}",  C.__star_gg_output__(), 'pipeline_star_genome_generate.py');
 M.add_var("STAR_AL_OUTPUT_SAM", ' '.join(C.__star_al_output_sam__()));
 M.add_var("STAR_AL_OUTPUT_UNMAPPED", ' '.join(flatten(C.__star_al_output_unmapped__())));
 M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_SAM} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');

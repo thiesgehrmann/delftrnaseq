@@ -53,9 +53,9 @@ for i in xrange(len(C.cuffdiff_cmp):
 
 #efor
 
-#retval = run_seq_cmds(cmds);
+retval = run_seq_cmds(cmds);
 
-print cmds[0];
+#print cmds[0];
 
 
 sys.exit(retval);

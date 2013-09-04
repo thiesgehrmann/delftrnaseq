@@ -49,7 +49,10 @@ class PIPELINECONF:
   # TRIMM-O-MATIC STUFF                                                       #
   #############################################################################
 
-  trimmomatic_opts="-threads 12";
+  def trimmomatic_opts(self):
+    return "-threads %d" % self.__max_threads__;
+  #edef
+
   trimmomatic_trim="LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36";
 
   def __trimmomatic_output__(self):
@@ -59,13 +62,20 @@ class PIPELINECONF:
   #############################################################################
   # STAR GENOME GENERATION STUFF                                              #
   #############################################################################
-
-  def star_gg_opts(self):
+  def star_pregg_opts(self):
     return "--runThreadN %d" % self.__max_threads__;
   #edef
 
-  star_gg_gdir = "genome"
+  def star_gg_opts(self):
+    return "--runThreadN %d --sjdbOverhang 99" % self.__max_threads__;
+  #edef
 
+  star_pregg_gdir = "pregenome"
+  def __star_pregg_output__(self):
+    return "%s/%s" %(self.outdir, self.star_pregg_gdir);
+  #edef
+
+  star_gg_gdir = "genome"
   def __star_gg_output__(self):
     return "%s/%s" %(self.outdir, self.star_gg_gdir);
   #edef
@@ -73,10 +83,23 @@ class PIPELINECONF:
   #############################################################################
   # STAR ALIGNMENT STUFF                                                      #
   #############################################################################
+  def star_preal_opts(self):
+    return "--runThreadN %d" % self.__max_threads__;
+
+  #splice sites filtering
+  #condition: (min_overhang >= $SPLICE_SITES_MINMAX_OVERHANG and at least 2 unique reads) OR unique_reads > $SPLICE_SITES_UNIQUE_READS OR nonunique_reads > SPLICE_SITES_NONUNIQUE_READS
+  splice_sites_minmax_overhang = 36 #(and minimal 2 unique reads) #OR
+  def splice_sites_unique_reads(self): #OR
+    return round(len(self.samples) / 2)
+  def splice_sites_nonunique_reads(self): #OR
+    return len(self.samples)
 
   def star_al_opts(self):
     return "--runThreadN %d" % self.__max_threads__;
   #edef
+  
+  def __star_preal_output__(self):
+    return self.outdir + "/splice_junction_db_nohead.tsv"
 
   def __star_al_output_sam__(self):
     return [ self.outdir + '/%s.star_align.sam' % sn for sn in self.sample_names ];
