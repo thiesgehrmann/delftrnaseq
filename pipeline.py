@@ -83,6 +83,7 @@ class makefile:
       fd.write('else ');
       fd.write('  stat="FAILED"; ');
       fd.write('fi; ');
+      fd.write('mkdir -p ${outdir}; ');
       fd.write('${inst_loc}/pipeline_notify.py "%s" "%s" "${outdir}/%s.std.log" "$$stat" "$$ds" "`date`"; echo "[%s] $$stat at `date`" ; exit $$ps;\n' % (loc, step, step, step));
     #efor
 
