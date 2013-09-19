@@ -50,7 +50,7 @@ class PIPELINECONF:
   #############################################################################
 
   trimmomatic_opts="-threads 12";
-  trimmomatic_trim="LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36";
+  trimmomatic_trim="LEADING:4 TRAILING:4 SLIDINGWINDOW:4:15 MINLEN:36";
 
   def __trimmomatic_output__(self):
     return [ (self.outdir + '/' + self.sample_names[i] + '_R1.fastq', self.outdir + '/' + self.sample_names[i] + '_R2.fastq') for i in xrange(len(self.sample_names)) ];
@@ -183,6 +183,8 @@ class PIPELINECONF:
   # CUFFDIFF STUFF                                                            #
   #############################################################################
 
+  cuffdiff_cmp = None;
+
   def cuffdiff_opts(self):
     return "-p %s --upper-quartile-norm" % self.__max_threads__;
   #edef
@@ -190,7 +192,7 @@ class PIPELINECONF:
   def __cuffdiff_output__(self):
     files = [ "bias_params.info", "cds.count_tracking", "cds.diff", "cds.fpkm_tracking", "cds.read_group_tracking", "cds_exp.diff", "gene_exp.diff", "genes.count_tracking", "genes.fpkm_tracking", "genes.read_group_tracking", "isoform_exp.diff", "isoforms.count_tracking", "isoforms.fpkm_tracking", "isoforms.read_group_tracking", "promoters.diff", "read_groups.info", "run.info", "splicing.diff", "tss_group_exp.diff", "tss_groups.count_tracking", "tss_groups.fpkm_tracking", "tss_groups.read_group_tracking", "var_model.info" ];
     r = [];
-    for (a,b) in self.cuffdiff_cmp:
+    for (a,b) in self.cuffdiff_cmp if self.cuffdiff_cmp else []:
       r.append(tuple([ "%s/%s-%s,%s.cuffdiff.%s" % (self.outdir, self.jobname, self.label_names[a], self.label_names[b], f) for f in files ]));
     #efor
     return r;
