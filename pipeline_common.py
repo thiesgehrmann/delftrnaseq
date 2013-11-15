@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import os;
 import sys;
@@ -48,6 +48,7 @@ class PIPELINECONF:
   #############################################################################
   # TRIMM-O-MATIC STUFF                                                       #
   #############################################################################
+  trimmomatic_prg = "trimmomaticPE"
 
   def trimmomatic_opts(self):
     return "-threads %d" % self.__max_threads__;
@@ -414,6 +415,23 @@ class PIPELINECONF:
   #edef
 
 #eclass
+
+
+
+def usage(a1):
+    print "Usage:  %s <config file>" % a1;
+
+def init_conf():
+    if len(os.sys.argv) != 2:
+        usage(os.sys.argv[0]);
+        os.sys.exit(1);
+    
+    C = PIPELINECONF(os.sys.argv[1])
+    run_cmd('mkdir -p %s' % C.outdir);
+    return C
+      
+   
+
 
 ###############################################################################
 ###############################################################################

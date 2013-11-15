@@ -1,7 +1,4 @@
-#!/usr/bin/python
-
-import os;
-import sys;
+#!/usr/bin/env python
 import smtplib;
 from email.mime.text import MIMEText;
 

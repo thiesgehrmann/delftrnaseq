@@ -1,25 +1,8 @@
 #!/usr/bin/env python
-
-import os;
-import sys;
-from ibidas import *
 from pipeline_common import *;
+from ibidas import *
 
-###############################################################################
-
-def usage(a1):
-  print "Usage:  %s <config file>" % a1;
-#edef
-
-if len(os.sys.argv) != 2:
-  usage(os.sys.argv[0]);
-  os.sys.exit(1);
-#fi
-
-C = PIPELINECONF(os.sys.argv[1]);
-run_cmd('mkdir -p %s' % C.outdir);
-
-###############################################################################
+C = init_conf()
 
 TR = C.__trimmomatic_output__();
 

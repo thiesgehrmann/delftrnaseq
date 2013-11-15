@@ -1,27 +1,12 @@
 #!/usr/bin/env python
-
-import os;
-import sys;
+from pipeline_common import *;
 from ibidas import *
 from ibidas.utils import util
-from pipeline_common import *;
 import quality_figures as qf
 import latex
-###############################################################################
 
-def usage(a1):
-  print "Usage:  %s <config file>" % a1;
-#edef
+C = init_conf()
 
-if len(os.sys.argv) != 2:
-  usage(os.sys.argv[0]);
-  os.sys.exit(1);
-#fi
-
-C = PIPELINECONF(os.sys.argv[1]);
-run_cmd('mkdir -p %s' % C.outdir);
-
-###############################################################################
 outfiles = C.__quality_output__()
 
 l = latex.LatexFile(outfiles[-1][0])

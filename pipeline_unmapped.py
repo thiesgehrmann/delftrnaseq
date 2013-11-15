@@ -1,7 +1,6 @@
 #!/usr/bin/env python
+from pipeline_common import *;
 
-import os;
-import sys;
 import pickle;
 import csv;
 import time
@@ -10,23 +9,8 @@ from ibidas import *
 from Bio import SeqIO;
 from Bio import Entrez;
 
-from pipeline_common import *;
 
-###############################################################################
-
-def usage(a1):
-  print "Usage:  %s <config file>" % a1;
-#edef
-
-if len(os.sys.argv) != 2:
-  usage(os.sys.argv[0]);
-  os.sys.exit(1);
-#fi
-
-C = PIPELINECONF(os.sys.argv[1]);
-run_cmd('mkdir -p %s' % C.outdir);
-
-###############################################################################
+C = init_conf()
 
 def BLAST(query_file, dbloc, outfile, blast_opts=""):
 
