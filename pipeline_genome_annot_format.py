@@ -29,4 +29,9 @@ cmd = 'gffread ' \
 
 retval = run_cmd(cmd);
 
+if retval != 0:
+    print "ERROR: gffread fails, simply copying genome annotation file instead!!!!!"
+    cmd = 'cp %s %s' % (C.genome_annot, gffout)
+    retval = run_cmd(cmd)
+
 sys.exit(retval);

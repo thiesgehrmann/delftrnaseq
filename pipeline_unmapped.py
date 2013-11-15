@@ -1,9 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import os;
 import sys;
 import pickle;
 import csv;
+import time
+from ibidas import *
 
 from Bio import SeqIO;
 from Bio import Entrez;
@@ -66,32 +68,46 @@ for i in xrange(len(BO)):
     #efor
   #ewith
 
-  gi_list = [ fh[k][0] for k in fh.keys() ];
+  gi_list = [ fh[k][0] for k in fh.keys() if fh[k][1] > 1500];
 
-  print "Determining source organism of hits"; sys.stdout.flush();
+  print "Determining source organism of %d hits" % len(gi_list); sys.stdout.flush();
 
   k = 0;
-  for j in xrange(0,len(gi_list), 100):
-    gi_str = ','.join(gi_list[j:(j+100)]);
+  xsize = 50;
+  for j in xrange(0,len(gi_list), xsize):
+    gi_str = ','.join(gi_list[j:(j+xsize)]);
 
-    print "Sending query %d" % (k/300); sys.stdout.flush();
+    print "Sending query %d" % (k/xsize); sys.stdout.flush();
     print gi_str;
-    handle  = Entrez.efetch(db="nuccore", id=gi_str, rettype="gb");
+    r = 0
+    handle = None
+    while 1:
+        try:
+            handle  = Entrez.efetch(db="nuccore", id=gi_str, rettype="gb");
+        except Exception, e:
+            r = r + 1
+            time.sleep(60)
+            if r> 30: 
+                raise
+            else:
+                print e
+                continue
+        break
+
+
     print "Parsing query"; sys.stdout.flush();
 
     l = '\n';
     while l != '':
       l = handle.readline();
-      print l
       if l[2:10] != 'ORGANISM':
         continue;
       #fi
-      print k;
       org = l[10:];
-      print org; sys.stdout.flush();
       if org in fo:
         fo[org] = (fo[org][0] + 1, fo[org][1] + [ fh[fh.keys()[k]] ] );
       else:
+        print org; sys.stdout.flush();
         fo[org] = (1, [ fh[fh.keys()[k]] ]);
       #fi
       k = k + 1;
@@ -108,8 +124,7 @@ for i in xrange(len(BO)):
   #efor
   print "\n\n";
   sys.stdout.flush();
-
-  pickle.dump(fo, open('%s/%s.unmapped_orgs.dat' % (C.outdir, sn), 'w'));
+  Save(fo, '%s/%s.unmapped_orgs.dat' % (C.outdir, sn));
 #efor
 
 sys.exit(0);

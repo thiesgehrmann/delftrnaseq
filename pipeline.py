@@ -63,6 +63,8 @@ class makefile:
     #efor
     fd.write('.PHONY : touch\n');
     fd.write('touch: status\n');
+    fd.write('\t@find ${outdir} | xargs touch\n')
+    fd.write('\t@find . | xargs touch\n')
     for (step, script) in self.steps:
       fd.write('\t@ls ${%s_OUT} &>/dev/null;' % step);
       fd.write('if [ $$? -eq 0 ]; then ');
@@ -154,9 +156,12 @@ M.add_step("CUFFLINKS_INDIV", "${POST_STAR_AL_SORT_OUT} ${GENOME_ANNOT_FORMAT_OU
 M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.__trinity_output__()), 'pipeline_trinity.py');
 M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.__trinity_orf_output__()), 'pipeline_trinity_orf.py');
 M.add_step("UNMAPPED_BLAST", "${TRINITY_ORF_OUT} %s" % (C.blast_db if C.blast_db != None else ""), ' '.join(C.__unmapped_blast_output__()), 'pipeline_unmapped_blast.py');
-M.add_step("UNMAPPED", "${UNMAPPED_BLAST}", ' '.join(C.__unmapped_output__()), 'pipeline_unmapped.py');
+M.add_step("UNMAPPED", "${UNMAPPED_BLAST_OUT}", ' '.join(C.__unmapped_output__()), 'pipeline_unmapped.py');
+M.add_step("CUFFDIFF_COMBINE", "${CUFFDIFF_OUT}", ' '.join(C.__cuffdiff_combine_output__()), 'pipeline_cuffdiff_combine.py');
+M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
+M.add_step("POSTANALYSIS", "${CUFFDIFF_COMBINE_OUT}", ' '.join(flatten(C.__analysis_output__())), 'pipeline_analysis.py');
 
-M.write(C.makefile, C.location, "${CUFFLINKS_OUT}", C.outdir);
+M.write(C.makefile, C.location, "${POSTANALYSIS}", C.outdir);
 
 ###############################################################################
 

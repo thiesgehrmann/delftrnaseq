@@ -99,7 +99,7 @@ class PIPELINECONF:
   #edef
   
   def __star_preal_output__(self):
-    return "./splice_junction_db_nohead.tsv"
+    return self.outdir + "/splice_junction_db_nohead.tsv"
 
   def __star_al_output_sam__(self):
     return [ self.outdir + '/%s.star_align.sam' % sn for sn in self.sample_names ];
@@ -207,17 +207,43 @@ class PIPELINECONF:
   #############################################################################
 
   def cuffdiff_opts(self):
-    return "-p %s --upper-quartile-norm" % self.__max_threads__;
+    return "-p %s --upper-quartile-norm --max-bundle-frags 100000000000" % self.__max_threads__;
   #edef
 
   def __cuffdiff_output__(self):
     files = [ "bias_params.info", "cds.count_tracking", "cds.diff", "cds.fpkm_tracking", "cds.read_group_tracking", "cds_exp.diff", "gene_exp.diff", "genes.count_tracking", "genes.fpkm_tracking", "genes.read_group_tracking", "isoform_exp.diff", "isoforms.count_tracking", "isoforms.fpkm_tracking", "isoforms.read_group_tracking", "promoters.diff", "read_groups.info", "run.info", "splicing.diff", "tss_group_exp.diff", "tss_groups.count_tracking", "tss_groups.fpkm_tracking", "tss_groups.read_group_tracking", "var_model.info" ];
     r = [];
-    for (a,b) in self.cuffdiff_cmp:
-      r.append(tuple([ "%s/%s-%s,%s.cuffdiff.%s" % (self.outdir, self.jobname, self.label_names[a], self.label_names[b], f) for f in files ]));
+    #for (a,b) in self.cuffdiff_cmp:
+    #  r.append(tuple([ "%s/%s-%s,%s.cuffdiff.%s" % (self.outdir, self.jobname, self.label_names[a], self.label_names[b], f) for f in files ]));
+    
+    #if self.cuffdiff_normalized_data:
+    r.append(tuple([ "%s/%s-all.cuffdiff.%s" % (self.outdir, self.jobname, f) for f in files ]));
     #efor
     return r;
   #edef
+
+  #############################################################################
+  # ANALYSIS STUFF                                                            #
+  #############################################################################
+ 
+  analysis_venn = []
+
+  def __analysis_output__(self):
+    files = []
+    files.append(['%s/%s_venn_%d.pdf' % (self.outdir, self.jobname, pos) for pos in range(len(self.analysis_venn))])
+    files.append(['%s/%s_pca.pdf' % (self.outdir, self.jobname), '%s/%s_pca_log_filter.pdf' % (self.outdir, self.jobname)])
+    files.append(['%s/%s_diffstats.pdf' % (self.outdir, self.jobname)])
+    files.append(['%s/%s_clusters.pdf' % (self.outdir, self.jobname)])
+    files.append(['%s/%s_analysis_report.tex' % (self.outdir, self.jobname)])
+    return files;
+
+
+  def __quality_output__(self):
+    files = []
+    files.append(['%s/%s_trimmomatic_nreads.pdf' % (self.outdir, self.jobname), '%s/%s_trimmomatic_ratio.pdf' % (self.outdir, self.jobname), '%s/%s_trimmomatic_single.pdf' % (self.outdir, self.jobname)])
+    files.append(['%s/%s_mapping_matched.pdf' % (self.outdir, self.jobname), '%s/%s_mapping_unmatched.pdf' % (self.outdir, self.jobname), '%s/%s_mapping_length.pdf' % (self.outdir, self.jobname)])
+    files.append(['%s/%s_quality_report.tex' % (self.outdir, self.jobname)])
+    return files
 
   #############################################################################
   # TRINITY STUFF                                                             #
@@ -246,11 +272,11 @@ class PIPELINECONF:
   #############################################################################
 
   blast_db = None;
-  def unmapped_blast_opts():
-    return "-num_threads %d" % __max_threads__;
+  def unmapped_blast_opts(self):
+    return "-num_threads %d" % self.__max_threads__;
   #edef
 
-  __unmapped_blast_fields__  = "qseqid sseqid slen length mismatch gapopen pident evalue bitscore";
+  __unmapped_blast_fields__  = "qseqid sseqid qlen slen length mismatch gapopen pident evalue bitscore";
 
   def __unmapped_blast_output__(self):
     return [ self.outdir + '/%s.unmapped_blast.tsv' % sn for sn in self.sample_names ];
@@ -266,6 +292,15 @@ class PIPELINECONF:
   def __unmapped_output__(self):
     return [ self.outdir + '/%s.unmapped_orgs.dat' % sn for sn in self.sample_names ];
   #edef
+  
+  
+  #############################################################################
+  # CUFFDIFF_COMBINE STUFF                                                    #
+  #############################################################################
+
+  annots_file = ''
+  def __cuffdiff_combine_output__(self):
+    return [ self.outdir + '/cuffdiff_combine.dat', self.outdir + '/cuffdiff_combine.csv'];
 
   #############################################################################
   #############################################################################  
@@ -464,6 +499,13 @@ def run_shell(cmd):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     res = p.communicate()[0]
     return p.returncode
+
+def getCommandOutput(cmd):
+    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    res = p.communicate()[0]
+    if p.returncode != 0:
+        raise RuntimeError, "Command failed: " + str(res)
+    return res
 
 ###############################################################################
 

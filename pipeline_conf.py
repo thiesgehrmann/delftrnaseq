@@ -1,4 +1,4 @@
-#!./pipeline.py
+#!/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/software/delftrnaseq/pipeline.py
 
 class config(PIPELINECONF):
   #inst_loc
@@ -8,7 +8,7 @@ class config(PIPELINECONF):
 
   location = "./conf";
   workdir = None;
-  outdir  = "/data/tmp/marchulsman/fengfeng_run/outdir"
+  outdir  = "/data/tmp/marchulsman/run_feng"
   #makefile="";
   blast_db = '/data/tmp/marchulsman/blast_db/nt.nal'    
   
@@ -41,7 +41,10 @@ class config(PIPELINECONF):
   label_names   = [ "F1", "F3", "F5", "N1", "N3", "N5" ];
 
   genome = '/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/assembly/n402_atcc.unpadded.fasta' 
-  genome_annot = '/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/annotations/n402_annotation.gff'
+  genome_annot = '/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/annotations/results/n402_annotations.gff'
+
+
+  annots_file = '/tudelft.net/staff-groups/ewi/insy/DBL/marchulsman/projects/n402_sequence/annotation_data/annots_v2.dat'
 
   #############################################################################
   # Trimmomatic options                                                       #
@@ -52,13 +55,22 @@ class config(PIPELINECONF):
   #############################################################################
   # STAR GENOME GENERATION OPTIONS                                            #
   #############################################################################
-  #star_gg_opts = "";
+  #adapt sjdbOverhang to read length - 1
+  def star_gg_opts(self):
+    return "--runThreadN %d --sjdbOverhang 99" % self.__max_threads__;
 
   #############################################################################
   # STAR ALIGNMENT OPTIONS                                                    #
   #############################################################################
-  #star_al_opts = "";
+  def star_preal_opts(self):
+    return "--runThreadN %d  --alignIntronMax 5000 --alignMatesGapMax 5000" % self.__max_threads__;
   
-  cuffdiff_cmp = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 4), (2, 5)]; 
+  #splice_sites_minmax_overhang = 36
+
+  def star_al_opts(self):
+    return "--runThreadN %d  --alignIntronMax 5000 --alignMatesGapMax 5000" % self.__max_threads__;
+  
+
+  cuffdiff_cmp = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 4), (2, 5), (3, 4), (3, 5), (4, 5)]; 
   
 #eclass
