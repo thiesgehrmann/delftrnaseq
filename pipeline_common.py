@@ -54,12 +54,8 @@ class PIPELINECONF:
     return "-threads %d" % self.__max_threads__;
   #edef
 
-<<<<<<< HEAD
   trimmomatic_trim="LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36";
-=======
   trimmomatic_opts="-threads 12";
-  trimmomatic_trim="LEADING:4 TRAILING:4 SLIDINGWINDOW:4:15 MINLEN:36";
->>>>>>> 377fdd8db90f2d6f68cec43fb17ecbe443169426
 
   def __trimmomatic_output__(self):
     return [ (self.outdir + '/' + self.sample_names[i] + '_R1.fastq', self.outdir + '/' + self.sample_names[i] + '_R2.fastq') for i in xrange(len(self.sample_names)) ];
