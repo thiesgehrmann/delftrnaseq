@@ -72,8 +72,11 @@ class PIPELINECONF:
     return "--runThreadN %d --sjdbOverhang 99" % self.__max_threads__;
   #edef
 
-  star_pregg_gdir = "pregenome"
-  def __star_pregg_output__(self):
+    # Do we build the spliceDB?
+  build_splice_db = True;
+
+  star_pre_splice_gdir = "pre_splice_genome"
+  def __star_pre_splice_output__(self):
     return "%s/%s" %(self.outdir, self.star_pregg_gdir);
   #edef
 
