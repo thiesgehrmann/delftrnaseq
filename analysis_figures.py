@@ -96,8 +96,11 @@ def create_diffgenes_stats(data, filename):
     up = []
     down = []
     cnames = []
+    print names;
     for name in names:
         comparison_name = name[:-12]
+        print comparison_name;
+        print data.Slices;
         xdata = data[_.Get(name) == "yes"]
         countup = (xdata.Get(comparison_name + "_log2_fold_change") > 0).Sum()()
         countdown = (xdata.Get(comparison_name + "_log2_fold_change") < 0).Sum()()

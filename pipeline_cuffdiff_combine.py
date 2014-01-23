@@ -12,7 +12,18 @@ infiles = C.__cuffdiff_output__();
 
 files = infiles[-1]
 
-read_group = Read(files[9])
+read_group = Read(files[9]);
+read_group = read_group / ('tracking_id', 'condition', 'replicate', 'raw_frags', 'internal_scaled_frags', 'external_scaled_frags', 'fpkm', 'effective_length', 'status');
+read_group = read_group.To(_.tracking_id, Do=_.Cast(bytes));
+read_group = read_group.To(_.condition,   Do=_.Cast(bytes));
+read_group = read_group.To(_.replicate,   Do=_.Cast(bytes));
+read_group = read_group.To(_.raw_frags,   Do=_.Cast(int));
+read_group = read_group.To(_.internal_scaled_frags, Do=_.Cast(float));
+read_group = read_group.To(_.external_scaled_frags, Do=_.Cast(float));
+read_group = read_group.To(_.fpkm,        Do=_.Cast(float));
+read_group = read_group.To(_.effective_length,      Do=_.Cast(bytes));
+
+
 #group by tracking id, condition and replicate
 read_group = read_group.GroupBy(_.tracking_id, _.condition, _.replicate, flat={0: (_.status, _.effective_length), (0,1,2):(_.raw_frags, _.internal_scaled_frags, _.external_scaled_frags, _.fpkm)}).Copy()
 
@@ -28,7 +39,7 @@ for i in range(len(C.label_names)):
 idx_lbl = [str(i) for i in range(len(C.label_names))]
 read_group = read_group.Get((_.condition + "_" + _.replicate).TakeFrom(Rep((idx_all, name_all)))/"sample_names", \
                             _.condition.TakeFrom(Rep((idx_lbl, C.label_names)))/'label_names', \
-                            _.tracking_id, _.condition, _.replicate, _.raw_frags, _.external_scaled_frags).Detect()
+                            _.tracking_id, _.condition, _.replicate, _.raw_frags, _.external_scaled_frags)
 
 #combine condition and replicate dimension, sort on condition first and then replicate. 
 read_group = read_group.Flat().Sort((_.condition, _.replicate)).Copy()
@@ -38,14 +49,33 @@ read_group_compact = read_group.Get(_.tracking_id/'gene_id', _.external_scaled_f
 
 #second part of manual implementation of inverse HArray
 names = read_group.sample_names.Each(str.lower)()
-dataraw = [read_group[...,i].raw_frags/(names[i] + '_raw') for i in range(len(names))]
+dataraw = [read_group[...,i].raw_frags/(','.join(names[i]) + '_raw') for i in range(len(names))]
 datanorm = [read_group[...,i].external_scaled_frags/(names[i] + '_normalized') for i in range(len(names))]
 read_group = read_group.Get(_.tracking_id/'gene_id', *(dataraw + datanorm)).Copy()
 
 #now get gene_exp.diff data for each comparison
 results = [read_group];
 
-all_expdiff = Read(files[6]).Detect().Copy()
+print files;
+
+all_expdiff = Read(files[10]).Copy()
+all_expdiff = all_expdiff / ('test_id', 'gene_id', 'gene', 'locus', 'sample_1', 'sample_2', 'status', 'value_1', 'value_2', 'log2_fold_change', 'test_stat', 'p_value', 'q_value', 'significant');
+#         | -      | -      | scaffold_24:203-2284 | 0        | 1        | NOTEST   | 1.41008  | 1.09656  | -0.362794 | 0        | 1        | 1        | no
+all_expdiff = all_expdiff.To(_.test_id, Do=_.Cast(bytes));
+all_expdiff = all_expdiff.To(_.gene_id, Do=_.Cast(bytes));
+all_expdiff = all_expdiff.To(_.gene, Do=_.Cast(bytes));
+all_expdiff = all_expdiff.To(_.locus, Do=_.Cast(bytes));
+all_expdiff = all_expdiff.To(_.sample_1, Do=_.Cast(int));
+all_expdiff = all_expdiff.To(_.sample_2, Do=_.Cast(int));
+all_expdiff = all_expdiff.To(_.status, Do=_.Cast(bytes));
+all_expdiff = all_expdiff.To(_.value_1, Do=_.Cast(float));
+all_expdiff = all_expdiff.To(_.value_2, Do=_.Cast(float));
+all_expdiff = all_expdiff.To(_.log2_fold_change, Do=_.Cast(float));
+all_expdiff = all_expdiff.To(_.test_stat, Do=_.Cast(float));
+all_expdiff = all_expdiff.To(_.p_value, Do=_.Cast(float));
+all_expdiff = all_expdiff.To(_.q_value, Do=_.Cast(float));
+all_expdiff = all_expdiff.To(_.significant, Do=_.Cast(bytes));
+
 for i in xrange(len(C.cuffdiff_cmp)):
   a, b = C.cuffdiff_cmp[i];
   #files = infiles[i]
@@ -57,13 +87,13 @@ for i in xrange(len(C.cuffdiff_cmp)):
   expdiffd = expdiffd / tuple([cname + '_' + name for name in expdiffd.Names])
   res = expdiff.Get(_.gene_id, expdiffd)
 
-  results.append(res.Copy())
+  results.append(res.Copy());
 
 #efor
 
 #combine the data
 for i in range(1, len(results)):
-    results[0] = (results[0] |Match| results[i]).Copy()
+    results[0] = (results[0] |Match(_.gene_id, _.gene_id)| results[i]).Copy()
 #efor
 
 #if annots file is available, add that one too (should have gene_id slice). 

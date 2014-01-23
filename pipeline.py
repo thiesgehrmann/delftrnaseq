@@ -130,8 +130,8 @@ if (C.genome_annot == None) and (C.genome_guide == None):
 
   # STAR alignment steps
 if C.build_splice_db:
-  M.add_step("STAR_PRE_SPLICE", C.genome, C.__star_pre_splice_output__(), 'pipeline_star_pregenome_generate.py');
-  M.add_step("STAR_SPLICE", "${STAR_PRE_SPLICE_OUT} ${TRIMMOMATIC_OUT}", C.__star_preal_output__(), 'pipeline_star_prealign.py');
+  M.add_step("STAR_PRE_SPLICE", C.genome, C.__star_pre_splice_output__(), 'pipeline_star_pre_splice.py');
+  M.add_step("STAR_SPLICE", "${STAR_PRE_SPLICE_OUT} ${TRIMMOMATIC_OUT}", C.__star_preal_output__(), 'pipeline_star_splice.py');
   M.add_step("STAR_GG", "${STAR_SPLICE_OUT}",  C.__star_gg_output__(), 'pipeline_star_genome_generate.py');
 else:
   M.add_step("STAR_GG", C.genome, C.__star_gg_output__(), 'pipeline_star_genome_generate.py');
@@ -160,6 +160,8 @@ M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.__trinity_orf_output__())
 M.add_step("UNMAPPED_BLAST", "${TRINITY_ORF_OUT} %s" % (C.blast_db if C.blast_db != None else ""), ' '.join(C.__unmapped_blast_output__()), 'pipeline_unmapped_blast.py');
 M.add_step("UNMAPPED", "${UNMAPPED_BLAST_OUT}", ' '.join(C.__unmapped_output__()), 'pipeline_unmapped.py');
 M.add_step("CUFFDIFF_COMBINE", "${CUFFDIFF_OUT}", ' '.join(C.__cuffdiff_combine_output__()), 'pipeline_cuffdiff_combine.py');
+
+  # REPORTS
 M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
 M.add_step("POSTANALYSIS", "${CUFFDIFF_COMBINE_OUT}", ' '.join(flatten(C.__analysis_output__())), 'pipeline_analysis.py');
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os;
+import pwd;
 import sys;
 import types;
 import pickle;
@@ -19,9 +20,13 @@ class PIPELINECONF:
 
   email          = None;
   jobname        = None;
+  title          = "Rna-Seq Analysis";
+  author         = pwd.getpwuid(os.getuid()).pw_gecos;
+  
   workdir        = "./"
   outdir         = "./"
   makefile       = "Makefile";
+
   location       = "";
   samples        = [];
   sample_names   = [];
