@@ -31,7 +31,7 @@ Given a configuration file (such as 'pipeline_conf_example.py'):
 You can get a status of each step by issuing:
 ```shell
 > make status
- [TRIMMOMATIC]:         INCOMPLETE
+![TRIMMOMATIC]:         INCOMPLETE
 [STAR_GG]:             INCOMPLETE
 [STAR_AL]:             INCOMPLETE
 [POST_STAR_AL_BAM]:    INCOMPLETE
