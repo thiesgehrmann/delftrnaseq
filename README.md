@@ -25,13 +25,13 @@ Usage
 
 Given a configuration file (such as 'pipeline_conf_example.py'):
 
-```
+```shell
 > ./pipeline_conf_example.py # Produces a makefile 'Makefile', and a configuration file 'conf'
 ```
 You can get a status of each step by issuing:
-```
+```shell
 > make status
- [TRIMMOMATIC]:         INCOMPLETE
+|[TRIMMOMATIC]:         INCOMPLETE
 [STAR_GG]:             INCOMPLETE
 [STAR_AL]:             INCOMPLETE
 [POST_STAR_AL_BAM]:    INCOMPLETE
@@ -75,7 +75,7 @@ And you can run any one of these steps with:
 ```
 
 If you start a step and you have not completed the dependencies of that step, it will run those first:
-```
+```shell
 > make CUFFDIFF
 > make status
 [TRIMMOMATIC]:         COMPLETE
