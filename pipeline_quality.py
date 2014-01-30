@@ -6,9 +6,10 @@ from pipeline_common import *;
 from ibidas import *
 from ibidas.utils import util
 
-sys.path.append('utilities');
+sys.path.append('%s/utilities/' % os.path.dirname(os.path.realpath(__file__)));
 import quality_figures as qf
 import latex
+
 
 C = init_conf()
 

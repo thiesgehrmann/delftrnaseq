@@ -389,6 +389,13 @@ class PIPELINECONF:
       errors = errors + fex(r2, "Could not find sample file '%s'" % r2);
     #efor
 
+    n_cmps = len(self.cuffdiff_cmp);
+    self.cuffdiff_cmp = list(set(self.cuffdiff_cmp));
+    if len(self.cuffdiff_cmp) < n_cmps:
+      warnings = warnings + 1;
+      warning("Some cuffdiff comparisons are specified more than once, correcting.");
+    #fi
+
     if warnings > 0:
       print("There were %d warnings!" % warnings);
     #fi

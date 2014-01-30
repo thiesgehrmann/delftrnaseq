@@ -92,7 +92,7 @@ def create_cluster(data, filename):
 
 
 def create_diffgenes_stats(data, filename):
-    names = Rep(data.Names)[_.HasPattern('significant')]()
+    names = [n for n in data.Names if "_significant" in n ]
     up = []
     down = []
     cnames = []

@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
-import sys;
+import sys, os
 
 from pipeline_common import *;
 from ibidas import *
 from ibidas.utils import util
 
-sys.path.append('utilities');
+sys.path.append('%s/utilities/' % os.path.dirname(os.path.realpath(__file__)));
 import analysis_figures as af
 import latex
-
 
 C = init_conf()
 
