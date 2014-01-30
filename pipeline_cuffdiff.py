@@ -14,8 +14,6 @@ all_reps = []
 for i in xrange(len(C.label_names)):
     all_reps.append([ bf[j] for j in xrange(len(bf)) if C.sample_labels[j] == i ]);
 
-files = out[-1];
-
 labels = ",".join([str(i) for i in range(len(C.label_names))])
 
 cmd = "cuffdiff " \
@@ -30,7 +28,7 @@ for reps in all_reps:
 cmds.append(cmd);
 
 for i in xrange(len(cuff_files)):
-    cmd = "mv %s %s" % (cuff_files[i], files[i]);
+    cmd = "mv %s %s" % (cuff_files[i], out[i]);
     cmds.append(cmd); 
    
 

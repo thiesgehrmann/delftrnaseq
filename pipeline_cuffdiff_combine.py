@@ -8,11 +8,10 @@ C = init_conf()
 def to_str(value):
     return str(value).replace('\n', ' ' )
 
-infiles = C.__cuffdiff_output__();
+files = C.__cuffdiff_output__();
 
-files = infiles[-1]
 
-read_group = Read(files[9]);
+read_group = Read(files[13]);
 read_group = read_group / ('tracking_id', 'condition', 'replicate', 'raw_frags', 'internal_scaled_frags', 'external_scaled_frags', 'fpkm', 'effective_length', 'status');
 read_group = read_group.To(_.tracking_id, Do=_.Cast(bytes));
 read_group = read_group.To(_.condition,   Do=_.Cast(bytes));

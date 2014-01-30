@@ -224,13 +224,7 @@ class PIPELINECONF:
 
   def __cuffdiff_output__(self):
     files = [ "bias_params.info", "cds.count_tracking", "cds.diff", "cds.fpkm_tracking", "cds.read_group_tracking", "cds_exp.diff", "gene_exp.diff", "genes.count_tracking", "genes.fpkm_tracking", "genes.read_group_tracking", "isoform_exp.diff", "isoforms.count_tracking", "isoforms.fpkm_tracking", "isoforms.read_group_tracking", "promoters.diff", "read_groups.info", "run.info", "splicing.diff", "tss_group_exp.diff", "tss_groups.count_tracking", "tss_groups.fpkm_tracking", "tss_groups.read_group_tracking", "var_model.info" ];
-    r = [];
-    #for (a,b) in self.cuffdiff_cmp:
-    #  r.append(tuple([ "%s/%s-%s,%s.cuffdiff.%s" % (self.outdir, self.jobname, self.label_names[a], self.label_names[b], f) for f in files ]));
-    
-    #if self.cuffdiff_normalized_data:
-    r.append(tuple([ "%s/%s-all.cuffdiff.%s" % (self.outdir, self.jobname, f) for f in files ]));
-    return r;
+    return [ "%s/%s-all.cuffdiff.%s" % (self.outdir, self.jobname, f) for f in files ];
   #edef
 
   #############################################################################
