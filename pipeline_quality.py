@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import os;
+import sys;
 
 from pipeline_common import *;
 from ibidas import *
 from ibidas.utils import util
 
-os.path.append('utilities');
+sys.path.append('utilities');
 import quality_figures as qf
 import latex
 
