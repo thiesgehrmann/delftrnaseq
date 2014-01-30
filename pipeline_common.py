@@ -242,8 +242,9 @@ class PIPELINECONF:
   #############################################################################
   # ANALYSIS STUFF                                                            #
   #############################################################################
- 
-  analysis_venn = []
+
+  perform_analysis = True; 
+  analysis_venn    = [];
 
   def __analysis_output__(self):
     files = []
@@ -261,6 +262,13 @@ class PIPELINECONF:
     files.append(['%s/%s_mapping_matched.pdf' % (self.outdir, self.jobname), '%s/%s_mapping_unmatched.pdf' % (self.outdir, self.jobname), '%s/%s_mapping_length.pdf' % (self.outdir, self.jobname)])
     files.append(['%s/%s_quality_report.tex' % (self.outdir, self.jobname)])
     return files
+
+
+  #############################################################################
+  # CONTAMINATION STUFF                                                       #
+  #############################################################################
+
+  check_contamination = True;
 
   #############################################################################
   # TRINITY STUFF                                                             #
@@ -393,17 +401,30 @@ class PIPELINECONF:
     self.cuffdiff_cmp = list(set(self.cuffdiff_cmp));
     if len(self.cuffdiff_cmp) < n_cmps:
       warnings = warnings + 1;
-      warning("Some cuffdiff comparisons are specified more than once, correcting.");
+      warning("Some cuffdiff comparisons are specified more than once, correcting. May cause confusion in later analysis");
     #fi
+
+    for venn in self.analysis_venn:
+      if len(venn) not in [2,3]:
+        errors = errors + 1;
+        error("The venn analysis: '%s' is impossible. Need 2 or 3 cuffdiff comparisons." % (str(venn)));
+      #fi
+      for v in venn:
+        if v < 0 or v > len(self.cuffdiff_cmp):
+          errors = errors + 1;
+          error("The venn analysis: '%s' is impossible. Cuffdiff comparison %d does not exist." % (str(venn), v));
+        #fi
+      #efor
+    #efor
 
     if warnings > 0:
       print("There were %d warnings!" % warnings);
     #fi
     if errors > 0:
       print("There were %d errors! Aborting!" % errors);
-      return 1
+      return 1;
     #fi
-    return 0
+    return 0;
   #edef
 
   #############################################################################

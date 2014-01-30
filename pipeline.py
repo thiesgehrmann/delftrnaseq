@@ -150,20 +150,20 @@ M.add_step("GENOME_ANNOT_FORMAT", C.genome_annot, C.__genome_annot_format_output
 M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__cufflinks_output__()), 'pipeline_cufflinks.py');
 M.add_step("CUFFDIFF", "${POST_STAR_AL_SORT_OUT} ${CUFFLINKS_OUT}", ' '.join(flatten(C.__cuffdiff_output__())), 'pipeline_cuffdiff.py');
 
-  # CUFF_INDIV steps
-#M.add_step("PRE_CUFFLINKS_INDIV_SORT", "${POST_STAR_AL_BAM_OUT}", ' '.join(C.__pre_cufflinks_indiv_sort_output__()), 'pipeline_pre_cufflinks_indiv_sort.py');
-M.add_step("CUFFLINKS_INDIV", "${POST_STAR_AL_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(flatten(C.__cufflinks_indiv_output__())), 'pipeline_cufflinks_indiv.py');
-
   # Contamination steps
-M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.__trinity_output__()), 'pipeline_trinity.py');
-M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.__trinity_orf_output__()), 'pipeline_trinity_orf.py');
-M.add_step("UNMAPPED_BLAST", "${TRINITY_ORF_OUT} %s" % (C.blast_db if C.blast_db != None else ""), ' '.join(C.__unmapped_blast_output__()), 'pipeline_unmapped_blast.py');
-M.add_step("UNMAPPED", "${UNMAPPED_BLAST_OUT}", ' '.join(C.__unmapped_output__()), 'pipeline_unmapped.py');
-M.add_step("CUFFDIFF_COMBINE", "${CUFFDIFF_OUT}", ' '.join(C.__cuffdiff_combine_output__()), 'pipeline_cuffdiff_combine.py');
+if C.check_contamination:
+  M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.__trinity_output__()), 'pipeline_trinity.py');
+  M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.__trinity_orf_output__()), 'pipeline_trinity_orf.py');
+  M.add_step("UNMAPPED_BLAST", "${TRINITY_ORF_OUT} %s" % (C.blast_db if C.blast_db != None else ""), ' '.join(C.__unmapped_blast_output__()), 'pipeline_unmapped_blast.py');
+  M.add_step("UNMAPPED", "${UNMAPPED_BLAST_OUT}", ' '.join(C.__unmapped_output__()), 'pipeline_unmapped.py');
+#fi
 
   # REPORTS
-M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
-M.add_step("POSTANALYSIS", "${CUFFDIFF_COMBINE_OUT}", ' '.join(flatten(C.__analysis_output__())), 'pipeline_analysis.py');
+if C.perform_analysis:
+  M.add_step("CUFFDIFF_COMBINE", "${CUFFDIFF_OUT}", ' '.join(C.__cuffdiff_combine_output__()), 'pipeline_cuffdiff_combine.py');
+  M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
+  M.add_step("POSTANALYSIS", "${CUFFDIFF_COMBINE_OUT}", ' '.join(flatten(C.__analysis_output__())), 'pipeline_analysis.py');
+#fi
 
 M.write(C.makefile, C.location, "${POSTANALYSIS}", C.outdir);
 
