@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 
+import os;
+
 from pipeline_common import *;
 from ibidas import *
 from ibidas.utils import util
+
+os.path.append('utilities');
 import analysis_figures as af
 import latex
 
+
 C = init_conf()
+
+###############################################################################
 
 infiles = C.__cuffdiff_combine_output__();
 data = Load(infiles[0])

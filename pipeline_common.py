@@ -217,6 +217,9 @@ class PIPELINECONF:
   #############################################################################
 
   cuffdiff_cmp = None;
+  __cuffdiff_test_type__         = 'isoform'; # cds|gene|isoform|tss
+  __cuffdiff_test_group_index__  = {'cds':3, 'gene':9, 'isoform':13, 'tss':21};
+  __cuffdiff_test_diff_index__   = {'cds':5, 'gene':6, 'isoform':10, 'tss':18};
 
   def cuffdiff_opts(self):
     return "-p %s --upper-quartile-norm --max-bundle-frags 100000000000" % self.__max_threads__;
@@ -225,6 +228,15 @@ class PIPELINECONF:
   def __cuffdiff_output__(self):
     files = [ "bias_params.info", "cds.count_tracking", "cds.diff", "cds.fpkm_tracking", "cds.read_group_tracking", "cds_exp.diff", "gene_exp.diff", "genes.count_tracking", "genes.fpkm_tracking", "genes.read_group_tracking", "isoform_exp.diff", "isoforms.count_tracking", "isoforms.fpkm_tracking", "isoforms.read_group_tracking", "promoters.diff", "read_groups.info", "run.info", "splicing.diff", "tss_group_exp.diff", "tss_groups.count_tracking", "tss_groups.fpkm_tracking", "tss_groups.read_group_tracking", "var_model.info" ];
     return [ "%s/%s-all.cuffdiff.%s" % (self.outdir, self.jobname, f) for f in files ];
+  #edef
+  
+  #############################################################################
+  # CUFFDIFF_COMBINE STUFF                                                    #
+  #############################################################################
+
+  annotation_files = None;
+  def __cuffdiff_combine_output__(self):
+    return [ self.outdir + '/cuffdiff_combine.dat', self.outdir + '/cuffdiff_combine.csv'];
   #edef
 
   #############################################################################
@@ -298,15 +310,6 @@ class PIPELINECONF:
     return [ self.outdir + '/%s.unmapped_orgs.dat' % sn for sn in self.sample_names ];
   #edef
   
-  
-  #############################################################################
-  # CUFFDIFF_COMBINE STUFF                                                    #
-  #############################################################################
-
-  annots_file = ''
-  def __cuffdiff_combine_output__(self):
-    return [ self.outdir + '/cuffdiff_combine.dat', self.outdir + '/cuffdiff_combine.csv'];
-
   #############################################################################
   #############################################################################  
   #############################################################################

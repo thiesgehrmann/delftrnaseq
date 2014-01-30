@@ -33,7 +33,7 @@ You can get a status of each step by issuing:
 > make status
 ```
 And you can run any one of these steps with:
-```shelÃ¸
+```shell¸
 > make TRIMMOMATIC
 ```
 
