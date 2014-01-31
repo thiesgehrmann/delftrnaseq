@@ -243,18 +243,24 @@ class PIPELINECONF:
   # ANALYSIS STUFF                                                            #
   #############################################################################
 
-  perform_analysis = True;
-  analysis_filter  = [None];
-  analysis_venn    = [];
+  perform_analysis           = True;
+  analysis_filter            = [None];
+  analysis_venn_updown_split = False;
+  analysis_venn              = [];
 
   def __analysis_output__(self):
     files = []
     for ifilter in xrange(len(self.analysis_filter)):
       filtfiles = [];
-      filtfiles.append(['%s/%s_filter%d_venn_%d.pdf' % (self.outdir, self.jobname, ifilter, pos) for pos in range(len(self.analysis_venn))])
-      filtfiles.append(['%s/%s_filter%d_pca.pdf' % (self.outdir, self.jobname, ifilter), '%s/%s_pca_log_filter.pdf' % (self.outdir, self.jobname)])
+      if self.analysis_venn_updown_split:
+        filtfiles.append([['%s/%s_filter%d_venn_%d_up.pdf' % (self.outdir, self.jobname, ifilter, pos), '%s/%s_filter%d_venn_%d_down.pdf' % (self.outdir, self.jobname, ifilter, pos) ]for pos in range(len(self.analysis_venn))])
+      else:
+        filtfiles.append([['%s/%s_filter%d_venn_%d.pdf' % (self.outdir, self.jobname, ifilter, pos)] for pos in range(len(self.analysis_venn))])
+      #fi
+      filtfiles.append(['%s/%s_filter%d_pca.pdf' % (self.outdir, self.jobname, ifilter), '%s/%s_filter%d_pca_log_filter.pdf' % (self.outdir, self.jobname, ifilter)])
       filtfiles.append(['%s/%s_filter%d_diffstats.pdf' % (self.outdir, self.jobname, ifilter)])
       filtfiles.append(['%s/%s_filter%d_clusters.pdf' % (self.outdir, self.jobname, ifilter)])
+      filtfiles.append(['%s/%s_filter%d_venn_subsets.csv' % (self.outdir, self.jobname, ifilter)])
       filtfiles.append(['%s/%s_filter%d_analysis_report.tex' % (self.outdir, self.jobname, ifilter)])
       files.append(filtfiles);
     #efor

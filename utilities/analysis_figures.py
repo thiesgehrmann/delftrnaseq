@@ -5,9 +5,11 @@ from sklearn import metrics
 import pylab as pl
 import numpy
 from collections import Counter
-from matplotlib_venn import venn2, venn3
 from figure_tools import *
 
+from matplotlib import pyplot as plt;
+from matplotlib_venn import venn3, venn3_circles, venn2, venn2_circles;
+  
 markers = ['o', '1', '8','2', 'p', '3', 's', '4', 'h','H','D','d','*','+', 'x', '.']
 
 
@@ -106,42 +108,132 @@ def create_diffgenes_stats(data, filename):
     pl.savefig(filename, dpi=200)
 
 
-def create_venn(data, compare_sets, names, filename):
-    compare_names = []
-    for compare_set in compare_sets:
-        label_names = [ names[condid] for condid in compare_set]
-        compare_names.append(("_".join(label_names)).lower())
+#def create_venn(data, compare_sets, names, filename):
+#    compare_names = []
+#    for compare_set in compare_sets:
+#        label_names = [ names[condid] for condid in compare_set]
+#        compare_names.append(("_".join(label_names)).lower())
+#
+#    indicators = []
+#    for compare_name in compare_names:
+#        indicators.append((data.Get(compare_name + "_significant") == "yes")())
+#
+#    skipvenn = any([numpy.sum(filter)==0 for filter in indicators])
+#    
+#    if len(compare_names) == 2:
+#        indicators = ["%d%d" % x for x in zip(*indicators)]
+#    else:
+#        assert len(compare_names) == 3, 'Number of compare sets in Venn diagram should be 2 or 3'
+#        indicators = ["%d%d%d" % x for x in zip(*indicators)]
+#
+#    subsets = Counter(indicators)
+#    
+#    fig = pl.figure()
+#    fig.set_facecolor('white')
+#    ax = fig.add_subplot(111)
+#    
+#    if not skipvenn:
+#        if len(compare_names) == 2:
+#            venn2(subsets, set_labels=tuple(compare_names),ax=ax)
+#        else:
+#            venn3(subsets, set_labels=tuple(compare_names),ax=ax)
+#    else:
+#        pl.text(0.5, 0.5, 'One or more sets has no significant genes', horizontalalignment='center')
+#        pl.axis('off')
+#
+#    pl.savefig(filename, dpi=200)
 
-    indicators = []
+def create_venn(data, compare_sets, names, filenames, udsplit):
+
+  datas = [];
+  dirs  = [];
+
+  compare_names = []
+  for compare_set in compare_sets:
+    label_names = [ names[condid] for condid in compare_set]
+    compare_names.append(("_".join(label_names)).lower())
+  #efor
+
+  if udsplit:
+    ups   = [];
+    downs = [];
     for compare_name in compare_names:
-        indicators.append((data.Get(compare_name + "_significant") == "yes")())
+      up   = set(data[data.Get((compare_name + '_significant')) == 'yes'].test_id()) & set(data[data.Get((compare_name + '_log2_fold_change')) > 0].test_id());
+      down = set(data[data.Get((compare_name + '_significant')) == 'yes'].test_id()) & set(data[data.Get((compare_name + '_log2_fold_change')) < 0].test_id());
+      ups.append(up);
+      downs.append(down);
+    #efor
+    datas.append(ups);
+    datas.append(downs);
+    dirs = [ 'up', 'down' ];
+  else:
+    alls = [];
+    for compare_name in compare_names:
+      all = set(data[data.Get(compare_name + '_significant') == 'yes'].test_id());
+      alls.append(all);
+    #efor
+    datas.append(all);
+    dirs = [ 'all' ];
+  #fi
 
-
-    skipvenn = any([numpy.sum(filter)==0 for filter in indicators])
-    
-    if len(compare_names) == 2:
-        indicators = ["%d%d" % x for x in zip(*indicators)]
+  numbers  = [];
+  overlaps = [];
+  for (data, filename, dir) in zip(datas, filenames, dirs):
+    if len(data) == 2:
+      numbers = [0]*3;
+      titles  = [ compare_names[0], compare_names[1], '%s n %s' % (compare_names[0], compare_names[1]) ];
+      numbers[2] = data[0] & data[1];
+      numbers[0] = data[0] - numbers[2];
+      numbers[1] = data[1] - numbers[2]; 
+    elif len(data) == 3:
+      numbers = [0]*7;
+      titles = [ compare_names[0], compare_names[1], ' n '.join([compare_names[0], compare_names[1]]), compare_names[2], ' n '.join([compare_names[0], compare_names[2]]), ' n '.join([compare_names[1], compare_names[2]]), ' n '.join([compare_names[0], compare_names[1], compare_names[2]]) ];
+      numbers[6] = data[0] & data[1] & data[2];
+      numbers[5] = data[1] & data[2] - numbers[6];
+      numbers[4] = data[0] & data[2] - numbers[6];
+      numbers[3] = data[2] - numbers[4] - numbers[5] - numbers[6];
+      numbers[2] = data[0] & data[1] - numbers[6];
+      numbers[1] = data[1] - numbers[2] - numbers[5] - numbers[6];
+      numbers[0] = data[0] - numbers[2] - numbers[4] - numbers[6];
     else:
-        assert len(compare_names) == 3, 'Number of compare sets in Venn diagram should be 2 or 3'
-        indicators = ["%d%d%d" % x for x in zip(*indicators)]
+      print "Error.";
+    #fi
+    overlaps.extend([ (','.join(compare_names) + ' ' + dir, t, list(n)) for (t,n) in zip(titles,numbers)]);
+    draw_venn(','.join(compare_names) + ' ' + dir, compare_names, [len(s) for s in numbers], filename);
+  #efor
 
-    subsets = Counter(indicators)
-    
-    fig = pl.figure()
-    fig.set_facecolor('white')
-    ax = fig.add_subplot(111)
-    
-    if not skipvenn:
-        if len(compare_names) == 2:
-            venn2(subsets, set_labels=tuple(compare_names),ax=ax)
-        else:
-            venn3(subsets, set_labels=tuple(compare_names),ax=ax)
-    else:
-        pl.text(0.5, 0.5, 'One or more sets has no significant genes', horizontalalignment='center')
-        pl.axis('off')
+  return overlaps;
+#edef
 
-    pl.savefig(filename, dpi=200)
-   
+###############################################################################
 
-
-
+def draw_venn(title, names, numbers, out):
+  
+  if len(numbers) == 7:
+    if numbers[0] + numbers[2] + numbers[4] + numbers[6] == 0:
+      numbers = [ numbers[1], numbers[3], numbers[5] ];
+      names   = [ names[1], names[2] ];
+    elif numbers[1] + numbers[2] + numbers[5] + numbers[6] == 0:
+      numbers = [ numbers[0], numbers[3], numbers[4] ];
+      names   = [ names[0], names[2] ];
+    elif numbers[3] + numbers[4] + numbers[5] + numbers[6] == 0:
+      numbers = [ numbers[0], numbers[1], numbers[2] ];
+      names   = [ names[0], names[1] ];
+    #fi
+  #fi
+  
+  plt.cla();
+  plt.figure(figsize=(10,10))
+  if len(numbers) == 7:
+    plt.cla();
+    plt.figure(figsize=(10,10))
+    v = venn3(subsets=numbers, set_labels = names)
+    c = venn3_circles(subsets=numbers, linestyle='dashed')
+  else:
+    v = venn2(subsets = numbers, set_labels = names);
+    c = venn2_circles(subsets = numbers, linestyle='dashed');
+  #fi
+  
+  plt.title(title)
+  plt.savefig(out);
+#edef

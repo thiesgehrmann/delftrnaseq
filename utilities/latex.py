@@ -25,6 +25,9 @@ class LatexFile(object):
     def texcape(self, txt):
         return txt.replace("_","\_")
 
+    def add_text(self, text):
+        self.f.write("%s\n" % self.texcape(text));
+
     def include_figure(self, filename, refname, caption = None, width=None):
         self.f.write("\\begin{figure}[htp]\n")
         self.f.write("\\noindent\\makebox[\\textwidth]{%\n")
