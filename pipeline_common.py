@@ -260,7 +260,7 @@ class PIPELINECONF:
       filtfiles.append(['%s/%s_filter%d_pca.pdf' % (self.outdir, self.jobname, ifilter), '%s/%s_filter%d_pca_log_filter.pdf' % (self.outdir, self.jobname, ifilter)])
       filtfiles.append(['%s/%s_filter%d_diffstats.pdf' % (self.outdir, self.jobname, ifilter)])
       filtfiles.append(['%s/%s_filter%d_clusters.pdf' % (self.outdir, self.jobname, ifilter)])
-      filtfiles.append(['%s/%s_filter%d_venn_subsets.csv' % (self.outdir, self.jobname, ifilter)])
+      filtfiles.append(['%s/%s_filter%d_venn_subsets.csv' % (self.outdir, self.jobname, ifilter), '%s/%s_filter%d_venn_subsets.dat' % (self.outdir, self.jobname, ifilter)])
       filtfiles.append(['%s/%s_filter%d_analysis_report.tex' % (self.outdir, self.jobname, ifilter)])
       files.append(filtfiles);
     #efor

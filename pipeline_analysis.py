@@ -42,7 +42,7 @@ for (i, filter) in enumerate(C.analysis_filter):
   af.create_diffgenes_stats(data_f, difffile)
   l.include_figure(difffile, 'diffgenes', 'Number of significant genes for each comparison. Upregulated/Downregulated means that the gene has a respectively higher/lower expression in the second mentioned condtion, compared to the first mentioned condition.', width=1.5)
 
-  venn_subsets_file = filt_outfiles[-2][0];
+  venn_subsets_file = filt_outfiles[-2];
   venn_files        = filt_outfiles[0];
   subsets = [];
   for pos, (venn, filenames) in enumerate(zip(C.analysis_venn, venn_files)):
@@ -52,7 +52,9 @@ for (i, filter) in enumerate(C.analysis_filter):
       l.include_figure(filename, 'venn%d' % pos, "Overlap significant genes between condition comparisons.")
     #efor
   #efor
-  Save(Rep(subsets) / ('group', 'subset', 'genes'), venn_subsets_file);
+  S = Rep(subsets) / ('group', 'subset', 'genes');
+  Export(S, venn_subsets_file[0]);
+  Save(S, venn_subsets_file[1]);
   l.clear_page()
   l.start_section("Patterns across all genes")
 

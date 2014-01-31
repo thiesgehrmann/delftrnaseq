@@ -15,7 +15,7 @@ class LatexFile(object):
         self.f.write("\\title{%s}\n" % title)
         self.f.write("\\author{%s}\n" % author)
         self.f.write("\\begin{document}\n")
-        self.f.write("\\maketitle")
+        self.f.write("\\maketitle\n\n\n")
                                              
     sectionlevels = ['section','subsection','subsubsection','paragraph','subparagraph']
     def start_section(self, sectionname, level=0):
