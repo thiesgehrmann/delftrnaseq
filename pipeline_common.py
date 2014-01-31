@@ -243,6 +243,7 @@ class PIPELINECONF:
   # ANALYSIS STUFF                                                            #
   #############################################################################
 
+  perform_quality_report     = True;
   perform_analysis           = True;
   analysis_filter            = [None];
   analysis_venn_updown_split = False;

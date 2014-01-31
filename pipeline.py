@@ -159,9 +159,16 @@ if C.check_contamination:
 #fi
 
   # REPORTS
+if C.perform_quality_report:
+  if C.check_contamination::
+    M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT} ${UNMAPPED_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
+  else:
+    M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
+  #fi
+#fi
+
 if C.perform_analysis:
   M.add_step("CUFFDIFF_COMBINE", "${CUFFDIFF_OUT}", ' '.join(C.__cuffdiff_combine_output__()), 'pipeline_cuffdiff_combine.py');
-  M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
   M.add_step("POSTANALYSIS", "${CUFFDIFF_COMBINE_OUT}", ' '.join(flatten(C.__analysis_output__())), 'pipeline_analysis.py');
 #fi
 

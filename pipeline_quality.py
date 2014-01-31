@@ -34,7 +34,10 @@ l.include_figure(outfiles[1][1], 'unmapped', 'Ratio of reads that is dropped due
 l.include_figure(outfiles[1][2], 'length', 'The average input read length compared to the average length of these reads that is aligned to the genome.')
 
 l.clear_page()
-l.start_section("Read contamination")
+
+if C.check_contamination:
+  l.start_section("Read contamination")
+#fi
 
 l.end_document()
 
