@@ -160,7 +160,7 @@ if C.check_contamination:
 
   # REPORTS
 if C.perform_quality_report:
-  if C.check_contamination::
+  if C.check_contamination:
     M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT} ${UNMAPPED_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
   else:
     M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
