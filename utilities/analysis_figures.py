@@ -13,10 +13,6 @@ markers = ['o', '1', '8','2', 'p', '3', 's', '4', 'h','H','D','d','*','+', 'x', 
 
 def create_pca(data, filename, logfilter=False):
     x = data.external_scaled_frags()
-    #print x.shape
-    #print numpy.std(numpy.log2(x+1), axis=1)
-    #x = x[numpy.std(numpy.log2(x+50),axis=1) > 1.0,:]
-    #print x.shape
 
     condlabels = data.label_names()
     samplelabels = data.sample_names()
@@ -96,11 +92,8 @@ def create_diffgenes_stats(data, filename):
     up = []
     down = []
     cnames = []
-    print names;
     for name in names:
         comparison_name = name[:-12]
-        print comparison_name;
-        print data.Slices;
         xdata = data[_.Get(name) == "yes"]
         countup = (xdata.Get(comparison_name + "_log2_fold_change") > 0).Sum()()
         countdown = (xdata.Get(comparison_name + "_log2_fold_change") < 0).Sum()()
@@ -113,10 +106,10 @@ def create_diffgenes_stats(data, filename):
     pl.savefig(filename, dpi=200)
 
 
-def create_venn(data, compare_sets, filename):
+def create_venn(data, compare_sets, names, filename):
     compare_names = []
     for compare_set in compare_sets:
-        label_names = [data[_.condition == condid].label_names[0]() for condid in compare_set]
+        label_names = [ names[condid] for condid in compare_set]
         compare_names.append(("_".join(label_names)).lower())
 
     indicators = []

@@ -243,16 +243,21 @@ class PIPELINECONF:
   # ANALYSIS STUFF                                                            #
   #############################################################################
 
-  perform_analysis = True; 
+  perform_analysis = True;
+  analysis_filter  = [None];
   analysis_venn    = [];
 
   def __analysis_output__(self):
     files = []
-    files.append(['%s/%s_venn_%d.pdf' % (self.outdir, self.jobname, pos) for pos in range(len(self.analysis_venn))])
-    files.append(['%s/%s_pca.pdf' % (self.outdir, self.jobname), '%s/%s_pca_log_filter.pdf' % (self.outdir, self.jobname)])
-    files.append(['%s/%s_diffstats.pdf' % (self.outdir, self.jobname)])
-    files.append(['%s/%s_clusters.pdf' % (self.outdir, self.jobname)])
-    files.append(['%s/%s_analysis_report.tex' % (self.outdir, self.jobname)])
+    for ifilter in xrange(len(self.analysis_filter)):
+      filtfiles = [];
+      filtfiles.append(['%s/%s_filter%d_venn_%d.pdf' % (self.outdir, self.jobname, ifilter, pos) for pos in range(len(self.analysis_venn))])
+      filtfiles.append(['%s/%s_filter%d_pca.pdf' % (self.outdir, self.jobname, ifilter), '%s/%s_pca_log_filter.pdf' % (self.outdir, self.jobname)])
+      filtfiles.append(['%s/%s_filter%d_diffstats.pdf' % (self.outdir, self.jobname, ifilter)])
+      filtfiles.append(['%s/%s_filter%d_clusters.pdf' % (self.outdir, self.jobname, ifilter)])
+      filtfiles.append(['%s/%s_filter%d_analysis_report.tex' % (self.outdir, self.jobname, ifilter)])
+      files.append(filtfiles);
+    #efor
     return files;
 
 
@@ -403,6 +408,13 @@ class PIPELINECONF:
       warnings = warnings + 1;
       warning("Some cuffdiff comparisons are specified more than once, correcting. May cause confusion in later analysis");
     #fi
+
+    for filt in self.analysis_filter:
+      if filt == None:
+        continue;
+      #fi
+      errors = errors + fex(filt, "Could not find filter file '%s'." % filt);
+    #efor
 
     for venn in self.analysis_venn:
       if len(venn) not in [2,3]:
