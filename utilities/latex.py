@@ -28,6 +28,20 @@ class LatexFile(object):
     def add_text(self, text):
         self.f.write("%s\n" % self.texcape(text));
 
+    def write_rep(self, R, caption):
+        D = zip(*R());
+        cols = 'l'*len(R.Names);
+        self.f.write("\\begin{table}[ht]\n");
+        self.f.write("\\centering\n");
+        self.f.write("\\caption{%s}\n" % (caption));
+        self.f.write("\\begin{tabular}{%s}\n" % (cols));
+        self.f.write(" & ".join(R.Names) + '\\hline\n');
+        for row in D:
+          self.f.write(" & ".join([ str(elem) for elem in row]) + ' \\ \n');
+        #efor
+        self.f.write("\\end{tabular}\n");
+        self.f.write("\\end{table}\n\n");
+
     def include_figure(self, filename, refname, caption = None, width=None):
         self.f.write("\\begin{figure}[htp]\n")
         self.f.write("\\noindent\\makebox[\\textwidth]{%\n")

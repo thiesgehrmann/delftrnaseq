@@ -8,6 +8,7 @@ from ibidas.utils import util
 
 sys.path.append('%s/utilities/' % os.path.dirname(os.path.realpath(__file__)));
 import analysis_figures as af
+import enrichment;
 import latex
 
 C = init_conf()
@@ -69,6 +70,15 @@ for (i, filter) in enumerate(C.analysis_filter):
   clustersfile = filt_outfiles[3][0]
   af.create_cluster(data_f, clustersfile)
   l.include_figure(clustersfile, 'clustering', 'k-Means clustering (n=12 clusters) applied to all genes. Normalized frag counts per gene per replicate were transformed to log space using log2(fragcount + 16). Genes were filtered on having a $std > 0.5$. Remaining genes were standardized (mean = 0, std = 1), and subsequently clustered.',width=2.0)
+
+  for annot in C.annotation_names:
+    for test in [ s for s in data.Names if '_significant' in s ]:
+      enrich_data = data.Get(_.test_id, test, '%s_1' % (annot.lower()));
+      enrich_meta = data.Get(*[s for s in data.Names if '%s_' % (annot.lower()) in s ]).FlatAll().Unique();
+      enriched    = enrichment.fast_enrich_sample(enrich_data.Copy(), enrich_meta);
+      l.write_rep(enriched.Sort(_.pvalue, descend=False), test);
+    #efor
+  #efor
 
   l.end_document()
 #efor

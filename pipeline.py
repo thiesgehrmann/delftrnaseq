@@ -168,7 +168,8 @@ if C.perform_quality_report:
 #fi
 
 if C.perform_analysis:
-  M.add_step("CUFFDIFF_COMBINE", "${CUFFDIFF_OUT}", ' '.join(C.__cuffdiff_combine_output__()), 'pipeline_cuffdiff_combine.py');
+  M.add_var('CUFFDIFF_COMBINE_ANNOTATION_FILES', ' '.join(C.annotation_files));
+  M.add_step("CUFFDIFF_COMBINE", "${CUFFDIFF_OUT} ${CUFFDIFF_COMBINE_ANNOTATION_FILES}", ' '.join(C.__cuffdiff_combine_output__()), 'pipeline_cuffdiff_combine.py');
   M.add_step("POSTANALYSIS", "${CUFFDIFF_COMBINE_OUT}", ' '.join(flatten(C.__analysis_output__())), 'pipeline_analysis.py');
 #fi
 

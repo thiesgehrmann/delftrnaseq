@@ -97,9 +97,9 @@ for i in range(1, len(results)):
 
 #if annots file is available, add that one too (first slice should be id slice). 
 if not(C.annotation_files == None):
-  for a in C.annotation_files:
+  for (a,n) in zip(C.annotation_files, C.annotation_names):
     annot = Load(a)
-    R = R | Match(0,0) | annot;
+    R = R |Match(0, 0, jointype='left', merge_same='equi')| (annot.GroupBy(0) / tuple(['%s_%d' % (n.lower(), i) for i in xrange(len(annot.Names))]) );
   #efor
 #fi
 R = R % C.__cuffdiff_test_type__;

@@ -234,7 +234,8 @@ class PIPELINECONF:
   # CUFFDIFF_COMBINE STUFF                                                    #
   #############################################################################
 
-  annotation_files = None;
+  annotation_files = [];
+  annotation_names = [];
   def __cuffdiff_combine_output__(self):
     return [ self.outdir + '/cuffdiff_combine.dat', self.outdir + '/cuffdiff_combine.csv'];
   #edef
@@ -416,25 +417,37 @@ class PIPELINECONF:
       warning("Some cuffdiff comparisons are specified more than once, correcting. May cause confusion in later analysis");
     #fi
 
-    for filt in self.analysis_filter:
-      if filt == None:
-        continue;
-      #fi
-      errors = errors + fex(filt, "Could not find filter file '%s'." % filt);
+    for file in self.annotation_files:
+      errors = errors + fex(file, "Could not find annotation file '%s'." % file);
     #efor
+    if not(len(self.annotation_files) == len(self.annotation_names)):
+      errors = errors + 1;
+      error("The annotation files in the 'annotation_files' variable have not been given names properly. Please set 'annotation_names' variable.");
+    #fi
 
-    for venn in self.analysis_venn:
-      if len(venn) not in [2,3]:
-        errors = errors + 1;
-        error("The venn analysis: '%s' is impossible. Need 2 or 3 cuffdiff comparisons." % (str(venn)));
-      #fi
-      for v in venn:
-        if v < 0 or v > len(self.cuffdiff_cmp):
-          errors = errors + 1;
-          error("The venn analysis: '%s' is impossible. Cuffdiff comparison %d does not exist." % (str(venn), v));
+    if self.perform_analysis:
+
+      for filt in self.analysis_filter:
+        if filt == None:
+          continue;
         #fi
+        errors = errors + fex(filt, "Could not find filter file '%s'." % filt);
       #efor
-    #efor
+
+      for venn in self.analysis_venn:
+        if len(venn) not in [2,3]:
+          errors = errors + 1;
+          error("The venn analysis: '%s' is impossible. Need 2 or 3 cuffdiff comparisons." % (str(venn)));
+        #fi
+        for v in venn:
+          if v < 0 or v > len(self.cuffdiff_cmp):
+            errors = errors + 1;
+            error("The venn analysis: '%s' is impossible. Cuffdiff comparison %d does not exist." % (str(venn), v));
+          #fi
+        #efor
+      #efor
+
+    #fi
 
     if warnings > 0:
       print("There were %d warnings!" % warnings);
