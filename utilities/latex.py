@@ -35,9 +35,9 @@ class LatexFile(object):
         self.f.write("\\centering\n");
         self.f.write("\\caption{%s}\n" % (caption));
         self.f.write("\\begin{tabular}{%s}\n" % (cols));
-        self.f.write(" & ".join(R.Names) + '\\hline\n');
+        self.f.write(" & ".join([self.texcape(n) for n in R.Names]) + '\\\\ \\hline\n');
         for row in D:
-          self.f.write(" & ".join([ str(elem) for elem in row]) + ' \\ \n');
+          self.f.write(" & ".join([ self.texcape(str(elem)) for elem in row]) + ' \\\\ \n');
         #efor
         self.f.write("\\end{tabular}\n");
         self.f.write("\\end{table}\n\n");
