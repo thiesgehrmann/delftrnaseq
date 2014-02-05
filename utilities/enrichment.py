@@ -42,6 +42,7 @@ def fast_enrich_sample(D, M):
 
   if M is not None:
     R = R | Match(0, 0, merge_same="equi") | M
+  #fi
 
   return R.Copy();
 
