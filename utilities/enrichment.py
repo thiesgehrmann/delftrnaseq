@@ -3,9 +3,12 @@ import scipy as sp;
 from scipy import stats as ssp;
 from ibidas import *;
 
+import multi_test_corr as mtc;
+reload(mtc);
+
 ###############################################################################
 
-def fast_enrich_sample(D, M):
+def fast_enrich_sample(D, M, alpha):
 
   #         TERM  NTERM
   #        +-----+-----+
@@ -17,6 +20,7 @@ def fast_enrich_sample(D, M):
   # D.0 = test_id
   # D.1 = significant
   # D.2 = annotation_id
+
   D  = D / ('test_id', 'significant', 'annotation_id');
   Df = D.FlatAll();
   Dg = Df.GroupBy(_.annotation_id);
@@ -35,10 +39,13 @@ def fast_enrich_sample(D, M):
   T = Dg.annotation_id();
 
   p = [ ssp.fisher_exact([ [a[i]+1,b[i]+1], [c[i]+1,d[i]+1]])[1] for i in xrange(NT)];                                                                                                                                     
-                                                                                                                                                                                                                           
-  T = zip(T, a, b, c, d, p);
 
-  R = Rep(T) / ('annotation_id', 'a', 'b', 'c', 'd', 'pvalue');
+    # Benjamini-Hochberg procedure
+  q = mtc.fdr_bh(p, alpha);
+
+  T = zip(T, a, b, c, d, p, q);
+
+  R = Rep(T) / ('annotation_id', 'a', 'b', 'c', 'd', 'pvalue', 'qvalue');
 
   if M is not None:
     R = R | Match(0, 0, merge_same="equi") | M
@@ -49,3 +56,4 @@ def fast_enrich_sample(D, M):
 #edef
 
 ###############################################################################
+

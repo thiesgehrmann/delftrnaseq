@@ -95,15 +95,15 @@ for (i, filter) in enumerate(C.analysis_filter):
   for annot in C.annotation_names:
     l.start_section(annot, level=1);_
     for test in [ s for s in data.Names if '_significant' in s ]:
-      enrich_data = data.Get(_.test_id, test, '%s_1' % (annot.lower()));
-      enrich_meta = data.Get(*[s for s in data.Names if '%s_' % (annot.lower()) in s ]).FlatAll().Unique();
-      enriched    = enrichment.fast_enrich_sample(enrich_data.Copy(), enrich_meta);
+      enrich_data = data_f.Get(_.test_id, test, '%s_1' % (annot.lower()));
+      enrich_meta = data_f.Get(*[s for s in data.Names if '%s_' % (annot.lower()) in s ]).FlatAll().Unique();
+      enriched    = enrichment.fast_enrich_sample(enrich_data.Copy(), enrich_meta, C.__analysis_enrichment_alpha__);
 
       if C.analysis_enrichment_verbose_output == False:
-        enriched = enriched.Without(_.a, _.b, _.c, _.d);
+        enriched = enriched.Without(_.a, _.b, _.c, _.d)[_.qvalue < C.__analysis_enrichment_alpha__];
       #fi
 
-      enriched = enriched[_.pvalue < C.__analysis_enrichment_pvalue_threshold__].Sort(_.pvalue, descend=False);
+      enriched = enriched.Sort(_.qvalue, descend=False);
       if C.analysis_enrichment_returned_values is not None:
         enriched = enriched[0:C.analysis_enrichment_returned_values];
       #fi

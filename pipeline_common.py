@@ -250,9 +250,9 @@ class PIPELINECONF:
   analysis_venn_updown_split = False;
   analysis_venn              = [];
 
-  analysis_enrichment_verbose_output       = False;
-  analysis_enrichment_returned_values      = None;
-  __analysis_enrichment_pvalue_threshold__ = 0.05; 
+  analysis_enrichment_verbose_output  = False;
+  analysis_enrichment_returned_values = None;
+  __analysis_enrichment_alpha__       = 0.05; 
 
   def __analysis_output__(self):
     files = []
