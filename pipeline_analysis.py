@@ -92,23 +92,34 @@ for (i, filter) in enumerate(C.analysis_filter):
   #############################################################################
 
   l.start_section("Enrichment analysis");
-  for annot in C.annotation_names:
-    l.start_section(annot, level=1);_
-    for test in [ s for s in data.Names if '_significant' in s ]:
-      enrich_data = data_f.Get(_.test_id, test, '%s_1' % (annot.lower()));
-      enrich_meta = data_f.Get(*[s for s in data.Names if '%s_' % (annot.lower()) in s ]).FlatAll().Unique();
-      enriched    = enrichment.fast_enrich_sample(enrich_data.Copy(), enrich_meta, C.__analysis_enrichment_alpha__);
-
-      if C.analysis_enrichment_verbose_output == False:
-        enriched = enriched.Without(_.a, _.b, _.c, _.d)[_.qvalue < C.__analysis_enrichment_alpha__];
+  splits = [ 'up', 'down' ] if C.analysis_enrichment_updown_split else [ 'all' ];
+  for (annot_name, annot_file) in zip(C.annotation_names, C.annotation_files):
+    l.start_section(annot_name, level=1);
+    A = Read(annot_file)
+    A = A / tuple(['%s_%d' % (annot_name.lower(), i) for i in xrange(len(A.Names))]);
+    for test in [ s[0:-12] for s in data.Names if '_significant' in s ]:
+      print annot_name, test;
+      enrich_data = data_f.Get(_.test_id, '%s_significant' % test, '%s_log2_fold_change' % test);
+      enrich_data = enrich_data |Match(0, 0, jointype='left', merge_same='equi')| A.GroupBy(0).Get(0,1);
+      if C.analysis_enrichment_only_annotated:
+        enrich_data = enrich_data[enrich_data.Get(3).Shape().Get(1) > 0];
       #fi
+      enrich_meta = A.Without(0).Unique(0);
+      #enrich_meta = data_f.Get(*[s for s in data.Names if '%s_' % (annot.lower()) in s ]).FlatAll().Unique();
+      for split in splits:
+        enriched    = enrichment.fast_enrich_sample(enrich_data.Unique(3).Copy(), enrich_meta, C.__analysis_enrichment_alpha__, all_or_up_or_down=split);
 
-      enriched = enriched.Sort(_.qvalue, descend=False);
-      if C.analysis_enrichment_returned_values is not None:
-        enriched = enriched[0:C.analysis_enrichment_returned_values];
-      #fi
+        if C.analysis_enrichment_verbose_output == False:
+          enriched = enriched.Without(_.a, _.b, _.c, _.d)[_.qvalue < C.__analysis_enrichment_alpha__];
+        #fi
 
-      l.write_rep(enriched, annot + ": " + test);
+        enriched = enriched.Sort(_.qvalue, descend=False);
+        if C.analysis_enrichment_returned_values is not None:
+          enriched = enriched[0:C.analysis_enrichment_returned_values];
+        #fi
+
+        l.write_rep(enriched, annot_name + ": " + test + ' - ' + split);
+      #efor
     #efor
   #efor
 

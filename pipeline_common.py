@@ -28,6 +28,7 @@ class PIPELINECONF:
   makefile       = "Makefile";
 
   location       = "";
+  PE             = None;
   samples        = [];
   sample_names   = [];
   sample_labels  = [];
@@ -42,7 +43,6 @@ class PIPELINECONF:
 
   inst_loc    = None;
   __max_threads__ = multiprocessing.cpu_count();
-
   __pipeline_email__       = 'delftrnaseq@gmail.com';
   __pipeline_mail_user__   = 'delftrnaseq';
   __pipeline_mail_pass__   = 'thiesgehrmann';
@@ -53,7 +53,6 @@ class PIPELINECONF:
   #############################################################################
   # TRIMM-O-MATIC STUFF                                                       #
   #############################################################################
-  trimmomatic_prg = "trimmomaticPE"
 
   def trimmomatic_opts(self):
     return "-threads %d" % self.__max_threads__;
@@ -63,7 +62,11 @@ class PIPELINECONF:
   trimmomatic_opts="-threads 12";
 
   def __trimmomatic_output__(self):
-    return [ (self.outdir + '/' + self.sample_names[i] + '_R1.fastq', self.outdir + '/' + self.sample_names[i] + '_R2.fastq') for i in xrange(len(self.sample_names)) ];
+    if self.PE:
+      return [ (self.outdir + '/' + sn + '_R1.fastq', self.outdir + '/' + sn + '_R2.fastq') for sn in self.sample_names ];
+    else:
+      return [ self.outdir + '/' + sn + '_READS.fastq' for sn in self.sample_names ];
+    #fi
   #edef
 
   #############################################################################
@@ -115,7 +118,10 @@ class PIPELINECONF:
     return [ self.outdir + '/%s.star_align.sam' % sn for sn in self.sample_names ];
   #edef
   def __star_al_output_unmapped__(self):
-    return [ (self.outdir + "/%s.star_align_unmapped_R1.fastq" % sn, self.outdir + "/%s.star_align_unmapped_R2.fastq" % sn) for sn in self.sample_names ];
+    if self.PE:
+      return [ (self.outdir + "/%s.star_align_unmapped_R1.fastq" % sn, self.outdir + "/%s.star_align_unmapped_R2.fastq" % sn) for sn in self.sample_names ];
+    else:
+      return [ self.outdir + "/%s.star_align_unmapped_R1.fastq" % sn for sn in self.sample_names ];
   #edef
 
   #############################################################################
@@ -252,6 +258,8 @@ class PIPELINECONF:
 
   analysis_enrichment_verbose_output  = False;
   analysis_enrichment_returned_values = None;
+  analysis_enrichment_only_annotated  = False; # Count only the annotated genes, or all genes (set to true if you set updown_split to true)
+  analysis_enrichment_updown_split    = False; # Enrich for sets of differentially up and diferentially downregulated genes.
   __analysis_enrichment_alpha__       = 0.05; 
 
   def __analysis_output__(self):
@@ -408,11 +416,25 @@ class PIPELINECONF:
       self.sample_labels = self.sample_names;
       warning("Sample labels are set incorrectly. Please set 'sample_labels' variable.");
 
-      # Check if sample files are there
-    for (r1, r2) in self.samples:
-      errors = errors + fex(r1, "Could not find sample file '%s'" % r1);
-      errors = errors + fex(r2, "Could not find sample file '%s'" % r2);
-    #efor
+    if len(self.samples) == 0:
+      error("No samples specified; What do you expect me to do??");
+      errors = errors + 1;
+    else:
+      if self.PE == None:
+        self.PE = hasattr(self.samples[0], '__iter__');
+        warning("Please specify if you are using paired end or single end reads, set variable PE. Detecting %s." % str(self.PE));
+        warnings = warnings + 1;
+        # Check if sample files are there
+      #fi
+      for rs in self.samples:
+        if self.PE:
+          errors = errors + fex(rs[0], "Could not find sample file '%s'" % rs[0]);
+          errors = errors + fex(rs[1], "Could not find sample file '%s'" % rs[1]);
+        else:
+          errors = errors + fex(rs, "Could not find sample file '%s'" % rs);
+        #fi
+      #efor
+    #fi
 
     n_cmps = len(self.cuffdiff_cmp);
     self.cuffdiff_cmp = list(set(self.cuffdiff_cmp));

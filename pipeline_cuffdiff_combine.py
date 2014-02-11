@@ -95,19 +95,14 @@ for i in range(1, len(results)):
     R = (R |Match(gslice, gslice)| results[i]).Copy()
 #efor
 
-#if annots file is available, add that one too (first slice should be id slice). 
-if not(C.annotation_files == None):
-  for (a,n) in zip(C.annotation_files, C.annotation_names):
-    annot = Load(a)
-    R = R |Match(0, 0, jointype='left', merge_same='equi')| (annot.GroupBy(0) / tuple(['%s_%d' % (n.lower(), i) for i in xrange(len(annot.Names))]) );
-  #efor
-#fi
+#if annots file is available, add that one too (first slice should be id slice).
+
 R = R % C.__cuffdiff_test_type__;
 
 res2 = R |Match| read_group_compact
 res2 = res2 % C.__cuffdiff_test_type__;
 
-Save(res2, C.__cuffdiff_combine_output__()[0])
-Save(res2, C.__cuffdiff_combine_output__()[1])
+Save(res2, C.__cuffdiff_combine_output__()[0]);
+Save(res2, C.__cuffdiff_combine_output__()[1]);
 
 sys.exit(0);

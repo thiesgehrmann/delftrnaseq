@@ -8,8 +8,7 @@ reload(mtc);
 
 ###############################################################################
 
-def fast_enrich_sample(D, M, alpha):
-
+def fast_enrich_sample(D, M, alpha, all_or_up_or_down='all'):
   #         TERM  NTERM
   #        +-----+-----+
   # DIFF  |  a  |  b  | ND
@@ -21,17 +20,31 @@ def fast_enrich_sample(D, M, alpha):
   # D.1 = significant
   # D.2 = annotation_id
 
-  D  = D / ('test_id', 'significant', 'annotation_id');
+  D  = D / ('test_id', 'significant', 'logfold', 'annotation_id');
   Df = D.FlatAll();
   Dg = Df.GroupBy(_.annotation_id);
 
   NG  = D.test_id.Unique().Shape()();
-  ND  = D.Unique(_.test_id)[_.significant == 'yes'].test_id.Shape()();
-  NND = NG - ND;
   NT  = Dg.annotation_id.Shape()();
 
-  a = Dg.significant[_.significant == 'yes'].Shape().Get(1)();
-  c = Dg.significant[_.significant == 'no'].Shape().Get(1)();
+  if all_or_up_or_down == 'all':
+    ND = D[_.significant == 'yes'].test_id.Shape()();
+    a  = Dg[  _.significant == 'yes' ];
+    c  = Dg[~(_.significant == 'yes')];
+  elif all_or_up_or_down == 'up':
+    ND = D[   _.significant == 'yes' and _.logfold > 0 ].test_id.Shape();
+    a  = Dg[  _.significant == 'yes' and _.logfold > 0 ];
+    c  = Dg[~(_.significant == 'yes' and _.logfold > 0)];
+  elif all_or_up_or_down == 'down':
+    ND = D[   _.significant == 'yes' and _.logfold < 0 ].test_id.Shape();
+    a  = Dg[  _.significant == 'yes' and _.logfold < 0 ];
+    c  = Dg[~(_.significant == 'yes' and _.logfold < 0)];
+  #fi
+
+  NND = NG - ND;
+
+  a = a.test_id.Shape().Get(1)();
+  c = c.test_id.Shape().Get(1)();
 
   b = [ (ND - x)  for x in a ];
   d = [ (NND - x) for x in c ];

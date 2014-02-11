@@ -6,13 +6,16 @@ C = init_conf()
 TR = C.__trimmomatic_output__();
 
 for i in xrange(len(TR)):
-  L, R = TR[i];
-
   print "Starting work on sample '%s'" % C.sample_names[i]; sys.stdout.flush();
 
   sname = '%s/%s' % (C.outdir, C.sample_names[i])
 
-  cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s %s --outSAMattributes All --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx" % (cor(C.star_al_opts), C.__star_gg_output__(), L, R);
+  if C.PE:
+    RS = ' '.join(TR[i]);
+  else:
+    RS = TR[i];
+  #fi
+  cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s --outSAMattributes All --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx" % (cor(C.star_al_opts), C.__star_gg_output__(), RS);
   
   run_cmd(cmd);
 
@@ -24,7 +27,9 @@ for i in xrange(len(TR)):
   cmds.append("mv Log.final.out '%s.star_align.final.log'" % sname );
   cmds.append("mv SJ.out.tab '%s.star_align.SJ.tab'" % sname );
   cmds.append("mv Unmapped.out.mate1 '%s.star_align_unmapped_R1.fastq'" % sname);
-  cmds.append("mv Unmapped.out.mate2 '%s.star_align_unmapped_R2.fastq'" % sname);
+  if C.PE:
+    cmds.append("mv Unmapped.out.mate2 '%s.star_align_unmapped_R2.fastq'" % sname);
+  #fi
 
   retval = run_seq_cmds(cmds);
   if retval != 0:
