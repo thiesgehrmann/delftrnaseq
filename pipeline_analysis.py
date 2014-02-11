@@ -98,7 +98,6 @@ for (i, filter) in enumerate(C.analysis_filter):
     A = Read(annot_file)
     A = A / tuple(['%s_%d' % (annot_name.lower(), i) for i in xrange(len(A.Names))]);
     for test in [ s[0:-12] for s in data.Names if '_significant' in s ]:
-      print annot_name, test;
       enrich_data = data_f.Get(_.test_id, '%s_significant' % test, '%s_log2_fold_change' % test);
       enrich_data = enrich_data |Match(0, 0, jointype='left', merge_same='equi')| A.GroupBy(0).Get(0,1);
       if C.analysis_enrichment_only_annotated:
