@@ -8,42 +8,51 @@ import pylab as pl
 from figure_tools import *
 
 
-def create_trim_figs(outdir, sample_names, filenames):
+def create_trim_figs(outdir, sample_names, filenames, PE):
     trimlogfile = os.path.join(outdir, 'TRIMMOMATIC.std.log')
     r = getCommandOutput('cat %s | grep "Input Read"' % trimlogfile)
     r = r.split('\n')
-    v = re.compile(r"Input Read Pairs\: ([\d]+) Both Surviving: ([\d]+) \([\d\.]+\%\) Forward Only Surviving: ([\d]+) \([\d\.]+\%\) Reverse Only Surviving: ([\d]+) \([\d\.]+\%\) Dropped: ([\d]+) \([\d\.]+\%\)")
+    if PE:
+      v  = re.compile(r"Input Read Pairs\: ([\d]+) Both Surviving: ([\d]+) \([\d\.]+\%\) Forward Only Surviving: ([\d]+) \([\d\.]+\%\) Reverse Only Surviving: ([\d]+) \([\d\.]+\%\) Dropped: ([\d]+) \([\d\.]+\%\)")
+      sn = ('sample_names', 'input','surviving','forward_only','reverse_only','dropped');
+    else:
+      v  = re.compile(r"Input Reads\: ([\d]+) Surviving: ([\d]+) \([\d\.]+\%\) Dropped: ([\d]+) \([\d\.]+\%\)");
+      sn = ('sample_names', 'input','surviving','dropped')
+      
     data = []
     for row in r:
         if row:
             data.append(v.match(row).groups())
 
-    data = Rep((sample_names, data)).To(_.data, Do=_.Fields()).Detect()/('sample_names', 'input','both_surviving','forward_only','reverse_only','dropped')
+    data = Rep((sample_names, data)).To(_.data, Do=_.Fields()).Detect()/sn;
     Save(data, os.path.join(outdir, 'trim_data.dat'))
 
-    fig = dual_bargraph(data.input(), data.both_surviving(), "Number of reads", sample_names,
-                  ('input read pairs','both reads surviving'), (20, 12.0))
+    survive_lab = "Both reads surviving" if PE else "Reads surviving";
+    fig = dual_bargraph(data.input(), data.surviving(), "Number of reads", sample_names,
+                  ('Input read pairs',survive_lab), (20, 12.0))
 
     pl.savefig(filenames[0], dpi=200)
     #pl.show()
 
-    ratio_surviving = (data.both_surviving.Cast(float) / data.input)()
+    ratio_surviving = (data.surviving.Cast(float) / data.input)()
     ratio_dropped = (data.dropped.Cast(float) / data.input)()
 
     fig = dual_bargraph(ratio_surviving, ratio_dropped, "Ratio of read pairs", sample_names,
-                  ('surviving','dropped'), (20, 12.0))
+                  ('Surviving','Dropped'), (20, 12.0))
 
     pl.savefig(filenames[1], dpi=200)
     #pl.show()
+
+    if PE:
+      ratio_forward = (data.forward_only.Cast(float) / data.input)()
+      ratio_reverse = (data.reverse_only.Cast(float) / data.input)()
+
+      fig = dual_bargraph(ratio_forward, ratio_reverse, "Ratio of read pairs", sample_names,
+                    ('Forward only surviving','Reverse only surviving'), (20, 12.0))
     
-    ratio_forward = (data.forward_only.Cast(float) / data.input)()
-    ratio_reverse = (data.reverse_only.Cast(float) / data.input)()
+      pl.savefig(filenames[2], dpi=200)
+    #fi;
 
-    fig = dual_bargraph(ratio_forward, ratio_reverse, "Ratio of read pairs", sample_names,
-                  ('forward only surviving','reverse only surviving'), (20, 12.0))
-
-    pl.savefig(filenames[2], dpi=200)
-    #pl.show()
 
 
 def create_mapping_figs(outdir, sample_names, filenames):
@@ -60,7 +69,7 @@ def create_mapping_figs(outdir, sample_names, filenames):
         data.append(umapped.search(r).groups() + mmapped.search(r).groups() + tooshort.search(r).groups() + mismatch.search(r).groups() + maplength.search(r).groups() + inputlength.search(r).groups())
 
     data = Rep((sample_names, data)).To(_.data, Do=_.Fields()).Detect()/('sample_names', 'unique_match','multi_match','too_short','too_many_mismatches','avg_mapping_length', 'avg_input_length')
-    print data    
+
     Save(data, os.path.join(outdir, 'mapping_data.dat'))
 
     ratio_unique = data.unique_match() / 100.0

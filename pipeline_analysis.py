@@ -21,9 +21,9 @@ data    = Load(infiles[0])
 
 outfiles = C.__analysis_output__()
 
-for (i, filter) in enumerate(C.analysis_filter):
+for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_filter_names)):
 
-  print "Performing analysis for filter %s." % (str(filter));
+  print "Performing analysis for filter %s." % (str(filter_name));
 
   filt_outfiles = outfiles[i];
 

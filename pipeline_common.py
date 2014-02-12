@@ -253,6 +253,7 @@ class PIPELINECONF:
   perform_quality_report     = True;
   perform_analysis           = True;
   analysis_filter            = [None];
+  analysis_filter_names      = [ "No Filter" ];
   analysis_venn_updown_split = False;
   analysis_venn              = [];
 
@@ -282,11 +283,16 @@ class PIPELINECONF:
 
 
   def __quality_output__(self):
-    files = []
-    files.append(['%s/%s_trimmomatic_nreads.pdf' % (self.outdir, self.jobname), '%s/%s_trimmomatic_ratio.pdf' % (self.outdir, self.jobname), '%s/%s_trimmomatic_single.pdf' % (self.outdir, self.jobname)])
+    files = [];
+    if self.PE:
+      files.append(['%s/%s_trimmomatic_nreads.pdf' % (self.outdir, self.jobname), '%s/%s_trimmomatic_ratio.pdf' % (self.outdir, self.jobname), '%s/%s_trimmomatic_single.pdf' % (self.outdir, self.jobname)])
+    else:
+      files.append(['%s/%s_trimmomatic_nreads.pdf' % (self.outdir, self.jobname), '%s/%s_trimmomatic_ratio.pdf' % (self.outdir, self.jobname)]);
+    #fi
     files.append(['%s/%s_mapping_matched.pdf' % (self.outdir, self.jobname), '%s/%s_mapping_unmatched.pdf' % (self.outdir, self.jobname), '%s/%s_mapping_length.pdf' % (self.outdir, self.jobname)])
     files.append(['%s/%s_quality_report.tex' % (self.outdir, self.jobname)])
     return files
+  #edef
 
 
   #############################################################################
@@ -452,6 +458,12 @@ class PIPELINECONF:
     #fi
 
     if self.perform_analysis:
+
+      if not(len(self.analysis_filter)  == len(self.analysis_filter_names)):
+        warnings = warnings + 1;
+        warning("Filters have not been assigned names properly. Please set analysis_filter_names correctly. Assigning names.");
+        self.analysis_filter_names = [ str(f) for f in self.analysis_filter ];
+      #fi
 
       for filt in self.analysis_filter:
         if filt == None:

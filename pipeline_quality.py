@@ -20,10 +20,12 @@ l.write_title('Quality Report "%s"' % C.title, C.author)
 
 l.start_section('Read Filtering')
 
-qf.create_trim_figs(C.outdir, C.sample_names, outfiles[0])
+qf.create_trim_figs(C.outdir, C.sample_names, outfiles[0], C.PE)
 l.include_figure(outfiles[0][0], 'nreads', 'Number of read pairs before and after filtering using Trimmomatic. Adapters and low-quality regions in the reads are removed. Reads that become too short due to the filtering are dropped.')
 l.include_figure(outfiles[0][1], 'ratio', 'Ratio of read pairs were both reads survive filtering through Trimmomatic, and ratio of read pairs for which both reads are dropped.')
-l.include_figure(outfiles[0][2], 'single', 'Ratio of read pairs for which only the forward or only the reverse read survives filtering through Trimmomatic.')
+if C.PE:
+  l.include_figure(outfiles[0][2], 'single', 'Ratio of read pairs for which only the forward or only the reverse read survives filtering through Trimmomatic.')
+#fi
 
 l.clear_page()
 

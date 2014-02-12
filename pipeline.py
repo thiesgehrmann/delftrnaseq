@@ -23,7 +23,8 @@ class makefile:
 
   def add_step(self, name, IN, OUT, script):
     self.add_var('%s_IN' % name, IN);
-    self.add_var('%s_OUT' % name, OUT);
+    self.add_var('%s_LOG' % name, "${outdir}/%s.std.log" % name);
+    self.add_var('%s_OUT' % name, OUT + ' ${%s_LOG}' % name);
     self.steps = self.steps + [ ( name, script ) ];
   #edef
 
@@ -78,7 +79,7 @@ class makefile:
       fd.write('\t@echo [%s] Starting at `date`\n' % step);
       fd.write('\t@rm -rf ${%s_OUT}\n' % step);
       fd.write('\t@ds=`date`; ');
-      fd.write('${inst_loc}/%s "%s" 2>&1 | tee "${outdir}/%s.std.log";' % (script, loc, step));
+      fd.write('${inst_loc}/%s "%s" 2>&1 | tee "${%s_LOG}";' % (script, loc, step));
       fd.write('ps=$${PIPESTATUS[0]}; ');
       fd.write('if [ $$ps -eq 0 ]; then ');
       fd.write('  stat="COMPLETED"; ');
