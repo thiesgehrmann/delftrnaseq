@@ -19,8 +19,15 @@ def fast_enrich_sample(D, M, alpha, all_or_up_or_down='all'):
   # D.0 = test_id
   # D.1 = significant
   # D.2 = annotation_id
+  output_slice_names = ('annotation_id', 'a', 'b', 'c', 'd', 'pvalue', 'qvalue');
 
   D  = D / ('test_id', 'significant', 'logfold', 'annotation_id');
+
+  if D.annotation_id.Shape().Get(1).Sum()() == 0:
+    S = Rep(tuple([0 for x in output_slice_names]) / output_slice_names;
+    return S[_.test_id > 0];
+  #fi
+
   Df = D.FlatAll();
   Dg = Df.GroupBy(_.annotation_id);
 
@@ -61,7 +68,7 @@ def fast_enrich_sample(D, M, alpha, all_or_up_or_down='all'):
   R = Rep(T) / ('annotation_id', 'a', 'b', 'c', 'd', 'pvalue', 'qvalue');
 
   if M is not None:
-    R = R | Match(0, 0, merge_same="equi") | M
+    R = R | Match(0, 0, merge_same="equi") | M;
   #fi
 
   return R.Copy();

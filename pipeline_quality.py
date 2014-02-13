@@ -37,10 +37,8 @@ l.include_figure(outfiles[1][2], 'length', 'The average input read length compar
 
 l.clear_page()
 
-if C.check_contamination:
-  l.start_section("Read contamination")
-#fi
-
 l.end_document()
+
+print "QUALITY REPORT is at %s. Run pdflatex twice." % (outfiles[-1][0]);
 
 sys.exit(0);

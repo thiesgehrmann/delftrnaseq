@@ -59,7 +59,6 @@ class PIPELINECONF:
   #edef
 
   trimmomatic_trim="LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36";
-  trimmomatic_opts="-threads 12";
 
   def __trimmomatic_output__(self):
     if self.PE:
@@ -265,21 +264,22 @@ class PIPELINECONF:
 
   def __analysis_output__(self):
     files = []
-    for ifilter in xrange(len(self.analysis_filter)):
+    for filter_name in xrange(len(self.analysis_filter_names)):
       filtfiles = [];
       if self.analysis_venn_updown_split:
-        filtfiles.append([['%s/%s_filter%d_venn_%d_up.pdf' % (self.outdir, self.jobname, ifilter, pos), '%s/%s_filter%d_venn_%d_down.pdf' % (self.outdir, self.jobname, ifilter, pos) ]for pos in range(len(self.analysis_venn))])
+        filtfiles.append([['%s/%s_filter=%s_venn_%d_up.pdf' % (self.outdir, self.jobname, filter_name, pos), '%s/%s_filter=%s_venn_%d_down.pdf' % (self.outdir, self.jobname, filter_name, pos) ]for pos in range(len(self.analysis_venn))])
       else:
-        filtfiles.append([['%s/%s_filter%d_venn_%d.pdf' % (self.outdir, self.jobname, ifilter, pos)] for pos in range(len(self.analysis_venn))])
+        filtfiles.append([['%s/%s_filter=%s_venn_%d.pdf' % (self.outdir, self.jobname, filter_name, pos)] for pos in range(len(self.analysis_venn))])
       #fi
-      filtfiles.append(['%s/%s_filter%d_pca.pdf' % (self.outdir, self.jobname, ifilter), '%s/%s_filter%d_pca_log_filter.pdf' % (self.outdir, self.jobname, ifilter)])
-      filtfiles.append(['%s/%s_filter%d_diffstats.pdf' % (self.outdir, self.jobname, ifilter)])
-      filtfiles.append(['%s/%s_filter%d_clusters.pdf' % (self.outdir, self.jobname, ifilter)])
-      filtfiles.append(['%s/%s_filter%d_venn_subsets.csv' % (self.outdir, self.jobname, ifilter), '%s/%s_filter%d_venn_subsets.dat' % (self.outdir, self.jobname, ifilter)])
-      filtfiles.append(['%s/%s_filter%d_analysis_report.tex' % (self.outdir, self.jobname, ifilter)])
+      filtfiles.append(['%s/%s_filter=%s_pca.pdf' % (self.outdir, self.jobname, filter_name), '%s/%s_filter=%s_pca_log_filter.pdf' % (self.outdir, self.jobname, filter_name)])
+      filtfiles.append(['%s/%s_filter=%s_diffstats.pdf' % (self.outdir, self.jobname, filter_name)])
+      filtfiles.append(['%s/%s_filter=%s_clusters.pdf' % (self.outdir, self.jobname, filter_name)])
+      filtfiles.append(['%s/%s_filter=%s_venn_subsets.csv' % (self.outdir, self.jobname, filter_name), '%s/%s_filter=%s_venn_subsets.dat' % (self.outdir, self.jobname, filter_name)])
+      filtfiles.append(['%s/%s_filter=%s_analysis_report.tex' % (self.outdir, self.jobname, filter_name)])
       files.append(filtfiles);
     #efor
     return files;
+  #edef
 
 
   def __quality_output__(self):
@@ -299,7 +299,7 @@ class PIPELINECONF:
   # CONTAMINATION STUFF                                                       #
   #############################################################################
 
-  check_contamination = True;
+  check_contamination = False;
 
   #############################################################################
   # TRINITY STUFF                                                             #

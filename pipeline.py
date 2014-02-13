@@ -157,15 +157,12 @@ if C.check_contamination:
   M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.__trinity_orf_output__()), 'pipeline_trinity_orf.py');
   M.add_step("UNMAPPED_BLAST", "${TRINITY_ORF_OUT} %s" % (C.blast_db if C.blast_db != None else ""), ' '.join(C.__unmapped_blast_output__()), 'pipeline_unmapped_blast.py');
   M.add_step("UNMAPPED", "${UNMAPPED_BLAST_OUT}", ' '.join(C.__unmapped_output__()), 'pipeline_unmapped.py');
+  #M.add_step("CONTAMINATIONREPORT", "${UNMAPPED_OUT}" '', '');
 #fi
 
   # REPORTS
 if C.perform_quality_report:
-  if C.check_contamination:
-    M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT} ${UNMAPPED_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
-  else:
-    M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
-  #fi
+  M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
 #fi
 
 if C.perform_analysis:
@@ -174,7 +171,7 @@ if C.perform_analysis:
   M.add_step("POSTANALYSIS", "${CUFFDIFF_COMBINE_OUT}", ' '.join(flatten(C.__analysis_output__())), 'pipeline_analysis.py');
 #fi
 
-M.write(C.makefile, C.location, "${POSTANALYSIS}", C.outdir);
+M.write(C.makefile, C.location, "${QUALITYREPORT} ${POSTANALYSIS}", C.outdir);
 
 ###############################################################################
 

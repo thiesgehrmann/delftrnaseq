@@ -123,6 +123,8 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
   #efor
 
   l.end_document()
+
+  print "Analysis report for filter %s is at %s. Run pdflatex twice." % (filter_name, filt_outfiles[-1][0]);
 #efor
 
 sys.exit(0);
