@@ -252,7 +252,7 @@ class PIPELINECONF:
   perform_quality_report     = True;
   perform_analysis           = True;
   analysis_filter            = [None];
-  analysis_filter_names      = [ "No Filter" ];
+  analysis_filter_names      = [ "NoFilter" ];
   analysis_venn_updown_split = False;
   analysis_venn              = [];
 
@@ -264,7 +264,7 @@ class PIPELINECONF:
 
   def __analysis_output__(self):
     files = []
-    for filter_name in xrange(len(self.analysis_filter_names)):
+    for filter_name in self.analysis_filter_names:
       filtfiles = [];
       if self.analysis_venn_updown_split:
         filtfiles.append([['%s/%s_filter=%s_venn_%d_up.pdf' % (self.outdir, self.jobname, filter_name, pos), '%s/%s_filter=%s_venn_%d_down.pdf' % (self.outdir, self.jobname, filter_name, pos) ]for pos in range(len(self.analysis_venn))])

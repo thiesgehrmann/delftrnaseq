@@ -24,7 +24,7 @@ def fast_enrich_sample(D, M, alpha, all_or_up_or_down='all'):
   D  = D / ('test_id', 'significant', 'logfold', 'annotation_id');
 
   if D.annotation_id.Shape().Get(1).Sum()() == 0:
-    S = Rep(tuple([0 for x in output_slice_names]) / output_slice_names;
+    S = Rep(tuple([0 for x in output_slice_names])) / output_slice_names;
     return S[_.test_id > 0];
   #fi
 
