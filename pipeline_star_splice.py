@@ -11,7 +11,7 @@ R = ",".join([filepair[1] for filepair in TR])
 
 print "Starting splice site discovery"; sys.stdout.flush();
 
-cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s %s --outSAMstrandField intronMotif --outSAMattributes All --outFilterIntronMotifs RemoveNoncanonical" % (cor(C.star_preal_opts), C.__star_pregg_output__(), L, R);
+cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s %s --outSAMstrandField intronMotif --outSAMattributes All --outFilterIntronMotifs RemoveNoncanonical" % (cor(C.star_preal_opts), C.__star_pre_splice_output__(), L, R);
 retval = run_cmd(cmd);
 if retval != 0:
    sys.exit(retval);

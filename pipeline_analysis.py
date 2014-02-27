@@ -53,19 +53,20 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
 
   venn_subsets_file = filt_outfiles[-2];
   venn_files        = filt_outfiles[0];
-  subsets = [];
-  for pos, (venn, filenames) in enumerate(zip(C.analysis_venn, venn_files)):
-    ss = af.create_venn(data_f, [C.cuffdiff_cmp[v] for v in venn], C.label_names, filenames, C.analysis_venn_updown_split)
-    subsets.extend(ss);
-    for filename in filenames:
-      l.include_figure(filename, 'venn%d' % pos, "Overlap significant genes between condition comparisons.")
+  if C.analysis_venn:
+    subsets = [];
+    for pos, (venn, filenames) in enumerate(zip(C.analysis_venn, venn_files)):
+        ss = af.create_venn(data_f, [C.cuffdiff_cmp[v] for v in venn], C.label_names, filenames, C.analysis_venn_updown_split)
+        subsets.extend(ss);
+        for filename in filenames:
+            l.include_figure(filename, 'venn%d' % pos, "Overlap significant genes between condition comparisons.")
+        #efor
     #efor
-  #efor
-  S = Rep(subsets) / ('group', 'subset', 'genes');
-  Export(S, venn_subsets_file[0]);
-  Save(S, venn_subsets_file[1]);
-  l.clear_page()
-  l.start_section("Patterns across all genes")
+    S = Rep(subsets) / ('group', 'subset', 'genes');
+    Export(S, venn_subsets_file[0]);
+    Save(S, venn_subsets_file[1]);
+    l.clear_page()
+    l.start_section("Patterns across all genes")
 
   #############################################################################
   # PCA                                                                       #
@@ -93,7 +94,7 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
 
   l.start_section("Enrichment analysis");
   splits = [ 'up', 'down' ] if C.analysis_enrichment_updown_split else [ 'all' ];
-  for (annot_name, annot_file) in zip(C.annotation_names, C.annotation_files):
+  for (annot_name, annot_file) in zip(C.annotation_names, C.enrichment_files):
     l.start_section(annot_name, level=1);
     A = Read(annot_file)
     A = A / tuple(['%s_%d' % (annot_name.lower(), i) for i in xrange(len(A.Names))]);

@@ -9,9 +9,9 @@ C = init_conf()
 
 files = C.__cuffdiff_output__();
 
-read_group_index = C.__cuffdiff_test_group_index__[C.__cuffdiff_test_type__];
-diff_data_index  = C.__cuffdiff_test_diff_index__[C.__cuffdiff_test_type__];
-gslice           = 'test_id'; #'gene_id' if C.__cuffdiff_test_type__ == 'gene' else 'test_id' # grouping_slice 
+read_group_index = C.__cuffdiff_test_group_index__[C.cuffdiff_test_type];
+diff_data_index  = C.__cuffdiff_test_diff_index__[C.cuffdiff_test_type];
+gslice           = 'gene_id' if C.cuffdiff_test_type == 'gene' else 'test_id' # grouping_slice 
 
 
 read_group = Read(files[read_group_index]);
@@ -96,13 +96,16 @@ for i in range(1, len(results)):
 #efor
 
 #if annots file is available, add that one too (first slice should be id slice).
+for annot_file in C.annotation_files:
+    annots = Load(annot_file)
+    R = annots |Match(gslice,gslice)| R
 
-R = R % C.__cuffdiff_test_type__;
+R = R % C.cuffdiff_test_type;
 
 res2 = R |Match| read_group_compact
-res2 = res2 % C.__cuffdiff_test_type__;
+res2 = res2 % C.cuffdiff_test_type;
 
 Save(res2, C.__cuffdiff_combine_output__()[0]);
-Save(res2, C.__cuffdiff_combine_output__()[1]);
+Save(R, C.__cuffdiff_combine_output__()[1]);
 
 sys.exit(0);
