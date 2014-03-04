@@ -8,6 +8,7 @@ from ibidas.utils import util
 
 sys.path.append('%s/utilities/' % os.path.dirname(os.path.realpath(__file__)));
 import quality_figures as qf
+import contamination_tables as ct
 import latex
 
 
@@ -36,7 +37,15 @@ l.include_figure(outfiles[1][2], 'length', 'The average input read length compar
 
 l.clear_page()
 
+if C.check_contamination :
+    l.start_section("Contamination")
+    l.add_text('Reads that were not mapped by STAR were assembled using Trinity assembler into transcripts. Predicted ORF on these transcripts were then BLASTed against known sequences to and the source organism of the hits was determined.')
+    table = ct.make_contamination_table(C.outdir, C.sample_names, top_n = 5)
+    l.write_table(['Sample', 'Organism', 'Hits'], table, "Top 5 contaminants for each sample.", alignment = "lll")
+    l.clear_page()
+
 l.end_document()
+
 
 print "QUALITY REPORT is at %s. Run pdflatex twice." % (outfiles[-1][0]);
 

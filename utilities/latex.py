@@ -1,5 +1,6 @@
 from os.path import basename
-from ibidas import *;
+from ibidas import *
+import numpy as np
 
 class LatexFile(object):
     def __init__(self, filename) :
@@ -38,13 +39,16 @@ class LatexFile(object):
     def add_text(self, text) :
         self.f.write("%s\n" % self.texcape(text));
 
-    def write_table(columns, rows, data, caption) :
+    def write_table(self, columns, data, caption, alignment = None) :
         n_columns = len(columns)
-        self.f.write('\\begin{table}\n')
+        self.f.write('\\begin{table}[h]\n')
         self.f.write('\\caption{%s}\n' % self.texcape(caption))
         self.f.write('\\centering\n')
         self.f.write('\\ra{1.2}\n')
-        self.f.write('\\begin{tabular}{%s}\n' % "r" * n_columns)
+        if alignment is None :
+            self.f.write('\\begin{tabular}{%s}\n' % ("r" * n_columns))
+        else :
+            self.f.write('\\begin{tabular}{%s}\n' % alignment)
         self.f.write('\\toprule\n')
         for i in xrange(n_columns) :
             col = columns[i]
@@ -58,8 +62,9 @@ class LatexFile(object):
             if i != n_columns - 1 :
                 self.f.write(' & ')
         self.f.write('\\tabularnewline\n')
-        self.f.write('\\midfule\n')
-        for i in xrange(n_rows) :
+        self.f.write('\\midrule\n')
+        data = np.atleast_2d(data)
+        for i in xrange(data.shape[0]) :
             for j in xrange(n_columns) :
                 obj = data[i][j]
                 if isinstance(obj, int) :
@@ -69,9 +74,9 @@ class LatexFile(object):
                 else :
                     str_rep = str(obj)
                 self.f.write('%s' % str_rep)
-                if i != n_columns - 1 :
+                if j < n_columns - 1 :
                     self.f.write(' & ')
-        self.f.write('\\tabularnewline\n')
+            self.f.write('\\tabularnewline\n')
         self.f.write('\\bottomrule\n')
         self.f.write('\\end{tabular}\n')
         self.f.write('\\end{table}\n')
