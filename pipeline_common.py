@@ -346,7 +346,10 @@ class PIPELINECONF:
   #############################################################################
   
   unmapped_opts = "";
+  
   __unmapped_blast_select_by__ = len(__unmapped_blast_fields__.split(' ')) - 1;
+  
+  __unmapped_blast_select_by_cutoff__ = 750
 
   def __unmapped_output__(self):
     return [ self.outdir + '/%s.unmapped_orgs.dat' % sn for sn in self.sample_names ];
@@ -384,7 +387,7 @@ class PIPELINECONF:
     #efor
     self.samples = samples
 
-    self.genome = wd + '/' + genome;
+    self.genome = wd + '/' + self.genome;
 
     self.genome_annot = wd + '/' + self.genome_annot if self.genome_annot else None;
     self.genome_guide = wd + '/' + self.genome_guide if self.genome_guide else None;
@@ -610,18 +613,17 @@ def cor(obj):
 
 ###############################################################################
 
-def run_cmd(cmd, bg=False, stdin=None, stdout=None, stderr=None):
-  p = subprocess.Popen(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr);
-  if bg:
-    return p;
-  else:
-    (pid, r) = os.waitpid(p.pid, 0);
-    return r;
-  #fi
-#edef
-
+def run_cmd(cmd, bg = False, stdin = None, stdout = None, stderr = None):
+    print '[RUN CMD] Executing: %s' % cmd
+    p = subprocess.Popen(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr);
+    if bg :
+        return p
+    else:
+        (pid, r) = os.waitpid(p.pid, 0);
+        return r;
 
 def run_shell(cmd):
+    print '[RUN SHELL] Executing: %s' % cmd
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     res = p.communicate()[0]
     return p.returncode
