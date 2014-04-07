@@ -458,9 +458,9 @@ class PIPELINECONF:
     for file in self.enrichment_files:
       errors = errors + fex(file, "Could not find annotation file '%s'." % file);
     #efor
-    if not(len(self.enrichment_files) == len(self.annotation_names)):
+    if not(len(self.annotation_files) == len(self.annotation_names)):
       errors = errors + 1;
-      error("The annotation files in the 'enrichment_files' variable have not been given names properly. Please set 'annotation_names' variable.");
+      error("The annotation files in the 'annoation_files' variable have not been given names properly. Please set 'annotation_names' variable.");
     #fi
 
     if self.perform_analysis:
