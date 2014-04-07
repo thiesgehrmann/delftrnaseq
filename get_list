@@ -1,0 +1,4 @@
+#!/bin/bash
+find "`pwd`" | grep R1.fastq | sort > r1.list; find "`pwd`" | grep R2.fastq | sort > r2.list; paste r1.list r2.list | awk -F'\t' '{printf "(\047%s\047, \047%s\047),\n", $1, $2;}'; 
+rm r1.list r2.list
+

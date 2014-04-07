@@ -153,6 +153,7 @@ M.add_step("CUFFDIFF", "${POST_STAR_AL_SORT_OUT} ${CUFFLINKS_OUT}", ' '.join(fla
 
   # Contamination steps
 if C.check_contamination:
+  M.add_var("UNMAPPED_OUT", ' '.join(C.__unmapped_output__()));
   M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.__trinity_output__()), 'pipeline_trinity.py');
   M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.__trinity_orf_output__()), 'pipeline_trinity_orf.py');
   M.add_step("UNMAPPED_BLAST", "${TRINITY_ORF_OUT} %s" % (C.blast_db if C.blast_db != None else ""), ' '.join(C.__unmapped_blast_output__()), 'pipeline_unmapped_blast.py');
@@ -162,11 +163,14 @@ if C.check_contamination:
 
   # REPORTS
 if C.perform_quality_report:
-  M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
+    if C.check_contamination :
+        M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT} ${UNMAPPED_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
+    else :
+        M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
 #fi
 
 if C.perform_analysis:
-  M.add_var('CUFFDIFF_COMBINE_ANNOTATION_FILES', ' '.join(C.annotation_files));
+  M.add_var('CUFFDIFF_COMBINE_ANNOTATION_FILES', ' '.join(C.enrichment_files));
   M.add_step("CUFFDIFF_COMBINE", "${CUFFDIFF_OUT} ${CUFFDIFF_COMBINE_ANNOTATION_FILES}", ' '.join(C.__cuffdiff_combine_output__()), 'pipeline_cuffdiff_combine.py');
   M.add_step("POSTANALYSIS", "${CUFFDIFF_COMBINE_OUT}", ' '.join(flatten(C.__analysis_output__())), 'pipeline_analysis.py');
 #fi

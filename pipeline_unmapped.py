@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-from pipeline_common import *;
 
+import os;
+import sys;
 import pickle;
 import csv;
 import time
@@ -9,19 +10,21 @@ from ibidas import *
 from Bio import SeqIO;
 from Bio import Entrez;
 
+from pipeline_common import *;
 
-C = init_conf()
+###############################################################################
 
-def BLAST(query_file, dbloc, outfile, blast_opts=""):
-
-  prog = "blastn";
-
-  opts = "qseqid sseqid slen length mismatch gapopen pident evalue bitscore";
-  cmd  = "%s -query '%s' -db '%s' -out '%s' -outfmt '6 %s' %s" % (prog, query, dbloc, outfile, opts, blast_opts);
-
-  return run_cmd(cmd);
-
+def usage(a1):
+  print "Usage:  %s <config file>" % a1;
 #edef
+
+if len(os.sys.argv) != 2:
+  usage(os.sys.argv[0]);
+  os.sys.exit(1);
+#fi
+
+C = PIPELINECONF(os.sys.argv[1]);
+run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
@@ -33,12 +36,15 @@ if C.__unmapped_blast_select_by__ == None or C.__unmapped_blast_select_by__ < 0:
 Entrez.email = C.__pipeline_email__;
 
 BO = C.__unmapped_blast_output__();
+criterion = C.__unmapped_blast_select_by__
+cutoff = C.__unmapped_blast_select_by_cutoff__
 
 for i in xrange(len(BO)):
   result = BO[i];
   sn = C.sample_names[i];
-  fh = {};
-  fo = {};
+
+  best_hit = {}
+  gi2org = {}
 
   print "Finding contaminations for sample %s" % sn;
 
@@ -46,23 +52,35 @@ for i in xrange(len(BO)):
   with open(result, 'r') as csvfile:
     r = csv.reader(csvfile, delimiter='\t', quotechar='"');
     for hit in r:
-      if (hit[0] in fh and fh[hit[0]][1] > float(hit[C.__unmapped_blast_select_by__])) or (hit[0] not in fh):
-        fh[hit[0]] = (hit[1].split('|')[1], float(hit[C.__unmapped_blast_select_by__]));
-      #fi
-    #efor
-  #ewith
+      query_id = hit[0]
+      value = float(hit[criterion])
+      gi = hit[1].split('|')[1]
+      if not best_hit.has_key(query_id) :
+          best_hit[query_id] = ([gi], value)
+      elif best_hit[query_id][1] > value :
+        best_hit[query_id] = ([gi], value)
+      elif best_hit[query_id][1] == value :
+        best_hit[query_id][0].append(gi)
 
-  gi_list = [ fh[k][0] for k in fh.keys() if fh[k][1] > 1500];
+  gi_list = []
+  for key in best_hit.keys() :
+      ids, value = best_hit[key]
+      ids = list(set(ids))
+      best_hit[key] = (ids, value)
+      if value >= cutoff :
+          for gi in ids :
+              gi_list.append(gi)
+  
+  gi_list = list(set(gi_list))
 
-  print "Determining source organism of %d hits" % len(gi_list); sys.stdout.flush();
+  print "[i] Determining source organism of %d hits" % len(gi_list); sys.stdout.flush();
 
   k = 0;
   xsize = 50;
   for j in xrange(0,len(gi_list), xsize):
     gi_str = ','.join(gi_list[j:(j+xsize)]);
 
-    print "Sending query %d" % (k/xsize); sys.stdout.flush();
-    print gi_str;
+    print "\t[i] Sending query %d" % (k/xsize); sys.stdout.flush();
     r = 0
     handle = None
     while 1:
@@ -79,36 +97,42 @@ for i in xrange(len(BO)):
         break
 
 
-    print "Parsing query"; sys.stdout.flush();
+    print "\t[i] Parsing query"; sys.stdout.flush();
 
     l = '\n';
     while l != '':
       l = handle.readline();
       if l[2:10] != 'ORGANISM':
         continue;
-      #fi
-      org = l[10:];
-      if org in fo:
-        fo[org] = (fo[org][0] + 1, fo[org][1] + [ fh[fh.keys()[k]] ] );
-      else:
-        print org; sys.stdout.flush();
-        fo[org] = (1, [ fh[fh.keys()[k]] ]);
-      #fi
+      org = l[10:]
+      gi = gi_list[k]
+      gi2org[gi] = org
+      print '%s %s' % (gi, org)
       k = k + 1;
-    #efor
-  #efor
 
-  ll   = [ (k[0], k[1][0]) for k in sorted(fo.items(), key=lambda x: x[1][0], reverse=True) ];
-  maxl = max([ len(o[0]) for o in ll ]) + 3;
+  cont = {}
+  for key in best_hit.keys() :
+      gis, score = best_hit[key]
+      if score >= cutoff :
+          for gi in gis :
+              org = gi2org[gi]
+              if cont.has_key(org) :
+                  hits, ids = cont[org]
+                  cont[org] = (hits + 1, ids + [gi])
+              else :
+                  cont[org] = (1, [gi])
 
-  print "Possible contaminants found in sample %s:" % sn;
+  ll   = [ (k[0], k[1][0]) for k in sorted(cont.items(), key=lambda x: x[1][0], reverse=True) ];
+  maxl = max([ len(o[0]) for o in ll ]) + 3 if len(ll) > 0 else 0;
+
+  print "[+] Possible contaminants found in sample %s:" % sn;
   print "  %-*s %-5s" % (maxl, "Organism", "Hits");
   for o in ll:
     print "  %-*s %-5d" % (maxl, o[0], o[1]);
   #efor
   print "\n\n";
   sys.stdout.flush();
-  Save(fo, '%s/%s.unmapped_orgs.dat' % (C.outdir, sn));
+  Save(cont, '%s/%s.unmapped_orgs.dat' % (C.outdir, sn));
 #efor
 
 sys.exit(0);

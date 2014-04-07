@@ -84,7 +84,7 @@ class PIPELINECONF:
 
   star_pre_splice_gdir = "pre_splice_genome"
   def __star_pre_splice_output__(self):
-    return "%s/%s" %(self.outdir, self.star_pregg_gdir);
+    return "%s/%s" %(self.outdir, self.star_pre_splice_gdir);
   #edef
 
   star_gg_gdir = "genome"
@@ -126,6 +126,9 @@ class PIPELINECONF:
   #############################################################################
   # POST STAR AL BAM STUFF                                                    #
   #############################################################################
+
+  max_bam_threads = min(__max_threads__ / 2,4) #reduce number of threads for bam (are a bit intensive on the disk)
+
 
   def __post_star_al_bam_output__(self):
     return [ self.outdir + "/%s.star_align.bam" % sn for sn in self.sample_names ];
@@ -222,7 +225,7 @@ class PIPELINECONF:
   #############################################################################
 
   cuffdiff_cmp = None;
-  __cuffdiff_test_type__         = 'isoform'; # cds|gene|isoform|tss
+  cuffdiff_test_type         = 'isoform'; # cds|gene|isoform|tss
   __cuffdiff_test_group_index__  = {'cds':3, 'gene':9, 'isoform':13, 'tss':21};
   __cuffdiff_test_diff_index__   = {'cds':5, 'gene':6, 'isoform':10, 'tss':18};
 
@@ -239,7 +242,7 @@ class PIPELINECONF:
   # CUFFDIFF_COMBINE STUFF                                                    #
   #############################################################################
 
-  annotation_files = [];
+  enrichment_files = [];
   annotation_names = [];
   def __cuffdiff_combine_output__(self):
     return [ self.outdir + '/cuffdiff_combine.dat', self.outdir + '/cuffdiff_combine.csv'];
@@ -343,7 +346,10 @@ class PIPELINECONF:
   #############################################################################
   
   unmapped_opts = "";
+  
   __unmapped_blast_select_by__ = len(__unmapped_blast_fields__.split(' ')) - 1;
+  
+  __unmapped_blast_select_by_cutoff__ = 750
 
   def __unmapped_output__(self):
     return [ self.outdir + '/%s.unmapped_orgs.dat' % sn for sn in self.sample_names ];
@@ -381,7 +387,7 @@ class PIPELINECONF:
     #efor
     self.samples = samples
 
-    self.genome = wd + '/' + genome;
+    self.genome = wd + '/' + self.genome;
 
     self.genome_annot = wd + '/' + self.genome_annot if self.genome_annot else None;
     self.genome_guide = wd + '/' + self.genome_guide if self.genome_guide else None;
@@ -449,12 +455,12 @@ class PIPELINECONF:
       warning("Some cuffdiff comparisons are specified more than once, correcting. May cause confusion in later analysis");
     #fi
 
-    for file in self.annotation_files:
+    for file in self.enrichment_files:
       errors = errors + fex(file, "Could not find annotation file '%s'." % file);
     #efor
-    if not(len(self.annotation_files) == len(self.annotation_names)):
+    if not(len(self.enrichment_files) == len(self.annotation_names)):
       errors = errors + 1;
-      error("The annotation files in the 'annotation_files' variable have not been given names properly. Please set 'annotation_names' variable.");
+      error("The annotation files in the 'enrichment_files' variable have not been given names properly. Please set 'annotation_names' variable.");
     #fi
 
     if self.perform_analysis:
@@ -607,18 +613,17 @@ def cor(obj):
 
 ###############################################################################
 
-def run_cmd(cmd, bg=False, stdin=None, stdout=None, stderr=None):
-  p = subprocess.Popen(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr);
-  if bg:
-    return p;
-  else:
-    (pid, r) = os.waitpid(p.pid, 0);
-    return r;
-  #fi
-#edef
-
+def run_cmd(cmd, bg = False, stdin = None, stdout = None, stderr = None):
+    print '[RUN CMD] Executing: %s' % cmd
+    p = subprocess.Popen(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr);
+    if bg :
+        return p
+    else:
+        (pid, r) = os.waitpid(p.pid, 0);
+        return r;
 
 def run_shell(cmd):
+    print '[RUN SHELL] Executing: %s' % cmd
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     res = p.communicate()[0]
     return p.returncode
