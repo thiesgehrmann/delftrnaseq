@@ -172,7 +172,7 @@ def create_venn(data, compare_sets, names, filenames, udsplit):
       all = set(data[data.Get(compare_name + '_significant') == 'yes'].test_id());
       alls.append(all);
     #efor
-    datas.append(all);
+    datas.append(alls);
     dirs = [ 'all' ];
   #fi
 

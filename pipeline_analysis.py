@@ -6,10 +6,9 @@ from pipeline_common import *;
 from ibidas import *
 from ibidas.utils import util
 
-sys.path.append('%s/utilities/' % os.path.dirname(os.path.realpath(__file__)));
-import analysis_figures as af
-import enrichment;
-import latex
+from utilities import analysis_figures as af
+from utilities import enrichment;
+from utilities import latex
 
 C = init_conf()
 

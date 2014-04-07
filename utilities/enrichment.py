@@ -39,11 +39,11 @@ def fast_enrich_sample(D, M, alpha, all_or_up_or_down='all'):
     a  = Dg[  _.significant == 'yes' ];
     c  = Dg[~(_.significant == 'yes')];
   elif all_or_up_or_down == 'up':
-    ND = D[   _.significant == 'yes' and _.logfold > 0 ].test_id.Shape();
+    ND = D[   _.significant == 'yes' and _.logfold > 0 ].test_id.Shape()();
     a  = Dg[  _.significant == 'yes' and _.logfold > 0 ];
     c  = Dg[~(_.significant == 'yes' and _.logfold > 0)];
   elif all_or_up_or_down == 'down':
-    ND = D[   _.significant == 'yes' and _.logfold < 0 ].test_id.Shape();
+    ND = D[   _.significant == 'yes' and _.logfold < 0 ].test_id.Shape()();
     a  = Dg[  _.significant == 'yes' and _.logfold < 0 ];
     c  = Dg[~(_.significant == 'yes' and _.logfold < 0)];
   #fi
