@@ -242,7 +242,7 @@ class PIPELINECONF:
   # CUFFDIFF_COMBINE STUFF                                                    #
   #############################################################################
 
-  enrichment_files = [];
+  annotation_files = [];
   annotation_names = [];
   def __cuffdiff_combine_output__(self):
     return [ self.outdir + '/cuffdiff_combine.dat', self.outdir + '/cuffdiff_combine.csv'];
@@ -455,7 +455,7 @@ class PIPELINECONF:
       warning("Some cuffdiff comparisons are specified more than once, correcting. May cause confusion in later analysis");
     #fi
 
-    for file in self.enrichment_files:
+    for file in self.annotation_files:
       errors = errors + fex(file, "Could not find annotation file '%s'." % file);
     #efor
     if not(len(self.annotation_files) == len(self.annotation_names)):
