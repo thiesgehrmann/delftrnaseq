@@ -1,20 +1,34 @@
 #!/home/nfs/thiesgehrmann/groups/w/phd/tasks/rnaseq_pipeline/delftrnaseq/pipeline.py
 
-class config(PIPELINECONF):
-  #inst_loc
+#### Running on Markov
+####
+####
 
+class config(PIPELINECONF):
+
+    # Specify the number of threads
   __max_threads__ = 12;
 
+    # Emails to receive updates at
   email = "thiesgehrmann@gmail.com"
+    # Job title
   jobname = "SCHCO_RNASEQ"
 
+    # Where to store the configuration file for the pipeline
   location = "./conf";
+    # Working directory (None is default)
   workdir  = None;
+    # Where to output the results
   outdir   = "/data/tmp/thiesgehrmann/rnaseq_schco3";
+    # Makefile name (Default = Makefile)
   #makefile="";
+    # local blast DB
   blast_db = "/data/tmp/thiesgehrmann/blastdb/nt.nal";
+  #server=markov
 
-  # find "`pwd`" | grep R1.fastq | sort > r1.list; find "`pwd`" | grep R2.fastq | sort > r2.list; paste r1.list r2.list | awk -F'\t' '{printf "(\047%s\047, \047%s\047),\n", $1, $2;}'; rm r1.list r2.list
+    # Paired end reads (False for Single End reads)
+  PE = True;
+    # Sample files structure [ (left_end1, right_end1) ... (left_endn, right_endn) ]
   samples = [
 ('/data/tmp/thiesgehrmann/data/schco_rnaseq_data/RawData/C1V86ACXX_102137-01_ATCACG_L007_R1.fastq', '/data/tmp/thiesgehrmann/data/schco_rnaseq_data/RawData/C1V86ACXX_102137-01_ATCACG_L007_R2.fastq'),
 ('/data/tmp/thiesgehrmann/data/schco_rnaseq_data/RawData/C1V86ACXX_102137-02_CGATGT_L007_R1.fastq', '/data/tmp/thiesgehrmann/data/schco_rnaseq_data/RawData/C1V86ACXX_102137-02_CGATGT_L007_R2.fastq'),
@@ -57,17 +71,17 @@ class config(PIPELINECONF):
 ('/data/tmp/thiesgehrmann/data/schco_rnaseq_data/RawData/C1V8EACXX_102137-40_ATGTCA_L007_R1.fastq', '/data/tmp/thiesgehrmann/data/schco_rnaseq_data/RawData/C1V8EACXX_102137-40_ATGTCA_L007_R2.fastq'),
 ('/data/tmp/thiesgehrmann/data/schco_rnaseq_data/RawData/C1V8EACXX_102137-41_CCGTCC_L007_R1.fastq', '/data/tmp/thiesgehrmann/data/schco_rnaseq_data/RawData/C1V8EACXX_102137-41_CCGTCC_L007_R2.fastq')
 ]
+
+    # A name for each sample
   sample_names  = [ "4.8-1", "4.8-2", "4.8-3", "4.8-4", "wc1-1", "wc1-2", "wc1-3", "wc1-4", "wc2-1", "wc2-2", "wc2-3", "wc2-4", "hom1-1", "hom1-2", "hom1-3", "hom1-4", "hom2-1", "hom2-2", "hom2-3", "hom2-4", "fst3-1", "fst3-2", "fst3-3", "fst3-4", "fst4-1", "fst4-2", "fst4-3", "fst4-4", "bri1-1", "bri1-2", "bri1-4", "gat1-1", "gat1-2", "gat1-3", "gat1-4", "c2h2-1", "c2h2-2", "c2h2-3", "c2h2-4", "bri1-3" ];
+    # Replicate groups
   sample_labels = [ 0,       0,       1,       1,       2,       2,       3,       3,       4,       4,       5,       5,       6,        6,        7,        7,        8,        8,        9,        9,        10,       10,       11,       11,       12,       12,       13,       13,       14,       14,       15,       16,       16,       17,       17,       18,       18,       19,       19,       15       ];
+    # Replicate group names
   label_names   = [ "4.8-1", "4.8-2", "wc1-1", "wc1-2", "wc2-1", "wc2-2", "hom1-1", "hom1-2", "hom2-1", "hom2-2","fst3-1", "fst3-2", "fst4-1", "fst4-2", "bri1-1", "bri1-2", "gat1-1", "gat1-2", "c2h2-1", "c2h2-2" ];
 
-#  samples       = samples[20:];
-#  sample_names  = sample_names[20:];
-#  sample_labels = sample_labels[20:];
-#  label_names   = label_names[20:];
-  
-
+    # Genome sequence file
   genome       = '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/genome.fasta';
+    # Gene model file
   genome_annot = '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/cleaned_gene_model_proteinid.gff';
 
   #############################################################################
@@ -81,6 +95,7 @@ class config(PIPELINECONF):
   #############################################################################
   #star_gg_opts = "";
 
+    # Don't build a splice DB for star
   build_splice_db = False;
 
   #############################################################################
@@ -102,6 +117,30 @@ class config(PIPELINECONF):
 
     # T1 vs T2
   cuffdiff_cmp.extend([ (i-1, i) for i in xrange(1, 20, 2) ]);
+  cuffdiff_cmp = list(set(cuffdiff_cmp));
+
+    # Replicate groups to compare with cuffdiff
+  cuffdiff_cmp = [(1, 3), (10, 11), (0, 14), (1, 17), (1, 15), (8, 9), (0, 16), (18, 19), (0, 10), (0, 3), (1, 11), (16, 17), (2, 3), (6, 7), (12, 13), (1, 5), (0, 4), (4, 5), (1, 13), (0, 18), (0, 12), (1, 19), (14, 15), (1, 9), (0, 8), (0, 1), (0, 13), (0, 6), (1, 7), (0, 9), (0, 5), (0, 2)];
+
   #cuffdiff_cmp = None;
 
+  #############################################################################
+  # ANALYSIS OPTIONS                                                          #
+  #############################################################################
+
+    # Enrichment analysis annotation files
+  annotation_files = [ '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/Schco3_GeneCatalog_proteins_20130812_GO_CUT.tab',  '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/IPR_annot.tsv' ];
+    # Enrichmeny analysis annotation names
+  annotation_names = [ 'GO' , 'IPR' ];
+
+    # Filter the postanalysis with these filters
+  analysis_filter       = [None, '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/pred_transfacs.tsv' ];
+    # Name the filters
+  analysis_filter_names = [ "NoFilter", 'TransFacs' ];
+
+    # Show venn diagrams of differencially expressed gene overlaps
+  analysis_venn                    = [ (16,20,24), (19,8,6), (6,27,8), (19,23,15) ];
+    # Show different venn diagrams for up and down regulated genes
+  analysis_venn_updown_split       = True;
+  #analysis_enrichment_updown_split = True;
 #eclass

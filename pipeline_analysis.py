@@ -93,7 +93,8 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
 
   l.start_section("Enrichment analysis");
   splits = [ 'up', 'down' ] if C.analysis_enrichment_updown_split else [ 'all' ];
-  for (annot_name, annot_file) in zip(C.annotation_names, C.enrichment_files):
+  for (annot_name, annot_file) in zip(C.annotation_names, C.annotation_files):
+    print (annot_name, annot_file);
     l.start_section(annot_name, level=1);
     A = Read(annot_file)
     A = A / tuple(['%s_%d' % (annot_name.lower(), i) for i in xrange(len(A.Names))]);
