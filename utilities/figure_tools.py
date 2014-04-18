@@ -8,9 +8,9 @@ def autolabel(rects, ax) :
         height = rect.get_height()
         maxheight = max(height, maxheight)    
         #if height < 1.0:
-        if isinstance(height, float) and height < 1.0 :
-            ax.text(rect.get_x() + rect.get_width() / 2.0 , 1.05 * height, '%.2g' % height, ha = 'center', va = 'bottom', fontsize = 18)
-        elif isinstance(height, float) :
+        #if isinstance(height, float) and height < 1.0 :
+        #    ax.text(rect.get_x() + rect.get_width() / 2.0 , 1.05 * height, '%.2g' % height, ha = 'center', va = 'bottom', fontsize = 18)
+        if isinstance(height, float) :
             ax.text(rect.get_x() + rect.get_width()/2., 1.05 * height, '%.2f' % height, ha = 'center', va = 'bottom', rotation = 90, fontsize = 18)
         else:
             ax.text(rect.get_x() + rect.get_width()/2., 1.05 * height, format(int(round(height)), ",d"), ha = 'center', va = 'bottom', rotation = 90, fontsize = 18)

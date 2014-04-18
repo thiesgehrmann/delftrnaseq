@@ -57,7 +57,7 @@ class LatexFile(object):
             elif isinstance(col, float) :
                 str_rep = '$%.2g$' % col
             else :
-                str_rep = str(col)
+                str_rep = self.texcape(str(col))
             self.f.write('%s' % str_rep)
             if i != n_columns - 1 :
                 self.f.write(' & ')
@@ -72,7 +72,7 @@ class LatexFile(object):
                 elif isinstance(obj, float) :
                     str_rep = '$%.2g$' % obj
                 else :
-                    str_rep = str(obj)
+                    str_rep = self.texcape(str(obj))
                 self.f.write('%s' % str_rep)
                 if j < n_columns - 1 :
                     self.f.write(' & ')

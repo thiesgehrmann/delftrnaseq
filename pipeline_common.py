@@ -143,6 +143,23 @@ class PIPELINECONF:
   #edef
 
   #############################################################################
+  # POST STAR AL INDEX STUFF                                                  #
+  #############################################################################
+
+  def __post_star_al_index_output__(self):
+    return [ self.outdir + "/%s.star_align_sort.bam.bai" % sn for sn in self.sample_names ];
+  
+  #############################################################################
+  # CDS BED STUFF                                                             #
+  #############################################################################
+
+  def __cds_bed_genome_output__(self) :
+    return "%s/%s.cleaned.bed" % (self.outdir, self.jobname)
+
+  def __cds_bed_output__(self):
+    return [ self.outdir + "/%s.star_align_sort.bed" % sn for sn in self.sample_names ] + [self.__cds_bed_genome_output__()]
+
+  #############################################################################
   # GENOME GENERATION STUFF                                                   #
   #############################################################################
 
@@ -350,6 +367,12 @@ class PIPELINECONF:
   __unmapped_blast_select_by__ = len(__unmapped_blast_fields__.split(' ')) - 1;
   
   __unmapped_blast_select_by_cutoff__ = 750
+  
+  unmapped_use_mysql = False
+  unmapped_mysql_user = 'genbank'
+  unmapped_mysql_pass = 'genbank'
+  unmapped_mysql_host = 'localhost'
+  unmapped_mysql_db = 'genbank'
 
   def __unmapped_output__(self):
     return [ self.outdir + '/%s.unmapped_orgs.dat' % sn for sn in self.sample_names ];
@@ -615,6 +638,7 @@ def cor(obj):
 
 def run_cmd(cmd, bg = False, stdin = None, stdout = None, stderr = None):
     print '[RUN CMD] Executing: %s' % cmd
+    sys.stdout.flush()
     p = subprocess.Popen(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr);
     if bg :
         return p
@@ -622,11 +646,15 @@ def run_cmd(cmd, bg = False, stdin = None, stdout = None, stderr = None):
         (pid, r) = os.waitpid(p.pid, 0);
         return r;
 
-def run_shell(cmd):
+def run_shell(cmd, bg = False):
     print '[RUN SHELL] Executing: %s' % cmd
+    sys.stdout.flush()
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    res = p.communicate()[0]
-    return p.returncode
+    if bg :
+        return p
+    else:
+        (pid, r) = os.waitpid(p.pid, 0);
+        return r;
 
 def getCommandOutput(cmd):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -637,7 +665,7 @@ def getCommandOutput(cmd):
 
 ###############################################################################
 
-def run_par_cmds(cmd_list, max_threads=PIPELINECONF.__max_threads__, stdin=None, stdout=None, stderr=None):
+def run_par_cmds(cmd_list, max_threads=PIPELINECONF.__max_threads__, stdin=None, stdout=None, stderr=None, shell=False):
   
   p = [];
   i = 0;
@@ -647,7 +675,11 @@ def run_par_cmds(cmd_list, max_threads=PIPELINECONF.__max_threads__, stdin=None,
   while i < cmds:
     while len(p) < max_threads and i < cmds:
       print "RUNNING: %s" % cmd_list[i]; sys.stdout.flush();
-      p.append( (run_cmd(cmd_list[i], bg=True, stdin=stdin, stdout=stdout, stderr=stderr),i) );
+      sys.stdout.flush()
+      if not shell :
+        p.append( (run_cmd(cmd_list[i], bg=True, stdin=stdin, stdout=stdout, stderr=stderr),i) );
+      else :
+        p.append( (run_shell(cmd_list[i], bg=True),i) );
       i = i + 1;
     #ewhile
 
@@ -660,8 +692,10 @@ def run_par_cmds(cmd_list, max_threads=PIPELINECONF.__max_threads__, stdin=None,
       if j.returncode != 0:
         retval = retval + j.returncode;
         print "ERROR: Failed in cmd: %s" % cmd_list[k]; sys.stdout.flush();
+        sys.stdout.flush()
       else:
         print "COMPLETED: cmd : %s" % cmd_list[k]; sys.stdout.flush();
+        sys.stdout.flush()
       #fi
     #efor
     p = running;
@@ -678,6 +712,7 @@ def run_seq_cmds(cmd_list, stdin=None, stdout=None, stderr=None):
     retval = run_cmd(cmd, stdin=stdin, stdout=stdout, stderr=stderr);
     if retval != 0:
       print "ERROR: Failed on cmd: %s" % cmd;
+      sys.stdout.flush()
       return retval;
     #fi
   #efor
