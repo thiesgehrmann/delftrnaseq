@@ -41,3 +41,14 @@ If you start a step and you have not completed the dependencies of that step, it
 ```shell
 > make CUFFDIFF
 ```
+
+Installation
+===============
+
+Clone the delftrnaseq repository to somewhere:
+
+```shell
+> git clone https://github.com/thiesgehrmann/delftrnaseq.git
+```
+
+In each configuration file you create, the first line should reflect the location of 'pipeline.py' in your current installation.
