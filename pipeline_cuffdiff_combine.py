@@ -96,9 +96,9 @@ for i in range(1, len(results)):
 #efor
 
 #if annots file is available, add that one too (first slice should be id slice).
-for annot_file in C.annotation_files:
-    annots = Load(annot_file)
-    R = annots |Match(gslice,gslice)| R
+#for annot_file in C.annotation_files:
+#    annots = Load(annot_file)
+#    R = annots |Match(gslice,gslice)| R
 
 R = R % C.cuffdiff_test_type;
 
