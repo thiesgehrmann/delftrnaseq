@@ -127,10 +127,10 @@ class PIPELINECONF:
   # POST STAR AL BAM STUFF                                                    #
   #############################################################################
 
-  max_bam_threads = min(__max_threads__ / 2,4) #reduce number of threads for bam (are a bit intensive on the disk)
+  max_bam_threads = min(__max_threads__ / 2, 4) #reduce number of threads for bam (are a bit intensive on the disk)
 
 
-  def __post_star_al_bam_output__(self):
+  def __post_star_al_bam_output__(self) :
     return [ self.outdir + "/%s.star_align.bam" % sn for sn in self.sample_names ];
   #edef
 
@@ -150,14 +150,18 @@ class PIPELINECONF:
     return [ self.outdir + "/%s.star_align_sort.bam.bai" % sn for sn in self.sample_names ];
   
   #############################################################################
-  # CDS BED STUFF                                                             #
+  # CDS GFF STUFF                                                             #
   #############################################################################
 
-  def __cds_bed_genome_output__(self) :
-    return "%s/%s.cleaned.bed" % (self.outdir, self.jobname)
+  def __cds_gff_output__(self):
+    return [ self.outdir + "/%s.star_align_sort.count" % sn for sn in self.sample_names ]
 
-  def __cds_bed_output__(self):
-    return [ self.outdir + "/%s.star_align_sort.bed" % sn for sn in self.sample_names ] + [self.__cds_bed_genome_output__()]
+  #############################################################################
+  # READ DISTRIBUTION STUFF                                                   #
+  #############################################################################
+
+  def __read_distribution_output__(self):
+    return [ self.outdir + "/%s.star_align_sort.read_stats.pdf" % sn for sn in self.sample_names ]
 
   #############################################################################
   # GENOME GENERATION STUFF                                                   #

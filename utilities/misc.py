@@ -31,8 +31,8 @@ def make_read_count_table(outdir, sample_names) :
     for sample_name in sample_names:
         fname = os.path.join(outdir, sample_name + ".star_align.final.log")
         r = getCommandOutput('cat %s' % fname)
-        fname = os.path.join(outdir, sample_name + '.star_align_sort.bed')
-        cds_count = getCommandOutput("cat  %s | awk 'BEGIN {s=0} {s=s+$11} END {print s}'" % fname)
+        fname = os.path.join(outdir, sample_name + '.star_align_sort.count')
+        cds_count = getCommandOutput("cat  %s | grep -v '__' | awk 'BEGIN {s=0} {s=s+$2} END {print s}'" % fname)
         data.append(mapped_regex.search(r).groups() + multimapped_regex.search(r).groups() + (int(cds_count), ))
     data = Rep((sample_names, data)).To(_.data, Do=_.Fields()).Detect()/('sample_names', 'unique_match','multi_match', 'cds_align')
     
@@ -46,6 +46,6 @@ def make_read_count_table(outdir, sample_names) :
         row = rows[0]
         name, input_pairs, survived_pairs, aligned, multi_aligned, cds_aligned = row[0], row[1], row[2], row[6], row[7], row[8]
         aligned += multi_aligned
-        table_row = [name, '$%s$' % '{:,.0f}'.format(input_pairs).replace(',', ',\\!'), '$%s$ ($%.2f$\\%%)' % ('{:,.0f}'.format(survived_pairs).replace(',', ',\\!'), survived_pairs / float(input_pairs) * 100.0), '$%s$ ($%.2f$\\%%)' % ('{:,.0f}'.format(aligned).replace(',', ',\\!'), aligned / float(input_pairs) * 100.0), '$%s$ ($%.2f$\\%%)' % ('{:,.0f}'.format(cds_aligned).replace(',', ',\\!'), cds_aligned / float(2 * input_pairs) * 100.0)]
+        table_row = [name, '$%s$' % '{:,.0f}'.format(input_pairs).replace(',', ',\\!'), '$%s$ ($%.2f$\\%%)' % ('{:,.0f}'.format(survived_pairs).replace(',', ',\\!'), survived_pairs / float(input_pairs) * 100.0), '$%s$ ($%.2f$\\%%)' % ('{:,.0f}'.format(aligned).replace(',', ',\\!'), aligned / float(input_pairs) * 100.0), '$%s$ ($%.2f$\\%%)' % ('{:,.0f}'.format(cds_aligned).replace(',', ',\\!'), cds_aligned / float(input_pairs) * 100.0)]
         table.append(table_row)
     return table

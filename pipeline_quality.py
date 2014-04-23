@@ -17,6 +17,9 @@ C = init_conf()
 
 outfiles = C.__quality_output__()
 
+qf.create_trim_figs(C.outdir, C.sample_names, outfiles[0], C.PE)
+qf.create_mapping_figs(C.outdir, C.sample_names, outfiles[1])
+
 l = latex.LatexFile(outfiles[-1][0])
 l.write_title("Quality Report ``%s''" % C.title, C.author)
 
@@ -26,9 +29,8 @@ table = misc.make_adapter_table(C.trimmomatic_trim)
 l.write_table(['Primer', 'Sequence'], table, "Filtered adapter sequences.", alignment = "ll")
 
 table = misc.make_read_count_table(C.outdir, C.sample_names)
-l.write_table(['Read set', 'Read pairs', 'Survived pairs', 'Aligned pairs', 'CDS-aligned reads'], table, "Read set statistics.", alignment = "lrrrr")
+l.write_table(['Read set', 'Read pairs', 'Survived pairs', 'Aligned pairs', 'CDS-aligned pairs'], table, "Read set statistics.", alignment = "lrrrr")
 
-qf.create_trim_figs(C.outdir, C.sample_names, outfiles[0], C.PE)
 l.include_figure(outfiles[0][0], 'nreads', 'Number of read pairs before and after filtering using Trimmomatic. Adapters and low-quality regions in the reads are removed. Reads that become too short after trimming are dropped.')
 l.include_figure(outfiles[0][1], 'ratio', 'Ratio of read pairs were both reads survive filtering using  Trimmomatic, and ratio of read pairs for which both reads are dropped.')
 if C.PE :
@@ -38,7 +40,6 @@ if C.PE :
 l.clear_page()
 
 l.start_section("Read Mapping")
-qf.create_mapping_figs(C.outdir, C.sample_names, outfiles[1])
 l.include_figure(outfiles[1][0], 'mapped', 'Ratio of reads that are mapped uniquely or non-uniquely to the target genome.')
 l.include_figure(outfiles[1][1], 'unmapped', 'Ratio of reads that is dropped due to the found alignment being too short, or due to having too many mismatches in the alignment.')
 l.include_figure(outfiles[1][2], 'length', 'The average input read length compared to the average length of these reads that is aligned to the genome.')

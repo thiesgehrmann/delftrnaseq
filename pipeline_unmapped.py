@@ -108,8 +108,9 @@ for i in xrange(len(BO)):
                 continue;
             org = l[10:]
             gi = gi_list[k]
+            gi = int(gi)
             gi2org[gi] = org
-            print '         [+] %s -> %s' % (gi, org)
+            print '         [+] %d -> %s' % (gi, org)
             k = k + 1;
 
   else :
@@ -133,14 +134,16 @@ for i in xrange(len(BO)):
         print "      [i] Parsing query results"
         sys.stdout.flush()
         for gi, org in data :
+            gi = int(gi)
             gi2org[gi] = org
-            print '         [+] %s -> %s' % (gi, org)
+            print '         [+] %d -> %s' % (gi, org)
 
   cont = {}
   for key in best_hit.keys() :
       gis, score = best_hit[key]
       if score >= cutoff :
           for gi in gis :
+              gi = int(gi)
               org = gi2org[gi]
               if cont.has_key(org) :
                   hits, ids = cont[org]
