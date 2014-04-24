@@ -32,7 +32,7 @@ def make_read_count_table(outdir, sample_names) :
         fname = os.path.join(outdir, sample_name + ".star_align.final.log")
         r = getCommandOutput('cat %s' % fname)
         fname = os.path.join(outdir, sample_name + '.star_align_sort.count')
-        cds_count = getCommandOutput("cat  %s | grep -v '__' | awk 'BEGIN {s=0} {s=s+$2} END {print s}'" % fname)
+        cds_count = getCommandOutput("cat  %s |  grep -v '__no_feature' | grep -v '__not_aligned' | grep -v '__alignment_not_unique' | grep -v '__too_low_aQual' | awk 'BEGIN {s=0} {s=s+$2} END {print s}'" % fname)
         data.append(mapped_regex.search(r).groups() + multimapped_regex.search(r).groups() + (int(cds_count), ))
     data = Rep((sample_names, data)).To(_.data, Do=_.Fields()).Detect()/('sample_names', 'unique_match','multi_match', 'cds_align')
     
