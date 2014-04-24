@@ -18,24 +18,25 @@ class PIPELINECONF:
   # DATA                                                                      #
   #############################################################################
 
-  email          = None;
-  jobname        = None;
-  title          = "Rna-Seq Analysis";
-  author         = pwd.getpwuid(os.getuid()).pw_gecos;
+  email           = None;
+  jobname         = None;
+  title           = "Rna-Seq Analysis";
+  author          = pwd.getpwuid(os.getuid()).pw_gecos;
   
-  workdir        = "./"
-  outdir         = "./"
-  makefile       = "Makefile";
+  workdir         = "./"
+  outdir          = "./"
+  makefile        = "Makefile";
 
-  location       = "";
-  PE             = None;
-  samples        = [];
-  sample_names   = [];
-  sample_labels  = [];
-  sample_comp    = [];
-  genome         = [];
-  genome_annot   = None;
-  genome_guide   = None;
+  location        = "";
+  PE              = None;
+  strand_specific = False;
+  samples         = [];
+  sample_names    = [];
+  sample_labels   = [];
+  sample_comp     = [];
+  genome          = [];
+  genome_annot    = None;
+  genome_guide    = None;
 
   #############################################################################
   # INTERNALS                                                                 #
