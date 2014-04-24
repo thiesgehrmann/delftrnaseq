@@ -16,6 +16,7 @@ class LatexFile(object):
 \usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{verbatim}
+\usepackage{morefloats}
 \usepackage[top=3cm, bottom=3cm, left=2cm, right=2cm]{geometry}
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 """)
@@ -102,11 +103,14 @@ class LatexFile(object):
         self.f.write("\\end{longtable}\n");
         self.f.write("\\end{center}\n\n");
 
-    def include_figure(self, filename, refname, caption = None, width = 1.0) :
+    def include_figure(self, filename, refname, caption = None, width = 1.0, additional_options = None) :
         self.f.write("\\begin{figure}[htp]\n")
         self.f.write("\\noindent\\makebox[\\textwidth]{%\n")
         filename = basename(filename)
-        self.f.write('\\includegraphics[width=%g\\textwidth]{%s}}\n' % (width, filename))
+        if additional_options is None :
+            self.f.write('\\includegraphics[width=%g\\textwidth]{%s}}\n' % (width, filename))
+        else :
+            self.f.write('\\includegraphics[%s,width=%g\\textwidth]{%s}}\n' % (additional_options, width, filename))
         
         if not caption is None :
             self.f.write("\\caption{%s}\n" % self.texcape(caption))

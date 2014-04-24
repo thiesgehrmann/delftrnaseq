@@ -31,18 +31,22 @@ l.write_table(['Primer', 'Sequence'], table, "Filtered adapter sequences.", alig
 table = misc.make_read_count_table(C.outdir, C.sample_names)
 l.write_table(['Read set', 'Read pairs', 'Survived pairs', 'Aligned pairs', 'CDS-aligned pairs'], table, "Read set statistics.", alignment = "lrrrr")
 
-l.include_figure(outfiles[0][0], 'nreads', 'Number of read pairs before and after filtering using Trimmomatic. Adapters and low-quality regions in the reads are removed. Reads that become too short after trimming are dropped.')
-l.include_figure(outfiles[0][1], 'ratio', 'Ratio of read pairs were both reads survive filtering using  Trimmomatic, and ratio of read pairs for which both reads are dropped.')
+for sample in C.sample_names :
+    figure_filename = sample + '.star_align_sort.read_stats'
+    l.include_figure(figure_filename, 'fig:read-stats-%s' % sample, 'Read (fragment) length distribution for %s sample.' % sample, additional_options = 'type=pdf,ext=.pdf,read=.pdf')
+
+l.include_figure(outfiles[0][0], 'fig:nreads', 'Number of read pairs before and after filtering using Trimmomatic. Adapters and low-quality regions in the reads are removed. Reads that become too short after trimming are dropped.')
+l.include_figure(outfiles[0][1], 'fig:ratio', 'Ratio of read pairs were both reads survive filtering using  Trimmomatic, and ratio of read pairs for which both reads are dropped.')
 if C.PE :
-  l.include_figure(outfiles[0][2], 'single', 'Ratio of read pairs for which only the forward or only the reverse read survives filtering through Trimmomatic.')
+  l.include_figure(outfiles[0][2], 'fig:single', 'Ratio of read pairs for which only the forward or only the reverse read survives filtering through Trimmomatic.')
 #fi
 
 l.clear_page()
 
 l.start_section("Read Mapping")
-l.include_figure(outfiles[1][0], 'mapped', 'Ratio of reads that are mapped uniquely or non-uniquely to the target genome.')
-l.include_figure(outfiles[1][1], 'unmapped', 'Ratio of reads that is dropped due to the found alignment being too short, or due to having too many mismatches in the alignment.')
-l.include_figure(outfiles[1][2], 'length', 'The average input read length compared to the average length of these reads that is aligned to the genome.')
+l.include_figure(outfiles[1][0], 'fig:mapped', 'Ratio of reads that are mapped uniquely or non-uniquely to the target genome.')
+l.include_figure(outfiles[1][1], 'fig:unmapped', 'Ratio of reads that is dropped due to the found alignment being too short, or due to having too many mismatches in the alignment.')
+l.include_figure(outfiles[1][2], 'fig:length', 'The average input read length compared to the average length of these reads that is aligned to the genome.')
 
 l.clear_page()
 

@@ -153,6 +153,8 @@ class PIPELINECONF:
   # CDS GFF STUFF                                                             #
   #############################################################################
 
+  cds_gff_type = 'CDS'
+
   def __cds_gff_output__(self):
     return [ self.outdir + "/%s.star_align_sort.count" % sn for sn in self.sample_names ]
 

@@ -1,5 +1,7 @@
-from pipeline_common import *;
+#!/usr/bin/env python
 
+from pipeline_common import *
+import sys
 import HTSeq
 import pylab
 import matplotlib.pyplot as plot
@@ -66,8 +68,9 @@ def read_bam_file(filename, figure_filename, PE, n_bins = 50) :
 C = init_conf()
 sort_outputs = C.__post_star_al_sort_output__()
 for bam_file in sort_outputs :
-    figure_file = sample + '.read_stats.pdf'
     prefix, ext = os.path.splitext(bam_file)
     figure_file = prefix + '.read_stats.pdf'
     print 'Processing file: %s' % bam_file
     read_bam_file(bam_file, figure_file, C.PE)
+
+sys.exit(0)

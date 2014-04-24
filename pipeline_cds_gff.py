@@ -12,7 +12,7 @@ cmds = []
 for i in xrange(len(sort_outputs)) :
   indexed_bam = sort_outputs[i]
   prefix, ext = os.path.splitext(indexed_bam)
-  cmd = "htseq-count -i ID -f bam -r pos -t CDS '%s' '%s' >%s.count" % (indexed_bam, genome_gff, prefix)
+  cmd = "htseq-count -i ID -f bam -r pos -t %s '%s' '%s' >%s.count" % (C.cds_gff_type, indexed_bam, genome_gff, prefix)
   cmds.append(cmd)
 
 print "Covering genome GFF with reads"
