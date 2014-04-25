@@ -57,9 +57,30 @@ if C.check_contamination :
     l.write_table(['Sample', 'Organism', 'Hits'], table, "Top 5 contaminants for each sample.", alignment = "lll")
     l.clear_page()
 
-l.start_section("FastQC: mapped")
-pass
-l.start_section("FastQC: unmapped")
+l.start_section("FastQC: mapped reads")
+for sample in C.sample_names :
+    l.start_section('Sample %s' % sample, level = 1)
+    dirname = C.outdir + '/' + sample + '.star_align_fastqc'
+    l.include_figure(dirname + '/Images/per_base_quality.png', 'fig:' + dirname + '-quality', "Per-base read quality for %s" % sample, width = 0.6)
+    l.include_figure(dirname + '/Images/kmer_profiles.png', 'fig:' + dirname + '-kmers', "$k$-mer over-representation profiles for %s" % sample, width = 0.6)
+    l.clear_page()
+
+l.start_section("FastQC: unmapped reads")
+for sample in C.sample_names :
+    l.start_section('Sample %s' % sample, level = 1)
+    if C.PE :
+        dirname = C.outdir + '/' + sample + '.star_align_unmapped_R1_fastqc'
+        l.include_figure(dirname + '/Images/per_base_quality.png', 'fig:' + dirname + '-quality', "Per-base read quality for %s (read 1)" % sample, width = 0.6)
+        l.include_figure(dirname + '/Images/kmer_profiles.png', 'fig:' + dirname + '-kmers', "$k$-mer over-representation profiles for %s (read 1)" % sample, width = 0.6)
+        dirname = C.outdir + '/' + sample + '.star_align_unmapped_R2_fastqc'
+        l.include_figure(dirname + '/Images/per_base_quality.png', 'fig:' + dirname + '-quality', "Per-base read quality for %s (read 2)" % sample, width = 0.6)
+        l.include_figure(dirname + '/Images/kmer_profiles.png', 'fig:' + dirname + '-kmers', "$k$-mer over-representation profiles for %s (read 2)" % sample, width = 0.6)
+    else :
+        dirname = C.outdir + '/' + sample + '.star_align_unmapped_fastqc'
+        l.include_figure(dirname + '/Images/per_base_quality.png', 'fig:' + dirname + '-quality', "Per-base read quality for %s" % sample, width = 0.6)
+        l.include_figure(dirname + '/Images/kmer_profiles.png', 'fig:' + dirname + '-kmers', "$k$-mer over-representation profiles for %s" % sample, width = 0.6)
+    l.clear_page()
+
 
 l.end_document()
 

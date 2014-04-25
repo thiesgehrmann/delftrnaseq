@@ -170,7 +170,7 @@ class PIPELINECONF:
   # CDS GFF STUFF                                                             #
   #############################################################################
   
-  def __fastqc_output__(self) :
+  def __fastqc_output__(self) : 
     out = []
     for bam_output in self.__post_star_al_bam_output__() :
         prefix, ext = os.path.splitext(bam_output)

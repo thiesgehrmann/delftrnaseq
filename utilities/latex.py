@@ -1,10 +1,12 @@
-from os.path import basename
+import os.path
 from ibidas import *
 import numpy as np
 
 class LatexFile(object):
     def __init__(self, filename) :
         self.f = open(filename, 'w')
+        dirsplit = os.path.split(filename)
+        self.basedir = dirsplit[0]
         self.write_header()
 
     def write_header(self) :
@@ -109,7 +111,8 @@ class LatexFile(object):
     def include_figure(self, filename, refname, caption = None, width = 1.0, additional_options = None) :
         self.f.write("\\begin{figure}[htp]\n")
         self.f.write("\\noindent\\makebox[\\textwidth]{%\n")
-        filename = basename(filename)
+        if os.path.isabs(filename) :
+            filename = os.path.relpath(filename, self.basedir)
         if additional_options is None :
             self.f.write('\\includegraphics[width=%g\\textwidth]{%s}}\n' % (width, filename))
         else :
