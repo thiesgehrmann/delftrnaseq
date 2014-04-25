@@ -18,6 +18,7 @@ class LatexFile(object):
 \usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{verbatim}
+\usepackage{hyperref}
 \usepackage{morefloats}
 \usepackage[top=3cm, bottom=3cm, left=2cm, right=2cm]{geometry}
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
