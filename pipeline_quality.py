@@ -24,7 +24,7 @@ l = latex.LatexFile(outfiles[-1][0])
 l.write_title("Quality Report ``%s''" % C.title, C.author)
 
 l.start_section('Read Filtering')
-l.add_text('Trimmomatic options:\\\\ \n\\verb=%s=' % misc.shorten_timmomatic_opts(C.trimmomatic_trim))
+l.add_text('Trimmomatic options:\\\\ \n\\verb=%s=' % misc.shorten_timmomatic_opts(C.trimmomatic_trim), texcape = False)
 table = misc.make_adapter_table(C.trimmomatic_trim)
 l.write_table(['Primer', 'Sequence'], table, "Filtered adapter sequences.", alignment = "ll")
 
@@ -56,6 +56,10 @@ if C.check_contamination :
     table = ct.make_contamination_table(C.outdir, C.sample_names, top_n = 5)
     l.write_table(['Sample', 'Organism', 'Hits'], table, "Top 5 contaminants for each sample.", alignment = "lll")
     l.clear_page()
+
+l.start_section("FastQC: mapped")
+pass
+l.start_section("FastQC: unmapped")
 
 l.end_document()
 

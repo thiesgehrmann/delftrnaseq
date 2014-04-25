@@ -167,6 +167,29 @@ class PIPELINECONF:
     return [ self.outdir + "/%s.star_align_sort.read_stats.pdf" % sn for sn in self.sample_names ]
 
   #############################################################################
+  # CDS GFF STUFF                                                             #
+  #############################################################################
+  
+  def __fastqc_output__(self) :
+    out = []
+    for bam_output in self.__post_star_al_bam_output__() :
+        prefix, ext = os.path.splitext(bam_output)
+        filename = prefix + '_fastqc'
+        out.append(filename)
+    if self.PE :
+        for left_in, right_in in self.__star_al_output_unmapped__() :
+            prefix, ext = os.path.splitext(left_in)
+            out.append(prefix + '_fastqc')
+            prefix, ext = os.path.splitext(right_in)
+            out.append(prefix + '_fastqc')
+    else :
+        for file in self.__star_al_output_unmapped__() :
+            prefix, ext = os.path.splitext(file)
+            output.append(prefix + '_fastqc')
+            out.append(prefix + '_fastqc')
+    return out
+
+  #############################################################################
   # GENOME GENERATION STUFF                                                   #
   #############################################################################
 

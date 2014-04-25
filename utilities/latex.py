@@ -37,8 +37,11 @@ class LatexFile(object):
     def texcape(self, txt) :
         return txt.replace("_","\_")
 
-    def add_text(self, text) :
-        self.f.write("%s\n" % self.texcape(text));
+    def add_text(self, text, texcape = True) :
+        if texcape :
+            self.f.write("%s\n" % self.texcape(text));
+        else :
+            self.f.write("%s\n" % text);
 
     def write_table(self, columns, data, caption, alignment = None) :
         n_columns = len(columns)
