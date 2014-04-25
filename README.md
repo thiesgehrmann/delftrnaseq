@@ -17,6 +17,8 @@ Dependencies
 Further functionality is provided by installing:
   * TRINTITY: http://trinityrnaseq.sourceforge.net/
   * BLAST+: ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+  * HTSeq: http://www-huber.embl.de/users/anders/HTSeq/doc/overview.html
+  * FastQC: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
   * Matplotlib: http://matplotlib.org/
   * LATEX: http://www.latex-project.org/
 
