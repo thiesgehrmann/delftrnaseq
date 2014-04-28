@@ -7,8 +7,9 @@ import csv;
 import time
 from ibidas import *
 
-from Bio import SeqIO;
-from Bio import Entrez;
+from Bio import SeqIO
+from Bio import Entrez
+import MySQLdb as mdb
 
 from pipeline_common import *;
 
@@ -75,46 +76,74 @@ for i in xrange(len(BO)):
 
   print "[i] Determining source organism of %d hits" % len(gi_list); sys.stdout.flush();
 
-  k = 0;
-  xsize = 50;
-  for j in xrange(0,len(gi_list), xsize):
-    gi_str = ','.join(gi_list[j:(j+xsize)]);
+  if not C.unmapped_use_mysql :
+    k = 0
+    xsize = 50
+    for j in xrange(0,len(gi_list), xsize) :
+        gi_str = ','.join(gi_list[j:(j+xsize)])
 
-    print "\t[i] Sending query %d" % (k/xsize); sys.stdout.flush();
-    r = 0
-    handle = None
-    while 1:
-        try:
-            handle  = Entrez.efetch(db="nuccore", id=gi_str, rettype="gb");
-        except Exception, e:
-            r = r + 1
-            time.sleep(60)
-            if r> 30: 
-                raise
-            else:
-                print e
-                continue
-        break
+        print "   [i] Sending query %d" % (k/xsize); sys.stdout.flush();
+        r = 0
+        handle = None
+        while True :
+            try :
+                handle  = Entrez.efetch(db = "nuccore", id = gi_str, rettype = "gb");
+            except Exception, e :
+                r = r + 1
+                time.sleep(60)
+                if r > 30 :
+                    raise
+                else:
+                    print e
+                    continue
+            break
 
 
-    print "\t[i] Parsing query"; sys.stdout.flush();
+        print "      [i] Parsing query"; sys.stdout.flush();
 
-    l = '\n';
-    while l != '':
-      l = handle.readline();
-      if l[2:10] != 'ORGANISM':
-        continue;
-      org = l[10:]
-      gi = gi_list[k]
-      gi2org[gi] = org
-      print '%s %s' % (gi, org)
-      k = k + 1;
+        l = '\n';
+        while l != '':
+            l = handle.readline();
+            if l[2:10] != 'ORGANISM':
+                continue;
+            org = l[10:]
+            gi = gi_list[k]
+            gi = int(gi)
+            gi2org[gi] = org
+            print '         [+] %d -> %s' % (gi, org)
+            k = k + 1;
+
+  else :
+        n_hits = len(gi_list)
+        gi_str = ','.join(gi_list)
+        print "   [i] Sending query (size %d)" % n_hits
+        con, data = None, None
+        try :
+            con = mdb.connect(C.unmapped_mysql_host, C.unmapped_mysql_user, C.unmapped_mysql_pass, C.unmapped_mysql_db)
+            cur = con.cursor()
+            str = 'SELECT gi, source FROM gi2source WHERE gi in (%s)' % gi_str
+            cur.execute(str)
+            data = cur.fetchall()
+        except mdb.Error, e :
+            print "Error %d: %s" % (e.args[0], e.args[1])
+            sys.stdout.flush()
+        finally :
+            if con :
+                con.close()
+
+        print "      [i] Parsing query results"
+        sys.stdout.flush()
+        for gi, org in data :
+            gi = int(gi)
+            gi2org[gi] = org
+            print '         [+] %d -> %s' % (gi, org)
 
   cont = {}
   for key in best_hit.keys() :
       gis, score = best_hit[key]
       if score >= cutoff :
           for gi in gis :
+              gi = int(gi)
               org = gi2org[gi]
               if cont.has_key(org) :
                   hits, ids = cont[org]
@@ -131,8 +160,8 @@ for i in xrange(len(BO)):
     print "  %-*s %-5d" % (maxl, o[0], o[1]);
   #efor
   print "\n\n";
-  sys.stdout.flush();
-  Save(cont, '%s/%s.unmapped_orgs.dat' % (C.outdir, sn));
+  sys.stdout.flush()
+  Save(cont, '%s/%s.unmapped_orgs.dat' % (C.outdir, sn))
 #efor
 
 sys.exit(0);

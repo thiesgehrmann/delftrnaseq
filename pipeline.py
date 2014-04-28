@@ -143,6 +143,10 @@ M.add_var("STAR_AL_OUTPUT_UNMAPPED", ' '.join(flatten(C.__star_al_output_unmappe
 M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_SAM} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');
 M.add_step("POST_STAR_AL_BAM", "${STAR_AL_OUTPUT_SAM}", ' '.join(C.__post_star_al_bam_output__()), 'pipeline_post_star_al_bam.py');
 M.add_step("POST_STAR_AL_SORT", "${POST_STAR_AL_BAM_OUT}", ' '.join(C.__post_star_al_sort_output__()), 'pipeline_post_star_al_sort.py');
+M.add_step("POST_STAR_AL_INDEX", "${POST_STAR_AL_SORT_OUT}", ' '.join(C.__post_star_al_index_output__()), 'pipeline_post_star_al_index.py');
+M.add_step("CDS_GFF", "${POST_STAR_AL_INDEX_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__cds_gff_output__()), 'pipeline_cds_gff.py');
+M.add_step("READ_DISTRIBUTION", "${POST_STAR_AL_INDEX_OUT}", ' '.join(C.__read_distribution_output__()), 'pipeline_read_distribution.py');
+M.add_step("FASTQC", "${STAR_AL_OUT} ${POST_STAR_AL_BAM_OUT}", ' '.join(C.__fastqc_output__()), 'pipeline_fastqc.py');
 
   # CUFF steps
 M.add_step("PRE_CUFFLINKS_MERGE", "${POST_STAR_AL_BAM_OUT}", C.__pre_cufflinks_merge_output__(), 'pipeline_pre_cufflinks_merge.py');
@@ -152,7 +156,7 @@ M.add_step("CUFFLINKS", "${PRE_CUFFLINKS_SORT_OUT} ${GENOME_ANNOT_FORMAT_OUT}", 
 M.add_step("CUFFDIFF", "${POST_STAR_AL_SORT_OUT} ${CUFFLINKS_OUT}", ' '.join(flatten(C.__cuffdiff_output__())), 'pipeline_cuffdiff.py');
 
   # Contamination steps
-if C.check_contamination:
+if C.check_contamination :
   M.add_var("UNMAPPED_OUT", ' '.join(C.__unmapped_output__()));
   M.add_step("TRINITY", "${STAR_AL_OUTPUT_UNMAPPED}", ' '.join(C.__trinity_output__()), 'pipeline_trinity.py');
   M.add_step("TRINITY_ORF", "${TRINITY_OUT}", ' '.join(C.__trinity_orf_output__()), 'pipeline_trinity_orf.py');
@@ -162,11 +166,11 @@ if C.check_contamination:
 #fi
 
   # REPORTS
-if C.perform_quality_report:
+if C.perform_quality_report :
     if C.check_contamination :
-        M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT} ${UNMAPPED_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
+        M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT} ${FASTQC_OUT} ${CDS_GFF_OUT} ${READ_DISTRIBUTION_OUT} ${UNMAPPED_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
     else :
-        M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
+        M.add_step("QUALITYREPORT", "${TRIMMOMATIC_OUT} ${STAR_AL_OUT} ${FASTQC_OUT} ${CDS_GFF_OUT} ${READ_DISTRIBUTION_OUT}", ' '.join(flatten(C.__quality_output__())), 'pipeline_quality.py');
 #fi
 
 if C.perform_analysis:

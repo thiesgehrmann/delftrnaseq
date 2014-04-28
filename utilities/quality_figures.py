@@ -7,12 +7,11 @@ import numpy
 import pylab as pl
 from figure_tools import *
 
-
 def create_trim_figs(outdir, sample_names, filenames, PE):
     trimlogfile = os.path.join(outdir, 'TRIMMOMATIC.std.log')
     r = getCommandOutput('cat %s | grep "Input Read"' % trimlogfile)
     r = r.split('\n')
-    if PE:
+    if PE :
       v  = re.compile(r"Input Read Pairs\: ([\d]+) Both Surviving: ([\d]+) \([\d\.]+\%\) Forward Only Surviving: ([\d]+) \([\d\.]+\%\) Reverse Only Surviving: ([\d]+) \([\d\.]+\%\) Dropped: ([\d]+) \([\d\.]+\%\)")
       sn = ('sample_names', 'input','surviving','forward_only','reverse_only','dropped');
     else:
@@ -32,7 +31,6 @@ def create_trim_figs(outdir, sample_names, filenames, PE):
                   ('Input read pairs',survive_lab), (20, 12.0))
 
     pl.savefig(filenames[0], dpi=200)
-    #pl.show()
 
     ratio_surviving = (data.surviving.Cast(float) / data.input)()
     ratio_dropped = (data.dropped.Cast(float) / data.input)()
@@ -41,17 +39,15 @@ def create_trim_figs(outdir, sample_names, filenames, PE):
                   ('Surviving','Dropped'), (20, 12.0))
 
     pl.savefig(filenames[1], dpi=200)
-    #pl.show()
 
-    if PE:
+    if PE :
       ratio_forward = (data.forward_only.Cast(float) / data.input)()
       ratio_reverse = (data.reverse_only.Cast(float) / data.input)()
 
       fig = dual_bargraph(ratio_forward, ratio_reverse, "Ratio of read pairs", sample_names,
                     ('Forward only surviving','Reverse only surviving'), (20, 12.0))
     
-      pl.savefig(filenames[2], dpi=200)
-    #fi;
+      pl.savefig(filenames[2], dpi = 200)
 
 def create_mapping_figs(outdir, sample_names, filenames):
     umapped = re.compile(r"Uniquely mapped reads \% \|\s+([\d\.]+)\%")
@@ -79,9 +75,6 @@ def create_mapping_figs(outdir, sample_names, filenames):
                   ('unique match','multi match'), (20, 12.0))
 
     pl.savefig(filenames[0], dpi=200)
-    #pl.show()
-
-
 
     ratio_short = data.too_short() / 100.0
     ratio_mismatch = data.too_many_mismatches() / 100.0
@@ -91,7 +84,6 @@ def create_mapping_figs(outdir, sample_names, filenames):
                   ('match too short','too many mismatches', 'other'), (20, 12.0))
     
     pl.savefig(filenames[1], dpi=200)
-    #pl.show()
 
 
     avg_input_length = data.avg_input_length()

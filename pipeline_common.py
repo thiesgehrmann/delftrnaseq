@@ -18,24 +18,25 @@ class PIPELINECONF:
   # DATA                                                                      #
   #############################################################################
 
-  email          = None;
-  jobname        = None;
-  title          = "Rna-Seq Analysis";
-  author         = pwd.getpwuid(os.getuid()).pw_gecos;
+  email           = None;
+  jobname         = None;
+  title           = "Rna-Seq Analysis";
+  author          = pwd.getpwuid(os.getuid()).pw_gecos;
   
-  workdir        = "./"
-  outdir         = "./"
-  makefile       = "Makefile";
+  workdir         = "./"
+  outdir          = "./"
+  makefile        = "Makefile";
 
-  location       = "";
-  PE             = None;
-  samples        = [];
-  sample_names   = [];
-  sample_labels  = [];
-  sample_comp    = [];
-  genome         = [];
-  genome_annot   = None;
-  genome_guide   = None;
+  location        = "";
+  PE              = None;
+  strand_specific = False;
+  samples         = [];
+  sample_names    = [];
+  sample_labels   = [];
+  sample_comp     = [];
+  genome          = [];
+  genome_annot    = None;
+  genome_guide    = None;
 
   #############################################################################
   # INTERNALS                                                                 #
@@ -127,10 +128,10 @@ class PIPELINECONF:
   # POST STAR AL BAM STUFF                                                    #
   #############################################################################
 
-  max_bam_threads = min(__max_threads__ / 2,4) #reduce number of threads for bam (are a bit intensive on the disk)
+  max_bam_threads = min(__max_threads__ / 2, 4) #reduce number of threads for bam (are a bit intensive on the disk)
 
 
-  def __post_star_al_bam_output__(self):
+  def __post_star_al_bam_output__(self) :
     return [ self.outdir + "/%s.star_align.bam" % sn for sn in self.sample_names ];
   #edef
 
@@ -141,6 +142,52 @@ class PIPELINECONF:
   def __post_star_al_sort_output__(self):
     return [ self.outdir + "/%s.star_align_sort.bam" % sn for sn in self.sample_names ];
   #edef
+
+  #############################################################################
+  # POST STAR AL INDEX STUFF                                                  #
+  #############################################################################
+
+  def __post_star_al_index_output__(self):
+    return [ self.outdir + "/%s.star_align_sort.bam.bai" % sn for sn in self.sample_names ];
+  
+  #############################################################################
+  # CDS GFF STUFF                                                             #
+  #############################################################################
+
+  cds_gff_type = 'CDS'
+
+  def __cds_gff_output__(self):
+    return [ self.outdir + "/%s.star_align_sort.count" % sn for sn in self.sample_names ]
+
+  #############################################################################
+  # READ DISTRIBUTION STUFF                                                   #
+  #############################################################################
+
+  def __read_distribution_output__(self):
+    return [ self.outdir + "/%s.star_align_sort.read_stats.pdf" % sn for sn in self.sample_names ]
+
+  #############################################################################
+  # CDS GFF STUFF                                                             #
+  #############################################################################
+  
+  def __fastqc_output__(self) : 
+    out = []
+    for bam_output in self.__post_star_al_bam_output__() :
+        prefix, ext = os.path.splitext(bam_output)
+        filename = prefix + '_fastqc'
+        out.append(filename)
+    if self.PE :
+        for left_in, right_in in self.__star_al_output_unmapped__() :
+            prefix, ext = os.path.splitext(left_in)
+            out.append(prefix + '_fastqc')
+            prefix, ext = os.path.splitext(right_in)
+            out.append(prefix + '_fastqc')
+    else :
+        for file in self.__star_al_output_unmapped__() :
+            prefix, ext = os.path.splitext(file)
+            output.append(prefix + '_fastqc')
+            out.append(prefix + '_fastqc')
+    return out
 
   #############################################################################
   # GENOME GENERATION STUFF                                                   #
@@ -351,6 +398,12 @@ class PIPELINECONF:
   __unmapped_blast_select_by__ = len(__unmapped_blast_fields__.split(' ')) - 1;
   
   __unmapped_blast_select_by_cutoff__ = 750
+  
+  unmapped_use_mysql = False
+  unmapped_mysql_user = 'genbank'
+  unmapped_mysql_pass = 'genbank'
+  unmapped_mysql_host = 'localhost'
+  unmapped_mysql_db = 'genbank'
 
   def __unmapped_output__(self):
     return [ self.outdir + '/%s.unmapped_orgs.dat' % sn for sn in self.sample_names ];
@@ -616,6 +669,7 @@ def cor(obj):
 
 def run_cmd(cmd, bg = False, stdin = None, stdout = None, stderr = None):
     print '[RUN CMD] Executing: %s' % cmd
+    sys.stdout.flush()
     p = subprocess.Popen(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr);
     if bg :
         return p
@@ -623,11 +677,15 @@ def run_cmd(cmd, bg = False, stdin = None, stdout = None, stderr = None):
         (pid, r) = os.waitpid(p.pid, 0);
         return r;
 
-def run_shell(cmd):
+def run_shell(cmd, bg = False):
     print '[RUN SHELL] Executing: %s' % cmd
+    sys.stdout.flush()
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    res = p.communicate()[0]
-    return p.returncode
+    if bg :
+        return p
+    else:
+        (pid, r) = os.waitpid(p.pid, 0);
+        return r;
 
 def getCommandOutput(cmd):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -638,7 +696,7 @@ def getCommandOutput(cmd):
 
 ###############################################################################
 
-def run_par_cmds(cmd_list, max_threads=PIPELINECONF.__max_threads__, stdin=None, stdout=None, stderr=None):
+def run_par_cmds(cmd_list, max_threads=PIPELINECONF.__max_threads__, stdin=None, stdout=None, stderr=None, shell=False):
   
   p = [];
   i = 0;
@@ -648,7 +706,11 @@ def run_par_cmds(cmd_list, max_threads=PIPELINECONF.__max_threads__, stdin=None,
   while i < cmds:
     while len(p) < max_threads and i < cmds:
       print "RUNNING: %s" % cmd_list[i]; sys.stdout.flush();
-      p.append( (run_cmd(cmd_list[i], bg=True, stdin=stdin, stdout=stdout, stderr=stderr),i) );
+      sys.stdout.flush()
+      if not shell :
+        p.append( (run_cmd(cmd_list[i], bg=True, stdin=stdin, stdout=stdout, stderr=stderr),i) );
+      else :
+        p.append( (run_shell(cmd_list[i], bg=True),i) );
       i = i + 1;
     #ewhile
 
@@ -661,8 +723,10 @@ def run_par_cmds(cmd_list, max_threads=PIPELINECONF.__max_threads__, stdin=None,
       if j.returncode != 0:
         retval = retval + j.returncode;
         print "ERROR: Failed in cmd: %s" % cmd_list[k]; sys.stdout.flush();
+        sys.stdout.flush()
       else:
         print "COMPLETED: cmd : %s" % cmd_list[k]; sys.stdout.flush();
+        sys.stdout.flush()
       #fi
     #efor
     p = running;
@@ -679,6 +743,7 @@ def run_seq_cmds(cmd_list, stdin=None, stdout=None, stderr=None):
     retval = run_cmd(cmd, stdin=stdin, stdout=stdout, stderr=stderr);
     if retval != 0:
       print "ERROR: Failed on cmd: %s" % cmd;
+      sys.stdout.flush()
       return retval;
     #fi
   #efor

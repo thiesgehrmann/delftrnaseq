@@ -1,10 +1,12 @@
-from os.path import basename
+import os.path
 from ibidas import *
 import numpy as np
 
 class LatexFile(object):
     def __init__(self, filename) :
         self.f = open(filename, 'w')
+        dirsplit = os.path.split(filename)
+        self.basedir = dirsplit[0]
         self.write_header()
 
     def write_header(self) :
@@ -16,6 +18,7 @@ class LatexFile(object):
 \usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{verbatim}
+\usepackage{morefloats}
 \usepackage[top=3cm, bottom=3cm, left=2cm, right=2cm]{geometry}
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 """)
@@ -36,8 +39,11 @@ class LatexFile(object):
     def texcape(self, txt) :
         return txt.replace("_","\_")
 
-    def add_text(self, text) :
-        self.f.write("%s\n" % self.texcape(text));
+    def add_text(self, text, texcape = True) :
+        if texcape :
+            self.f.write("%s\n" % self.texcape(text));
+        else :
+            self.f.write("%s\n" % text);
 
     def write_table(self, columns, data, caption, alignment = None) :
         n_columns = len(columns)
@@ -57,7 +63,7 @@ class LatexFile(object):
             elif isinstance(col, float) :
                 str_rep = '$%.2g$' % col
             else :
-                str_rep = str(col)
+                str_rep = self.texcape(str(col))
             self.f.write('%s' % str_rep)
             if i != n_columns - 1 :
                 self.f.write(' & ')
@@ -72,7 +78,7 @@ class LatexFile(object):
                 elif isinstance(obj, float) :
                     str_rep = '$%.2g$' % obj
                 else :
-                    str_rep = str(obj)
+                    str_rep = self.texcape(str(obj))
                 self.f.write('%s' % str_rep)
                 if j < n_columns - 1 :
                     self.f.write(' & ')
@@ -102,11 +108,15 @@ class LatexFile(object):
         self.f.write("\\end{longtable}\n");
         self.f.write("\\end{center}\n\n");
 
-    def include_figure(self, filename, refname, caption = None, width = 1.0) :
+    def include_figure(self, filename, refname, caption = None, width = 1.0, additional_options = None) :
         self.f.write("\\begin{figure}[htp]\n")
         self.f.write("\\noindent\\makebox[\\textwidth]{%\n")
-        filename = basename(filename)
-        self.f.write('\\includegraphics[width=%g\\textwidth]{%s}}\n' % (width, filename))
+        if os.path.isabs(filename) :
+            filename = os.path.relpath(filename, self.basedir)
+        if additional_options is None :
+            self.f.write('\\includegraphics[width=%g\\textwidth]{%s}}\n' % (width, filename))
+        else :
+            self.f.write('\\includegraphics[%s,width=%g\\textwidth]{%s}}\n' % (additional_options, width, filename))
         
         if not caption is None :
             self.f.write("\\caption{%s}\n" % self.texcape(caption))
