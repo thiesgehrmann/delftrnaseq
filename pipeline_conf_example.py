@@ -124,6 +124,12 @@ class config(PIPELINECONF):
 
   #cuffdiff_cmp = None;
 
+   
+  #############################################################################
+  # CUFFDIFF COMBINE OPTIONS                                                  #
+  #############################################################################
+  merge_annotation_files = [ '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/Schco3_GeneCatalog_proteins_20130812_GO_CUT.tab' ];
+
   #############################################################################
   # ANALYSIS OPTIONS                                                          #
   #############################################################################

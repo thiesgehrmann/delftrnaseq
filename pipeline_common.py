@@ -289,6 +289,8 @@ class PIPELINECONF:
   # CUFFDIFF_COMBINE STUFF                                                    #
   #############################################################################
 
+  merge_annotation_files = []
+
   annotation_files = [];
   annotation_names = [];
   def __cuffdiff_combine_output__(self):

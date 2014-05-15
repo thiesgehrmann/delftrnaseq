@@ -110,7 +110,7 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
       #fi
       enrich_meta = A.Without(0).Unique(0);
       #enrich_meta = data_f.Get(*[s for s in data.Names if '%s_' % (annot.lower()) in s ]).FlatAll().Unique();
-      for split in splits:
+      for split in splits :
         enriched      = enrichment.fast_enrich_sample(enrich_data.Unique(3).Copy(), enrich_meta, C.__analysis_enrichment_alpha__, all_or_up_or_down=split);
         enrichs[(test, split)] = enriched;
         if C.analysis_enrichment_verbose_output == False:

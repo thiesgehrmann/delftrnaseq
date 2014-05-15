@@ -29,7 +29,7 @@ run_cmd('mkdir -p %s' % C.outdir);
 
 ###############################################################################
 
-def send_mysql_qeury(gi_list) :
+def send_mysql_query(gi_list) :
     results = []
     n_hits = len(gi_list)
     gi_str = ','.join(gi_list)
@@ -152,7 +152,7 @@ for i in xrange(len(BO)):
             gi = int(gi)
             gi2org[gi] = org
             print '         [+] %d -> %s' % (gi, org)
-        unmapped = [gi in gi_list if not gi2org.has_key(int(gi))]
+        unmapped = [gi for gi in gi_list if not gi2org.has_key(int(gi))]
         data = send_entrez_query(unmapped)
         for gi, org in data :
           gi = int(gi)

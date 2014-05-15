@@ -95,10 +95,11 @@ for i in range(1, len(results)):
     R = (R |Match(gslice, gslice)| results[i]).Copy()
 #efor
 
-#if annots file is available, add that one too (first slice should be id slice).
-#for annot_file in C.annotation_files:
-#    annots = Load(annot_file)
-#    R = annots |Match(gslice,gslice)| R
+# if annots file is available, add that one too (first slice should be id slice).
+for annot_file in C.merge_annotation_files :
+    annots = Read(annot_file, fieldnames = True)
+    #R = annots |Match(gslice,gslice)| R
+    R = annots |Match(0,gslice)| R
 
 R = R % C.cuffdiff_test_type;
 
