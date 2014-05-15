@@ -50,7 +50,7 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
   # VENN DIAGRAMS                                                             #
   #############################################################################
 
-  venn_subsets_file = filt_outfiles[-2];
+  venn_subsets_file = filt_outfiles[4];
   venn_files        = filt_outfiles[0];
   if C.analysis_venn:
     subsets = [];
@@ -97,6 +97,7 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
   l.start_section("Enrichment analysis");
   splits = [ 'up', 'down' ] if C.analysis_enrichment_updown_split else [ 'all' ];
   for (annot_name, annot_file) in zip(C.annotation_names, C.annotation_files):
+    enrichs = {};
     print (annot_name, annot_file);
     l.start_section(annot_name, level=1);
     A = Read(annot_file)
@@ -110,8 +111,8 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
       enrich_meta = A.Without(0).Unique(0);
       #enrich_meta = data_f.Get(*[s for s in data.Names if '%s_' % (annot.lower()) in s ]).FlatAll().Unique();
       for split in splits:
-        enriched = enrichment.fast_enrich_sample(enrich_data.Unique(3).Copy(), enrich_meta, C.__analysis_enrichment_alpha__, all_or_up_or_down=split);
-
+        enriched      = enrichment.fast_enrich_sample(enrich_data.Unique(3).Copy(), enrich_meta, C.__analysis_enrichment_alpha__, all_or_up_or_down=split);
+        enrichs[(test, split)] = enriched;
         if C.analysis_enrichment_verbose_output == False:
           enriched = enriched.Without(_.a, _.b, _.c, _.d)[_.qvalue < C.__analysis_enrichment_alpha__];
         #fi
@@ -124,6 +125,7 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
         l.write_rep(enriched, annot_name + ": " + test + ' - ' + split);
       #efor
     #efor
+    Save(enrichs, filt_outfiles[5][0]);
   #efor
 
   l.end_document()
