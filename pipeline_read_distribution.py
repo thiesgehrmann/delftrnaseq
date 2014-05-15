@@ -33,25 +33,29 @@ def read_bam_file(filename, figure_filename, PE, n_bins = 50) :
     if PE :
         insert_size = np.array(insert_size)
         values = scipy.stats.mstats.mquantiles(insert_size, prob = [0.01, 0.99])
+        values = values.astype(np.int32)
         insert_size = insert_size[insert_size >= values[0]]
         insert_size = insert_size[insert_size <= values[1]]
         f, ax = plot.subplots(1, 3)
         ax[0].set_xlabel('Insert size', fontsize = 16)
         ax[0].set_ylabel('Fraction of pairs', fontsize = 16)
         ax[0].set_xlim(values[0], values[1])
-        n, bins, patches = ax[0].hist(insert_size, n_bins, normed = True, histtype = 'stepfilled')
+        #n, bins, patches = ax[0].hist(insert_size, n_bins, normed = True, histtype = 'stepfilled')
+        n, bins, patches = ax[0].hist(insert_size, bins = range(values[0], values[1] + 1), normed = True, histtype = 'stepfilled')
         pylab.setp(patches, 'facecolor', 'b', 'alpha', 0.45)
         
         ax[1].set_xlabel('Read 1 length', fontsize = 16)
         ax[1].set_ylabel('Fraction of reads', fontsize = 16)
         ax[1].set_xlim(np.min(left_read_length), np.max(left_read_length))
-        n, bins, patches = ax[1].hist(left_read_length, n_bins, normed = True, histtype = 'stepfilled')
+        #n, bins, patches = ax[1].hist(left_read_length, n_bins, normed = True, histtype = 'stepfilled')
+        n, bins, patches = ax[1].hist(left_read_length, bins = range(values[0], values[1] + 1), normed = True, histtype = 'stepfilled')
         pylab.setp(patches, 'facecolor', 'b', 'alpha', 0.45)
         
         ax[2].set_xlabel('Read 2 length', fontsize = 16)
         ax[2].set_ylabel('Fraction of reads', fontsize = 16)
         ax[2].set_xlim(np.min(right_read_length), np.max(right_read_length))
-        n, bins, patches = ax[2].hist(right_read_length, n_bins, normed = True, histtype = 'stepfilled')
+        #n, bins, patches = ax[2].hist(right_read_length, n_bins, normed = True, histtype = 'stepfilled')
+        n, bins, patches = ax[2].hist(right_read_length, bins = range(values[0], values[1] + 1), normed = True, histtype = 'stepfilled')
         pylab.setp(patches, 'facecolor', 'b', 'alpha', 0.45)
         f.set_size_inches(12, 3)
     else :
@@ -59,7 +63,8 @@ def read_bam_file(filename, figure_filename, PE, n_bins = 50) :
         ax.set_xlabel('Read length', fontsize = 16)
         ax.set_ylabel('Fraction of reads', fontsize = 16)
         ax.set_xlim(np.min(read_length), np.max(read_length))
-        n, bins, patches = ax.hist(read_length, n_bins, normed = True, histtype = 'stepfilled')
+        #n, bins, patches = ax.hist(read_length, n_bins, normed = True, histtype = 'stepfilled')
+        n, bins, patches = ax.hist(read_length, bins = range(value[0], value[1] + 1), normed = True, histtype = 'stepfilled')
         pylab.setp(patches, 'facecolor', 'b', 'alpha', 0.45)
         f.set_size_inches(4, 3)
     f.tight_layout()
