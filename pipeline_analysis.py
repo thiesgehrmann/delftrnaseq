@@ -34,7 +34,7 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
   #fi
 
   l = latex.LatexFile(filt_outfiles[-1][0])
-  l.write_title('Results "%s"' % C.title, C.author)
+  l.write_title("Results ``%s''" % C.title, C.author)
   l.add_text("Filter for this analysis: %s.\n" % str(filter));
 
   #############################################################################
@@ -44,7 +44,7 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
   l.start_section("Significant genes")
   difffile = filt_outfiles[2][0]
   af.create_diffgenes_stats(data_f, difffile)
-  l.include_figure(difffile, 'diffgenes', 'Number of significant genes for each comparison. Upregulated/Downregulated means that the gene has a respectively higher/lower expression in the second mentioned condtion, compared to the first mentioned condition.', width=1)
+  l.include_figure(difffile, 'diffgenes', 'Number of significant genes for each comparison. Upregulated/Downregulated means that the gene has a respectively higher/lower expression in the second mentioned condition, compared to the first mentioned condition.', width=1)
 
   #############################################################################
   # VENN DIAGRAMS                                                             #
@@ -55,6 +55,9 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
   if C.analysis_venn:
     subsets = [];
     for pos, (venn, filenames) in enumerate(zip(C.analysis_venn, venn_files)):
+        #print C.cuffdiff_cmp
+        #print venn
+        #print [C.cuffdiff_cmp[v] for v in venn]
         ss = af.create_venn(data_f, [C.cuffdiff_cmp[v] for v in venn], C.label_names, filenames, C.analysis_venn_updown_split)
         subsets.extend(ss);
         for filename in filenames:
@@ -102,13 +105,14 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
     for test in [ s[0:-12] for s in data.Names if '_significant' in s ]:
       enrich_data = data_f.Get(_.test_id, '%s_significant' % test, '%s_log2_fold_change' % test);
       enrich_data = enrich_data |Match(0, 0, jointype='left', merge_same='equi')| A.GroupBy(0).Get(0,1);
-      if C.analysis_enrichment_only_annotated:
+      if C.analysis_enrichment_only_annotated :
         enrich_data = enrich_data[enrich_data.Get(3).Shape().Get(1) > 0];
       #fi
       enrich_meta = A.Without(0).Unique(0);
       #enrich_meta = data_f.Get(*[s for s in data.Names if '%s_' % (annot.lower()) in s ]).FlatAll().Unique();
-      for split in splits:
+      for split in splits :
         enriched      = enrichment.fast_enrich_sample(enrich_data.Unique(3).Copy(), enrich_meta, C.__analysis_enrichment_alpha__, all_or_up_or_down=split);
+
         enrichs[(test, annot_name, split)] = enriched;
 
         if C.analysis_enrichment_verbose_output == False:

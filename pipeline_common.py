@@ -289,6 +289,8 @@ class PIPELINECONF:
   # CUFFDIFF_COMBINE STUFF                                                    #
   #############################################################################
 
+  merge_annotation_files = []
+
   annotation_files = [];
   annotation_names = [];
   def __cuffdiff_combine_output__(self):
@@ -503,7 +505,7 @@ class PIPELINECONF:
     #fi
 
     n_cmps = len(self.cuffdiff_cmp);
-    self.cuffdiff_cmp = list(set(self.cuffdiff_cmp));
+    #self.cuffdiff_cmp = list(set(self.cuffdiff_cmp));
     if len(self.cuffdiff_cmp) < n_cmps:
       warnings = warnings + 1;
       warning("Some cuffdiff comparisons are specified more than once, correcting. May cause confusion in later analysis");
