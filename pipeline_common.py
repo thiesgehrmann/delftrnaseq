@@ -185,7 +185,6 @@ class PIPELINECONF:
     else :
         for file in self.__star_al_output_unmapped__() :
             prefix, ext = os.path.splitext(file)
-            output.append(prefix + '_fastqc')
             out.append(prefix + '_fastqc')
     return out
 
