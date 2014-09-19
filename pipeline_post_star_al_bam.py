@@ -17,7 +17,7 @@ for i in xrange(len(ALN)):
 #efor
 
 print "Converting SAM to BAM"; sys.stdout.flush();
-retval = run_par_cmds(cmds, max_threads=C.max_bam_threads);
+retval = run_par_cmds(cmds, max_threads=cor(C.__max_bam_threads__));
 if retval != 0:
  sys.exit(retval);
 #fi 

@@ -128,7 +128,10 @@ class PIPELINECONF:
   # POST STAR AL BAM STUFF                                                    #
   #############################################################################
 
-  max_bam_threads = min(__max_threads__ / 2, 4) #reduce number of threads for bam (are a bit intensive on the disk)
+    #reduce number of threads for bam (are a bit intensive on the disk)
+  def __max_bam_threads__(self):
+    return  min(self.__max_threads__ / 2, 4);
+  #eder
 
 
   def __post_star_al_bam_output__(self) :

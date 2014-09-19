@@ -92,7 +92,7 @@ for i in xrange(len(C.cuffdiff_cmp)):
 #combine the data
 R = results[0];
 for i in range(1, len(results)):
-    R = (R |Match(gslice, gslice)| results[i]).Copy()
+    R = (R |Match(gslice, gslice, jointype='left', merge_same='equi')| results[i]).Copy()
 #efor
 
 # if annots file is available, add that one too (first slice should be id slice).
