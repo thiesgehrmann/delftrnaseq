@@ -25,6 +25,7 @@ read_group = read_group.To(_.external_scaled_frags, Do=_.Cast(float));
 read_group = read_group.To(_.fpkm,                  Do=_.Cast(float));
 read_group = read_group.To(_.effective_length,      Do=_.Cast(bytes));
 read_group = read_group.Copy();
+print read_group
 
 #group by tracking id, condition and replicate
 read_group = read_group.GroupBy(_.tracking_id, _.condition, _.replicate, flat={0: (_.status, _.effective_length), (0,1,2):(_.raw_frags, _.internal_scaled_frags, _.external_scaled_frags, _.fpkm)}).Copy()
@@ -97,7 +98,10 @@ for i in range(1, len(results)):
 
 # if annots file is available, add that one too (first slice should be id slice).
 for annot_file in C.merge_annotation_files :
-    annots = Read(annot_file, fieldnames = True)
+    if annot_file.endswith('dat'):
+        annots = Load(annot_file)
+    else:
+        annots = Read(annot_file, fieldnames = True)
     #R = annots |Match(gslice,gslice)| R
     R = annots |Match(0,gslice)| R
 

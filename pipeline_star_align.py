@@ -9,19 +9,19 @@ for i in xrange(len(TR)):
   print "Starting work on sample '%s'" % C.sample_names[i]; sys.stdout.flush();
 
   sname = '%s/%s' % (C.outdir, C.sample_names[i])
-
+  tmpdir = '%s/star_tmp' % C.outdir
   if C.PE:
     RS = ' '.join(TR[i]);
   else:
     RS = TR[i];
   #fi
-  cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s --outSAMattributes All --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx" % (cor(C.star_al_opts), C.__star_gg_output__(), RS);
+  cmd = "STAR %s --genomeDir %s --outTmpDir %s --genomeLoad LoadAndRemove --readFilesIn %s --outSAMattributes All --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 100000000000" % (cor(C.star_al_opts), C.__star_gg_output__(), tmpdir, RS);
   
   run_cmd(cmd);
 
   cmds = [];
 
-  cmds.append("mv Aligned.out.sam '%s.star_align.sam'" % sname);
+  cmds.append("mv Aligned.sortedByCoord.out.bam '%s.star_align.bam'" % sname);
   cmds.append("mv Log.out '%s.star_align.log'" %sname );
   cmds.append("mv Log.progress.out '%s.star_align.progress.log'" % sname );
   cmds.append("mv Log.final.out '%s.star_align.final.log'" % sname );

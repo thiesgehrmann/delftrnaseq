@@ -3,7 +3,7 @@ from pipeline_common import *;
 
 C = init_conf()
 
-SORT = C.__post_star_al_sort_output__();
+SORT = C.__star_al_output_bam__();
 
 cmds = []
 

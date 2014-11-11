@@ -103,6 +103,7 @@ def create_diffgenes_stats(data, filename):
         up.append(countup)
         down.append(countdown)
 
+    print up, down
     fig = dual_bargraph(up, down, "Number of significant genes", cnames, \
                   ('upregulated','downregulated'),figsize=(15.0, 9.0))
     pl.savefig(filename, dpi=200)
@@ -154,12 +155,18 @@ def create_venn(data, compare_sets, names, filenames, udsplit):
     compare_names.append(("_".join(label_names)).lower())
   #efor
 
+  x = set(data.Names)
+  if not 'gene_id' in x:
+      name = 'test_id'
+  else:
+      name = 'gene_id'
+
   if udsplit:
     ups   = [];
     downs = [];
     for compare_name in compare_names:
-      up   = set(data[data.Get((compare_name + '_significant')) == 'yes'].test_id()) & set(data[data.Get((compare_name + '_log2_fold_change')) > 0].test_id());
-      down = set(data[data.Get((compare_name + '_significant')) == 'yes'].test_id()) & set(data[data.Get((compare_name + '_log2_fold_change')) < 0].test_id());
+      up   = set(data[data.Get((compare_name + '_significant')) == 'yes'].Get(name)()) & set(data[data.Get((compare_name + '_log2_fold_change')) > 0].Get(name)());
+      down = set(data[data.Get((compare_name + '_significant')) == 'yes'].Get(name)()) & set(data[data.Get((compare_name + '_log2_fold_change')) < 0].Get(name)());
       ups.append(up);
       downs.append(down);
     #efor
@@ -169,7 +176,7 @@ def create_venn(data, compare_sets, names, filenames, udsplit):
   else:
     alls = [];
     for compare_name in compare_names:
-      all = set(data[data.Get(compare_name + '_significant') == 'yes'].test_id());
+      all = set(data[data.Get(compare_name + '_significant') == 'yes'].Get(name)());
       alls.append(all);
     #efor
     datas.append(alls);

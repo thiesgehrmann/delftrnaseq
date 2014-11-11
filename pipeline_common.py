@@ -114,8 +114,8 @@ class PIPELINECONF:
   def __star_preal_output__(self):
     return self.outdir + "/splice_junction_db_nohead.tsv"
 
-  def __star_al_output_sam__(self):
-    return [ self.outdir + '/%s.star_align.sam' % sn for sn in self.sample_names ];
+  def __star_al_output_bam__(self):
+    return [ self.outdir + '/%s.star_align.bam' % sn for sn in self.sample_names ];
   #edef
   def __star_al_output_unmapped__(self):
     if self.PE:
@@ -125,33 +125,11 @@ class PIPELINECONF:
   #edef
 
   #############################################################################
-  # POST STAR AL BAM STUFF                                                    #
-  #############################################################################
-
-    #reduce number of threads for bam (are a bit intensive on the disk)
-  def __max_bam_threads__(self):
-    return  min(self.__max_threads__ / 2, 4);
-  #eder
-
-
-  def __post_star_al_bam_output__(self) :
-    return [ self.outdir + "/%s.star_align.bam" % sn for sn in self.sample_names ];
-  #edef
-
-  #############################################################################
-  # POST STAR AL SORT STUFF                                                   #
-  #############################################################################
-
-  def __post_star_al_sort_output__(self):
-    return [ self.outdir + "/%s.star_align_sort.bam" % sn for sn in self.sample_names ];
-  #edef
-
-  #############################################################################
   # POST STAR AL INDEX STUFF                                                  #
   #############################################################################
 
   def __post_star_al_index_output__(self):
-    return [ self.outdir + "/%s.star_align_sort.bam.bai" % sn for sn in self.sample_names ];
+    return [ self.outdir + "/%s.star_align.bam.bai" % sn for sn in self.sample_names ];
   
   #############################################################################
   # CDS GFF STUFF                                                             #
@@ -160,14 +138,14 @@ class PIPELINECONF:
   cds_gff_type = 'CDS'
 
   def __cds_gff_output__(self):
-    return [ self.outdir + "/%s.star_align_sort.count" % sn for sn in self.sample_names ]
+    return [ self.outdir + "/%s.star_align.count" % sn for sn in self.sample_names ]
 
   #############################################################################
   # READ DISTRIBUTION STUFF                                                   #
   #############################################################################
 
   def __read_distribution_output__(self):
-    return [ self.outdir + "/%s.star_align_sort.read_stats.pdf" % sn for sn in self.sample_names ]
+    return [ self.outdir + "/%s.star_align.read_stats.pdf" % sn for sn in self.sample_names ]
 
   #############################################################################
   # CDS GFF STUFF                                                             #
@@ -175,7 +153,7 @@ class PIPELINECONF:
   
   def __fastqc_output__(self) : 
     out = []
-    for bam_output in self.__post_star_al_bam_output__() :
+    for bam_output in self.__star_al_output_bam__() :
         prefix, ext = os.path.splitext(bam_output)
         filename = prefix + '_fastqc'
         out.append(filename)

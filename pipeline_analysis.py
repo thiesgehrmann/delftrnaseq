@@ -26,6 +26,7 @@ for (i, (filter, filter_name)) in enumerate(zip(C.analysis_filter, C.analysis_fi
 
   filt_outfiles = outfiles[i];
 
+  print infiles[0]
   if filter == None:
     data_f = data;
   else:
