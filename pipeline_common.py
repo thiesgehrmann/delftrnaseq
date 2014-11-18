@@ -124,6 +124,14 @@ class PIPELINECONF:
       return [ self.outdir + "/%s.star_align_unmapped_R1.fastq" % sn for sn in self.sample_names ];
   #edef
 
+  def __star_al_output_logs__(self):
+    return [ [ '%s/%s.star_align.log'       % (self.outdir, sn) for sn in self.sample_names ], # Log.out
+             [ '%s/%s.star_align.progress.log' % (self.outdir, sn) for sn in self.sample_names ], # Log.progress.out
+             [ '%s/%s.star_align.final.log'    % (self.outdir, sn) for sn in self.sample_names ], # Log.final.out
+             [ '%s/%s.star_align.SJ.tab'       % (self.outdir, sn) for sn in self.sample_names ]  # SJ.out.tab
+           ]
+  #edef
+
   #############################################################################
   # POST STAR AL BAM STUFF                                                    #
   #############################################################################
@@ -412,7 +420,61 @@ class PIPELINECONF:
   def __unmapped_output__(self):
     return [ self.outdir + '/%s.unmapped_orgs.dat' % sn for sn in self.sample_names ];
   #edef
-  
+
+
+  #############################################################################
+  # DENSE GENOME ISOFORM ANALYSIS STUFF                                       #
+  #############################################################################
+
+  isoform_dense_build_splice_db = False;
+
+  def __isoform_dense_genome_split_output__(self):
+    return [ self.outdir + "isoform_dense_genome_split.gffread.gff", self.outdir + "isoform_dense_genome_split.fasta" ];
+  #edef
+
+  def __isoform_dense_star_pre_splice_output__(self):
+    return "%s/%s" %(self.outdir, 'isoform_dense_star_pre_splice_genome');
+  #edef
+
+  def __isoform_dense_star_splice_output__(self):
+    return self.outdir + "/isoform_dense_splice_junction_db_nohead.tsv"
+  #edef
+
+  def __isoform_dense_star_splice_output_logs__(self):
+    return [ '%s/%s' % (self.outdir, log) for log in [ "isoform_dense_star_prealign.log", "isoform_dense_star_prealign.progress.log", "isoform_dense_star_prealign.final.log" ] ];
+  #edef
+
+  def __isoform_dense_genome_generate_dir__(self):
+    return self.outdir + '/split_genome_index';
+  #edef
+
+  def __isoform_dense_star_align_output_sam__(self):
+    arr = [ self.outdir + '/isoform_dense_star_one.sam', self.outdir + '/isoform_dense_star_two.sam', self.outdir + '/isoform_dense_star_three.sam' ];
+    if self.PE:
+      return arr;
+    else:
+      return arr[0:1];
+  #edef
+
+  def __isoform_dense_star_align_output_log__(self):
+    if C.PE:
+      step_names = ["one", "two", "three"];
+    else:
+      step_anmes = ["one"];
+    #fi
+
+    return [ [ '%s/isoform_dense_star_%s.star_align.log'          % (self.outdir, sn), # Log.out
+               '%s/isoform_dense_star_%s.star_align.progress.log' % (self.outdir, sn), # Log.progress.out
+               '%s/isoform_dense_star_%s.star_align.final.log'    % (self.outdir, sn), # Log.final.out
+               '%s/isoform_dense_star_%s.star_align.SJ.tab'       % (self.outdir, sn) ]  # SJ.out.tab
+           for sn in step_names
+           ]
+  #edef
+  def __isoform_dense_star_align_output_merged__(self):
+    return C.outdir + "/isoform_dense_star_sam_merged.sam");
+    
+
+
   #############################################################################
   #############################################################################  
   #############################################################################
@@ -681,6 +743,16 @@ def run_cmd(cmd, bg = False, stdin = None, stdout = None, stderr = None):
         (pid, r) = os.waitpid(p.pid, 0);
         return r;
 
+def run_cmd_fail(cmd, stdin = None, stdout = None, stderr = None):
+    print '[RUN CMD] Executing: %s' % cmd
+    sys.stdout.flush()
+    p = subprocess.Popen(shlex.split(cmd), stdin=stdin, stdout=stdout, stderr=stderr);
+    (pid, r) = os.waitpid(p.pid, 0);
+    if r != 0:
+      raise RuntimeError, "Command failed: " + str(res) + "\n" + cmd;
+      sys.exit(r);
+    return r;
+
 def run_shell(cmd, bg = False):
     print '[RUN SHELL] Executing: %s' % cmd
     sys.stdout.flush()
@@ -695,7 +767,7 @@ def getCommandOutput(cmd):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     res = p.communicate()[0]
     if p.returncode != 0:
-        raise RuntimeError, "Command failed: " + str(res)
+        raise RuntimeError, "Command failed: " + str(res) + "\n" + cmd;
     return res
 
 ###############################################################################

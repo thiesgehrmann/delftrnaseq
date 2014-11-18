@@ -182,6 +182,19 @@ if C.perform_analysis:
   M.add_step("POSTANALYSIS", "${CUFFDIFF_COMBINE_OUT}", ' '.join(flatten(C.__analysis_output__())), 'pipeline_analysis.py');
 #fi
 
+if C.isoform_dense_analysis:
+  M.add_step("ISOFORM_DENSE_SPLIT_GENOME", "${STAR_AL_OUTPUT_SAM} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__isoform_dense_genome_split_output__()), 'pipeline_isoform_dense_genome_split.py');
+  if C.isoform_dense_build_splice_db:
+    M.add_step("ISOFORM_DENSE_STAR_PRE_SPLICE", "${ISOFORM_DENSE_SPLIT_GENOME}", cor(C.__isoform_dense_star_pre_splice_output__), 'pipeline_isoform_dense_star_pre_splice.py');
+    M.add_step("ISOFORM_DENSE_STAR_SPLICE", "${ISOFORM_DENSE_STAR_PRE_SPLICE_OUT} ${TRIMMOMATIC_OUT}", ' '.join([cor(C.__isoform_dense_star_splice_output__)] + cor(C.__isoform_dense_star_splice_output_logs__)), 'pipeline_dense_isoform_star_splice.py');
+    M.add_step("ISOFORM_DENSE_STAR_GG", "${ISOFORM_DENSE_SPLIT_GENOME_OUT} ${ISOFORM_DENSE_STAR_SPLICE_OUT}", C.__isoform_dense_genome_generate_dir__(), 'pipeline_isoform_dense_star_genome_generate.py');
+  else:
+    M.add_step("ISOFORM_DENSE_STAR_GG", "${ISOFORM_DENSE_SPLIT_GENOME_OUT}", C.__isoform_dense_genome_generate_dir__(), 'pipeline_isoform_dense_star_genome_generate.py');
+  #fi
+  M.add_step("ISOFORM_DENSE_STAR", "${ISOFORM_DENSE_STAR_GG} ${TRIMMOMATIC_OUT}", ' '.join(C.__isoform_dense_star_align_output_sam__() + flatten(cor(C.__isoform_dense_star_align_output_log__)) + [cor(C.__isoform_dense_star_align_output_merged__)]), 'pipeline_isoform_dense_star_align.py');
+
+#fi
+
 M.write(C.makefile, C.location, "${QUALITYREPORT} ${POSTANALYSIS}", C.outdir);
 
 ###############################################################################

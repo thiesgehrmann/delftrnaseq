@@ -95,44 +95,39 @@ class config(PIPELINECONF):
   #############################################################################
   #star_gg_opts = "";
 
-    # Don't build a splice DB for star
-  build_splice_db = False;
+    # Build a splice DB for star?
+  build_splice_db = True;
 
   #############################################################################
   # STAR ALIGNMENT OPTIONS                                                    #
   #############################################################################
-  #star_al_opts = "";
+  #star_al_opts    = "--runThreadN %d --alignIntronMax 1500 --alignIntronMin 10 " % __max_threads__;
+  #star_preal_opts = "--runThreadN %d --alignIntronMax 1500 --alignIntronMin 10 " % __max_threads__;
 
   #############################################################################
   # CUFFDIFF OPTIONS                                                          #
   #############################################################################
 
-    # Versus wildtype without phenotype
-  cuffdiff_cmp = [ (0, i) for i in xrange(2, 20, 2) ] + \
-                 [ (1, i) for i in xrange(3, 20, 2) ];
-
-    # Versus wildtype with phenotype
-  cuffdiff_cmp.extend([ (0,2), (0,3), (0,4), (0,5),  (0,8),  (0,9),  (0,12), (0,13), (0,14), (1,15), \
-                        (0,1), (0,6), (1,7), (0,10), (1,11), (0,16), (1,17), (0,18), (1,19) ]);
-
-    # T1 vs T2
-  cuffdiff_cmp.extend([ (i-1, i) for i in xrange(1, 20, 2) ]);
-  cuffdiff_cmp = list(set(cuffdiff_cmp));
 
     # Replicate groups to compare with cuffdiff
   cuffdiff_cmp = [(1, 3), (10, 11), (0, 14), (1, 17), (1, 15), (8, 9), (0, 16), (18, 19), (0, 10), (0, 3), (1, 11), (16, 17), (2, 3), (6, 7), (12, 13), (1, 5), (0, 4), (4, 5), (1, 13), (0, 18), (0, 12), (1, 19), (14, 15), (1, 9), (0, 8), (0, 1), (0, 13), (0, 6), (1, 7), (0, 9), (0, 5), (0, 2)];
 
-  #cuffdiff_cmp = None;
+    # cuffdiff test to perform. =  cds|gene|isoform|tss
+  #cuffdiff_test_type         = 'isoform';
 
+  #cuffdiff_opts = "";
    
   #############################################################################
   # CUFFDIFF COMBINE OPTIONS                                                  #
   #############################################################################
-  merge_annotation_files = [ '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/Schco3_GeneCatalog_proteins_20130812_GO_CUT.tab' ];
 
   #############################################################################
   # ANALYSIS OPTIONS                                                          #
   #############################################################################
+  #perform_quality_report     = True;
+  #perform_analysis           = True;
+  #check_contamination        = False;
+
 
     # Enrichment analysis annotation files
   annotation_files = [ '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/Schco3_GeneCatalog_proteins_20130812_GO_CUT.tab',  '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/IPR_annot.tsv' ];
@@ -149,4 +144,11 @@ class config(PIPELINECONF):
     # Show different venn diagrams for up and down regulated genes
   analysis_venn_updown_split       = True;
   #analysis_enrichment_updown_split = True;
+
+  #############################################################################
+  # DENSE GENOME ISOFORM ANALYSIS                                             #
+  #############################################################################
+
+  isoform_dense_analysis = True;
+  isoform_dense_build_splice_db = True;
 #eclass

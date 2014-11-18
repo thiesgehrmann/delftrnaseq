@@ -5,10 +5,16 @@ C = init_conf()
 
 TR = C.__trimmomatic_output__();
 
+
+
+SAMS = cor(C.__star_al_output_sam__);
+UNMP = cor(C.__star_al_output_unmapped__);
+LOGS = cor(C.__star_al_output_logs__);
+
 for i in xrange(len(TR)):
   print "Starting work on sample '%s'" % C.sample_names[i]; sys.stdout.flush();
 
-  sname = '%s/%s' % (C.outdir, C.sample_names[i])
+  sname = '%s/%s' % (C.outdir, C.sample_names[i]);
 
   if C.PE:
     RS = ' '.join(TR[i]);
@@ -21,14 +27,16 @@ for i in xrange(len(TR)):
 
   cmds = [];
 
-  cmds.append("mv Aligned.out.sam '%s.star_align.sam'" % sname);
-  cmds.append("mv Log.out '%s.star_align.log'" %sname );
-  cmds.append("mv Log.progress.out '%s.star_align.progress.log'" % sname );
-  cmds.append("mv Log.final.out '%s.star_align.final.log'" % sname );
-  cmds.append("mv SJ.out.tab '%s.star_align.SJ.tab'" % sname );
-  cmds.append("mv Unmapped.out.mate1 '%s.star_align_unmapped_R1.fastq'" % sname);
+  cmds.append("mv Aligned.out.sam '%s'"  % SAMS[i]);
+  cmds.append("mv Log.out '%s'"          % LOGS[0][i]);
+  cmds.append("mv Log.progress.out '%s'" % LOGS[1][i]);
+  cmds.append("mv Log.final.out '%s'"    % LOGS[2][i]);
+  cmds.append("mv SJ.out.tab '%s'"       % LOGS[3][i]);
   if C.PE:
-    cmds.append("mv Unmapped.out.mate2 '%s.star_align_unmapped_R2.fastq'" % sname);
+    cmds.append("mv Unmapped.out.mate1 '%s'" % UNMP[i][0]);
+    cmds.append("mv Unmapped.out.mate2 '%s'" % UNMP[i][1]);
+  else:
+    cmds.append("mv Unmapped.out.mate1 '%s'" % UNMP[i])
   #fi
 
   retval = run_seq_cmds(cmds);

@@ -17,7 +17,7 @@ for i in xrange(len(BAM)):
 #efor
 
 print "Sorting BAM files"; sys.stdout.flush();
-retval = run_par_cmds(cmds, max_threads=min(C.max_bam_threads,2));
+retval = run_par_cmds(cmds, max_threads=min(C.__max_bam_threads__,2));
 if retval != 0:
   sys.exit(retval);
 #fi
