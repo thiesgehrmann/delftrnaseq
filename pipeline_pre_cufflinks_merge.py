@@ -4,7 +4,7 @@ from pipeline_common import *;
 
 C = init_conf()
 
-bamin  = C.__post_star_al_bam_output__();
+bamin  = C.__star_al_output_bam__();
 bamout = C.__pre_cufflinks_merge_output__();
 
 cmd = 'bamtools merge %s -out %s' % (' -in '.join([' '] + bamin), bamout);

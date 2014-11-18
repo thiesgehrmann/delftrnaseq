@@ -472,6 +472,7 @@ class PIPELINECONF:
   #edef
   def __isoform_dense_star_align_output_merged__(self):
     return C.outdir + "/isoform_dense_star_sam_merged.sam");
+  #edef
     
 
 
