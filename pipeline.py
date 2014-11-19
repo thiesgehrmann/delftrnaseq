@@ -201,9 +201,9 @@ if C.isoform_dense_analysis:
   M.add_var("ISOFORM_DENSE_STAR_LOGS", ' '.join(flatten(C.__isoform_dense_star_align_output_log__())));
   M.add_var("ISOFORM_DENSE_STAR_MERGED_BAM", C.__isoform_dense_star_align_output_merged__());
   M.add_step("ISOFORM_DENSE_STAR", "${ISOFORM_DENSE_STAR_GG} ${TRIMMOMATIC_OUT}", '${ISOFORM_DENSE_STAR_UNMAPPED} ${ISOFORM_DENSE_STAR_BAM} ${ISOFORM_DENSE_STAR_LOGS} ${ISOFORM_DENSE_STAR_MERGED_BAM} ', 'pipeline_isoform_dense_star_align.py');
-  M.add_step("ISOFORM_DENSE_CUFFLINKS_RABT", "${ISOFORM_DENSE_STAR_MERGED_BAM} ${ISOFORM_DENSE_SPLIT_GENOME_OUT}", ' '.join(cor(C.__isoform_dense_cufflinks_output__),  'pipeline_isoform_dense_cufflinks_rabt.py');
+  M.add_step("ISOFORM_DENSE_CUFFLINKS_RABT", "${ISOFORM_DENSE_STAR_MERGED_BAM} ${ISOFORM_DENSE_SPLIT_GENOME_OUT}", ' '.join(cor(C.__isoform_dense_cufflinks_output__)),  'pipeline_isoform_dense_cufflinks_rabt.py');
   M.add_step("ISOFORM_DENSE_UNSPLIT_GENOME", "${ISOFORM_DENSE_CUFFLINKS_RABT}", cor(C.__isoform_dense_genome_unsplit_output__), 'pipeline_isoform_dense_genome_unsplit.py');
-  M.add_step("ISOFORM_DENSE_UNSPLIT_ANALYSIS", "${ISOFORM_DENSE_UNSPLIT_GENOME}", cor(C.__isoform_dense_genome_analysis_outdir__)), 'pipeline_isoform_dense_analysis.py');
+  M.add_step("ISOFORM_DENSE_UNSPLIT_ANALYSIS", "${ISOFORM_DENSE_UNSPLIT_GENOME}", cor(C.__isoform_dense_genome_analysis_outdir__), 'pipeline_isoform_dense_analysis.py');
 #fi
 
 M.write(C.makefile, C.location, "${QUALITYREPORT} ${POSTANALYSIS}", C.outdir);
