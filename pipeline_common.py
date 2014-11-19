@@ -114,6 +114,10 @@ class PIPELINECONF:
   def __star_preal_output__(self):
     return self.outdir + "/splice_junction_db_nohead.tsv"
 
+  def __star_al_output_bam__(self):
+    return [ self.outdir + '/%s.star_align.bam' % sn for sn in self.sample_names ];
+  #edef
+
   def __star_al_output_sam__(self):
     return [ self.outdir + '/%s.star_align.sam' % sn for sn in self.sample_names ];
   #edef
@@ -429,7 +433,7 @@ class PIPELINECONF:
   isoform_dense_build_splice_db = False;
 
   def __isoform_dense_genome_split_output__(self):
-    return [ self.outdir + "isoform_dense_genome_split.gffread.gff", self.outdir + "isoform_dense_genome_split.fasta" ];
+    return [ self.outdir + "/isoform_dense_genome_split.gffread.gff", self.outdir + "/isoform_dense_genome_split.fasta" ];
   #edef
 
   def __isoform_dense_star_pre_splice_output__(self):
@@ -448,8 +452,8 @@ class PIPELINECONF:
     return self.outdir + '/split_genome_index';
   #edef
 
-  def __isoform_dense_star_align_output_sam__(self):
-    arr = [ self.outdir + '/isoform_dense_star_one.sam', self.outdir + '/isoform_dense_star_two.sam', self.outdir + '/isoform_dense_star_three.sam' ];
+  def __isoform_dense_star_align_output_bam__(self):
+    arr = [ self.outdir + '/isoform_dense_star_one.bam', self.outdir + '/isoform_dense_star_two.bam', self.outdir + '/isoform_dense_star_three.bam' ];
     if self.PE:
       return arr;
     else:
@@ -457,7 +461,7 @@ class PIPELINECONF:
   #edef
 
   def __isoform_dense_star_align_output_log__(self):
-    if C.PE:
+    if self.PE:
       step_names = ["one", "two", "three"];
     else:
       step_anmes = ["one"];
@@ -471,10 +475,38 @@ class PIPELINECONF:
            ]
   #edef
   def __isoform_dense_star_align_output_merged__(self):
-    return C.outdir + "/isoform_dense_star_sam_merged.sam");
+    return self.outdir + "/isoform_dense_star_bam_merged.bam";
   #edef
     
+  def __isoform_dense_star_align_output_unmapped__(self):
+    if self.PE:
+      return [ [ self.outdir + '/dense_isoform_star_S1.unmapped.mate1.fastq', self.outdir + '/dense_isoform_star_S1.unmapped.mate2.fastq' ], self.outdir + '/dense_isoform_star_S2.unmapped.mate1.fastq', self.outdir + '/dense_isoform_star_S3.unmapped.mate1.fastq' ];
+    else:
+      return [ self.outdir + '/dense_isoform_star_S1.unmapped.mate1.fastq' ];
+    #fi
+  #edef
 
+  def isoform_dense_cufflinks_opts(self):
+    return self.cufflinks_opts()
+  #edef
+
+  def __isoform_dense_cufflinks_outdir__(self):
+    return self.outdir + '/isoform_dense_cufflinks_rabt_output/';
+  #edef
+ 
+  def __isoform_dense_cufflinks_output__(self):
+    return [ "%s/%s" % (cor(self.__isoform_dense_cufflinks_outdir__), f) for f in [ "genes.fpkm_tracking", "isoforms.fpkm_tracking", "transcripts.gtf", "skipped.gtf", "cleaned.transcripts.gtf" "geneids.cleaned.transcripts.gff" ] ];
+  #edef
+
+  __isoform_dense_attr_name__ = "knownGeneID";
+
+  def __isoform_dense_genome_unsplit_output__(self):
+    return self.outdir + "isoform_dense_genome_unsplit.gffread.gff";
+  #edef
+
+  def __isoform_dense_genome_analysis_outdir__(self):
+    return self.outdir + '/isoform_dense_analysis';
+  #edef
 
   #############################################################################
   #############################################################################  

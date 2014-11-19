@@ -36,11 +36,6 @@ cmds.append("mv Log.progress.out %s" % LOGS[1]);
 cmds.append("mv Log.final.out %s" % LOGS[2]);
 cmds.append("rm SJ.out.tab");
 cmds.append("rm Aligned.out.sam");
-cmds.append("rm Unmapped.out.mate1");
-if C.PE:
-  cmds.append("rm Unmapped.out.mate2");
-#fi
-
 
 retval = run_seq_cmds(cmds);
 if retval != 0:

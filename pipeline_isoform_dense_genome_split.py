@@ -34,7 +34,7 @@ else:
 cmds.append(cmd);
 
 cmds.append("gffread -FE %s -o %s" % (split_gff, out_gff));
-
+cmds.append("rm %s" % split_gff);
 
 print "Splitting genome"
 sys.exit(run_seq_cmds(cmds));

@@ -30,11 +30,13 @@ for i in xrange(len(TR)):
     # Run the BAM version
   cmd = "STAR %s --genomeDir %s --outTmpDir %s --genomeLoad LoadAndRemove --readFilesIn %s --outSAMattributes All --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx --outSAMtype BAM SortedByCoordinate --limitBAMsortRAM 100000000000" % (cor(C.star_al_opts), C.__star_gg_output__(), tmpdir, RS);
   cmds.append(cmd);
-    # AND the SAM version
-  cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s --outSAMattributes All --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx" % (cor(C.star_al_opts), cor(C.__star_gg_output__), RS); 
-  cmds.append(cmd);
 
-  cmds.append("mv Aligned.out.sam '%s'"  % SAMS[i]);
+  if C.isoform_dense_analysis::
+      # AND the SAM version
+    cmd = "STAR %s --genomeDir %s --genomeLoad LoadAndRemove --readFilesIn %s --outSAMattributes All --outSAMstrandField intronMotif --outFilterIntronMotifs RemoveNoncanonicalUnannotated --outReadsUnmapped Fastx" % (cor(C.star_al_opts), cor(C.__star_gg_output__), RS); 
+    cmds.append(cmd);
+    cmds.append("mv Aligned.out.sam '%s'"  % SAMS[i]);
+  #fi
   cmds.append("mv Aligned.sortedByCoord.out.bam '%s.star_align.bam'" % sname);
   cmds.append("mv Log.out '%s'"          % LOGS[0][i]);
   cmds.append("mv Log.progress.out '%s'" % LOGS[1][i]);

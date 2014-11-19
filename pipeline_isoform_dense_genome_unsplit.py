@@ -3,15 +3,21 @@ from pipeline_common import *;
 
 C = init_conf()
 
-prg="STAR"
+genome_annot = C.__genome_annot_format_output__();
 
-cmds = [ "mkdir -p %s " % C.__star_gg_output__() ];
+split_gff, split_fasta = cor(C.__isoform_dense_genome_split_output__);
 
-if C.build_splice_db:
-  cmds.append("%s --runMode genomeGenerate --genomeDir %s --genomeFastaFiles %s --sjdbFileChrStartEnd %s %s" % (prg, C.__star_gg_output__(), C.genome, C.__star_preal_output__(), cor(C.star_gg_opts)));
-else:
-  cmds.append("%s --runMode genomeGenerate --genomeDir %s --genomeFastaFiles %s %s" % (prg, C.__star_gg_output__(), C.genome, cor(C.star_gg_opts)));
-#fi
+cuff_outputs = cor(C.__isoform_dense_cufflinks_output__);
+
+unsplit_gff = "%s/unsplit_genome.gff" % C.outdir;
+
+out_gff     = cor(C.__isoform_dense_genome_unsplit_output__);
+
+cmds = [];
+
+cmds.append("%s/utilities/split_genome.py unsplit %s %s %s %s %s" % (C.inst_loc, genome_annot, split_fasta, cuff_outputs[-1], unsplit_gff));
+cmds.append("gffread -EF %s -o %s" % (unsplit_gff, out_gff));
+cmds.append("rm %s" % unsplit_gff);
 
 sys.exit(run_seq_cmds(cmds));
 

@@ -140,7 +140,12 @@ else:
 
 M.add_var("STAR_AL_OUTPUT_BAM", ' '.join(C.__star_al_output_bam__()));
 M.add_var("STAR_AL_OUTPUT_UNMAPPED", ' '.join(flatten(C.__star_al_output_unmapped__())));
-M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_BAM} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');
+if C.isoform_dense_analysis:
+  M.add_var("STAR_AL_OUTPUT_SAM", ' '.join(C.__star_al_output_sam__()));
+  M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_BAM} ${STAR_AL_OUTPUT_SAM} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');
+else:
+  M.add_step("STAR_AL", "${STAR_GG_OUT} ${TRIMMOMATIC_OUT}", "${STAR_AL_OUTPUT_BAM} ${STAR_AL_OUTPUT_UNMAPPED}", 'pipeline_star_align.py');
+#fi
 #M.add_step("POST_STAR_AL_BAM", "${STAR_AL_OUTPUT_SAM}", ' '.join(C.__post_star_al_bam_output__()), 'pipeline_post_star_al_bam.py');
 #M.add_step("POST_STAR_AL_SORT", "${POST_STAR_AL_BAM_OUT}", ' '.join(C.__post_star_al_sort_output__()), 'pipeline_post_star_al_sort.py');
 
@@ -162,7 +167,7 @@ if C.check_contamination :
 #fi
 
   # REPORTS
-if C.perform_quality_report :
+if C.perform_quality_report:
 
   M.add_step("POST_STAR_AL_INDEX", "${STAR_AL_OUTPUT_BAM}", ' '.join(C.__post_star_al_index_output__()), 'pipeline_post_star_al_index.py');
   M.add_step("CDS_GFF", "${POST_STAR_AL_INDEX_OUT} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__cds_gff_output__()), 'pipeline_cds_gff.py');
@@ -185,14 +190,20 @@ if C.perform_analysis:
 if C.isoform_dense_analysis:
   M.add_step("ISOFORM_DENSE_SPLIT_GENOME", "${STAR_AL_OUTPUT_SAM} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__isoform_dense_genome_split_output__()), 'pipeline_isoform_dense_genome_split.py');
   if C.isoform_dense_build_splice_db:
-    M.add_step("ISOFORM_DENSE_STAR_PRE_SPLICE", "${ISOFORM_DENSE_SPLIT_GENOME}", cor(C.__isoform_dense_star_pre_splice_output__), 'pipeline_isoform_dense_star_pre_splice.py');
+    M.add_step("ISOFORM_DENSE_STAR_PRE_SPLICE", "${ISOFORM_DENSE_SPLIT_GENOME_OUT}", cor(C.__isoform_dense_star_pre_splice_output__), 'pipeline_isoform_dense_star_pre_splice.py');
     M.add_step("ISOFORM_DENSE_STAR_SPLICE", "${ISOFORM_DENSE_STAR_PRE_SPLICE_OUT} ${TRIMMOMATIC_OUT}", ' '.join([cor(C.__isoform_dense_star_splice_output__)] + cor(C.__isoform_dense_star_splice_output_logs__)), 'pipeline_dense_isoform_star_splice.py');
     M.add_step("ISOFORM_DENSE_STAR_GG", "${ISOFORM_DENSE_SPLIT_GENOME_OUT} ${ISOFORM_DENSE_STAR_SPLICE_OUT}", C.__isoform_dense_genome_generate_dir__(), 'pipeline_isoform_dense_star_genome_generate.py');
   else:
     M.add_step("ISOFORM_DENSE_STAR_GG", "${ISOFORM_DENSE_SPLIT_GENOME_OUT}", C.__isoform_dense_genome_generate_dir__(), 'pipeline_isoform_dense_star_genome_generate.py');
   #fi
-  M.add_step("ISOFORM_DENSE_STAR", "${ISOFORM_DENSE_STAR_GG} ${TRIMMOMATIC_OUT}", ' '.join(C.__isoform_dense_star_align_output_sam__() + flatten(cor(C.__isoform_dense_star_align_output_log__)) + [cor(C.__isoform_dense_star_align_output_merged__)]), 'pipeline_isoform_dense_star_align.py');
-
+  M.add_var("ISOFORM_DENSE_STAR_UNMAPPED", ' '.join(flatten(C.__isoform_dense_star_align_output_unmapped__())));
+  M.add_var("ISOFORM_DENSE_STAR_BAM", ' '.join(C.__isoform_dense_star_align_output_bam__()));
+  M.add_var("ISOFORM_DENSE_STAR_LOGS", ' '.join(flatten(C.__isoform_dense_star_align_output_log__())));
+  M.add_var("ISOFORM_DENSE_STAR_MERGED_BAM", C.__isoform_dense_star_align_output_merged__());
+  M.add_step("ISOFORM_DENSE_STAR", "${ISOFORM_DENSE_STAR_GG} ${TRIMMOMATIC_OUT}", '${ISOFORM_DENSE_STAR_UNMAPPED} ${ISOFORM_DENSE_STAR_BAM} ${ISOFORM_DENSE_STAR_LOGS} ${ISOFORM_DENSE_STAR_MERGED_BAM} ', 'pipeline_isoform_dense_star_align.py');
+  M.add_step("ISOFORM_DENSE_CUFFLINKS_RABT", "${ISOFORM_DENSE_STAR_MERGED_BAM} ${ISOFORM_DENSE_SPLIT_GENOME_OUT}", ' '.join(cor(C.__isoform_dense_cufflinks_output__),  'pipeline_isoform_dense_cufflinks_rabt.py');
+  M.add_step("ISOFORM_DENSE_UNSPLIT_GENOME", "${ISOFORM_DENSE_CUFFLINKS_RABT}", cor(C.__isoform_dense_genome_unsplit_output__), 'pipeline_isoform_dense_genome_unsplit.py');
+  M.add_step("ISOFORM_DENSE_UNSPLIT_ANALYSIS", "${ISOFORM_DENSE_UNSPLIT_GENOME}", cor(C.__isoform_dense_genome_analysis_outdir__), 'pipeline_isoform_dense_analysis.py');
 #fi
 
 M.write(C.makefile, C.location, "${QUALITYREPORT} ${POSTANALYSIS}", C.outdir);
