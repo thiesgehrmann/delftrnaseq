@@ -39,7 +39,7 @@ And you can run any one of these steps with:
 > make TRIMMOMATIC
 ```
 
-If you start a step and you have not completed the dependencies of that step, it will run those first. E.g.:
+If you start a step and you have not completed the dependencies of that step, it will run those first.
 
 Installation
 ===============
