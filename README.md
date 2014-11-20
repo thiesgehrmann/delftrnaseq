@@ -1,9 +1,9 @@
 delftrnaseq
 ===========
 
-RNA-Seq pipeline used at the Delft Bioinformatics Lab.
+RNA-Seq pipeline used at the Delft Bioinformatics Lab for paired and single end reads.
 
-![An outline of what the pipeline can (or will) be able to produce](/delftrnaseq.png)
+![An outline of what the pipeline can (or will) be able to produce](/readme/pipeline.png)
 
 Dependencies
 =============
@@ -25,7 +25,7 @@ Further functionality is provided by installing:
 Usage
 =========
 
-Given a configuration file (such as 'pipeline_conf_example.py'):
+Given a configuration file (such as 'pipeline_conf_example.py') (most functionality is exemplified there)
 
 ```shell
 > ./pipeline_conf_example.py # Produces a makefile 'Makefile', and a configuration file 'conf'
@@ -40,9 +40,6 @@ And you can run any one of these steps with:
 ```
 
 If you start a step and you have not completed the dependencies of that step, it will run those first. E.g.:
-```shell
-> make CUFFDIFF
-```
 
 Installation
 ===============
