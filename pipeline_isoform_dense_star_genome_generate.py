@@ -5,7 +5,7 @@ C = init_conf()
 
 cmds = [];
 
-split_gff, split_fasta = cor(C.__isoform_dense_genome_split_output__);
+split_gff, split_fasta, split_info = cor(C.__isoform_dense_genome_split_output__);
 
 cmds.append("mkdir -p %s" % cor(C.__isoform_dense_genome_generate_dir__));
 

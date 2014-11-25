@@ -32,7 +32,7 @@ class makefile:
     self.vars = self.vars + [ ( name, val ) ];
   #edef
 
-  def write(self, mfile, loc, end, workdir):
+  def write(self, mfile, loc, end, workdir, title):
     fd = open(mfile, 'w');
 
     for (name, val) in self.vars:
@@ -48,36 +48,80 @@ class makefile:
     fd.write('.PHONY : status\n');
     fd.write('status: \n');
     maxl = max([len(n) + 4 for (n,s) in self.steps]);
+    status_header = "PIPELINE STATUS FOR %s" % title;
+    spacing = ' ' * (((maxl + 19) - len(status_header)) / 2);
+    fd.write('\t@echo "%s%s";' % (spacing, status_header));
+    fd.write('echo "%s%s"; echo "";\n' % (spacing, '-' * len(status_header)));
     for (step, script) in self.steps:
       fd.write('\t@printf "%%-*s" %d "[%s]: "; ' % (maxl, step));
       fd.write('ls ${%s_OUT} &>/dev/null; ' % step);
       fd.write('complete_res=$$?; ');
       fd.write('ls ${%s_IN} &>/dev/null;' % step);
       fd.write('ready_res=$$?;');
-      fd.write('if [ $$ready_res -eq 0 ]; then');
+      fd.write('in_newest=`for x in ${%s_IN}; do if [ -e "$$x" ]; then echo "$$x"; fi; done | xargs stat -c \'%%Y\' 2> /dev/null | sort | tail -n1`;' % step);
+      fd.write('for x in ${%s_IN}; do if [ -e "$$x" ]; then echo "$$x"; fi; done | xargs stat -c \'%%Y\' 2> /dev/null | sort | tail -n1 &> /dev/null;' % step);
+      fd.write('in_newest_status=$${PIPESTATUS[1]};');
+      fd.write('if [ ! $$in_newest_status -eq 0 ]; then');
+      fd.write('  in_newest=`date \'+%s\'`;');
+      fd.write('fi;');
+      fd.write('out_oldest=`for x in ${%s_OUT}; do if [ -e "$$x" ]; then echo $$x; fi; done | xargs stat -c \'%%Y\' 2> /dev/null | sort | head -n1`;' % step);
+      fd.write('for x in ${%s_OUT}; do if [ -e "$$x" ]; then echo $$x; fi; done | xargs stat -c \'%%Y\' 2> /dev/null | sort | tail -n1 &> /dev/null;' % step);
+      fd.write('out_oldest_status=$${PIPESTATUS[1]};');
+      fd.write('if [ ! $$out_oldest_status -eq 0 ]; then');
+      fd.write('  out_oldest=`date \'+%s\'`;');
+      fd.write('fi;');
+      fd.write('if [ "$$ready_res" -eq 0 ]; then');
       fd.write('  echo -en "READY   ";');
       fd.write('else');
-      fd.write('  echo -en "WAITING ";');
+      fd.write('  echo -en "UNREADY ";');
       fd.write('fi;');
       fd.write('if [ -n "`ps aux | grep \'${inst_loc}/%s %s\' | grep -v \'grep\'`" ]; then' % (script, loc));
-      fd.write('  c=`ls ${%s_OUT} 2> /dev/null | wc -l`;' % step);
+      fd.write('  c=`ls -d ${%s_OUT} 2> /dev/null | wc -l`;' % step);
       fd.write('  t=`echo ${%s_OUT} | tr \' \' \'\\n\' | wc -l`;' % step);
       fd.write('  printf "RUNNING %3s / %3s\\n" "$$c" "$$t";');
       fd.write('elif [ $$complete_res -eq 0 ]; then');
-      fd.write('  echo "COMPLETE";');
+      fd.write('  if [ $$in_newest -gt $$out_oldest ]; then');
+      fd.write('    echo "REPEAT";');
+      fd.write('  else');
+      fd.write('    echo "COMPLETE";');
+      fd.write('  fi;');
       fd.write('else');
       fd.write('  echo "INCOMPLETE";');
+      fd.write('fi;');
+      #fd.write('echo -$$out_oldest-, -$$in_newest-;');
+      fd.write('\n');
+    #efor
+    fd.write('\t@echo "";');
+    fd.write('echo "READY      - The direct dependencies of this target have been met.";');
+    fd.write('echo "UNREADY    - The direct dependencies of this target have not been met.";');
+    fd.write('echo "COMPLETE   - The products of this target have been created more recently than its direct dependencies";');
+    fd.write('echo "REPEAT     - The products of this target have been created, but before its direct dependencies. You may want to run touch to resolve this.";');
+    fd.write('echo "RUNNING    - This target is currently running.";');
+    fd.write('echo "INCOMPLETE - The products of this target have not (all) been created."\n');
+
+    fd.write('.PHONY : just_touch\n');
+    fd.write('just_touch:\n');
+    fd.write('\t@find ${outdir} -print0 | xargs -0r touch;\n')
+    #fd.write('\tfind . | xargs touch -a\n')
+    for (step, script) in self.steps:
+      fd.write('\t@ls ${%s_IN} &>/dev/null;' % step);
+      fd.write('if [ $$? -eq 0 ]; then ');
+      fd.write('  echo -e ${%s_IN} | xargs touch;' % step);
       fd.write('fi\n');
     #efor
-    fd.write('.PHONY : touch\n');
-    fd.write('touch: status\n');
-    fd.write('\t@find ${outdir} | xargs touch\n')
-    fd.write('\t@find . | xargs touch\n')
     for (step, script) in self.steps:
       fd.write('\t@ls ${%s_OUT} &>/dev/null;' % step);
       fd.write('if [ $$? -eq 0 ]; then ');
-      fd.write('  touch ${%s_OUT};' % step);
+      fd.write('  echo -e ${%s_OUT} | xargs touch;' % step);
       fd.write('fi\n');
+    #efor
+
+    fd.write('.PHONY : touch\n');
+    fd.write('touch: just_touch status\n');
+
+    for (step, script) in self.steps:
+      fd.write('clean_%s: status\n' % step);
+      fd.write('\t@rm -rf ${%s_OUT} &>/dev/null;\n' % step);
     #efor
     fd.write('\n\n');
 
@@ -198,7 +242,7 @@ if C.isoform_dense_analysis:
   M.add_step("ISOFORM_DENSE_SPLIT_GENOME", "${STAR_AL_OUTPUT_SAM} ${GENOME_ANNOT_FORMAT_OUT}", ' '.join(C.__isoform_dense_genome_split_output__()), 'pipeline_isoform_dense_genome_split.py');
   if C.isoform_dense_build_splice_db:
     M.add_step("ISOFORM_DENSE_STAR_PRE_SPLICE", "${ISOFORM_DENSE_SPLIT_GENOME_OUT}", cor(C.__isoform_dense_star_pre_splice_output__), 'pipeline_isoform_dense_star_pre_splice.py');
-    M.add_step("ISOFORM_DENSE_STAR_SPLICE", "${ISOFORM_DENSE_STAR_PRE_SPLICE_OUT} ${TRIMMOMATIC_OUT}", ' '.join([cor(C.__isoform_dense_star_splice_output__)] + cor(C.__isoform_dense_star_splice_output_logs__)), 'pipeline_dense_isoform_star_splice.py');
+    M.add_step("ISOFORM_DENSE_STAR_SPLICE", "${ISOFORM_DENSE_STAR_PRE_SPLICE_OUT} ${TRIMMOMATIC_OUT}", ' '.join([cor(C.__isoform_dense_star_splice_output__)] + cor(C.__isoform_dense_star_splice_output_logs__)), 'pipeline_isoform_dense_star_splice.py');
     M.add_step("ISOFORM_DENSE_STAR_GG", "${ISOFORM_DENSE_SPLIT_GENOME_OUT} ${ISOFORM_DENSE_STAR_SPLICE_OUT}", C.__isoform_dense_genome_generate_dir__(), 'pipeline_isoform_dense_star_genome_generate.py');
   else:
     M.add_step("ISOFORM_DENSE_STAR_GG", "${ISOFORM_DENSE_SPLIT_GENOME_OUT}", C.__isoform_dense_genome_generate_dir__(), 'pipeline_isoform_dense_star_genome_generate.py');
@@ -207,13 +251,13 @@ if C.isoform_dense_analysis:
   M.add_var("ISOFORM_DENSE_STAR_BAM", ' '.join(C.__isoform_dense_star_align_output_bam__()));
   M.add_var("ISOFORM_DENSE_STAR_LOGS", ' '.join(flatten(C.__isoform_dense_star_align_output_log__())));
   M.add_var("ISOFORM_DENSE_STAR_MERGED_BAM", C.__isoform_dense_star_align_output_merged__());
-  M.add_step("ISOFORM_DENSE_STAR", "${ISOFORM_DENSE_STAR_GG} ${TRIMMOMATIC_OUT}", '${ISOFORM_DENSE_STAR_UNMAPPED} ${ISOFORM_DENSE_STAR_BAM} ${ISOFORM_DENSE_STAR_LOGS} ${ISOFORM_DENSE_STAR_MERGED_BAM} ', 'pipeline_isoform_dense_star_align.py');
+  M.add_step("ISOFORM_DENSE_STAR", "${ISOFORM_DENSE_STAR_GG_OUT} ${TRIMMOMATIC_OUT}", '${ISOFORM_DENSE_STAR_UNMAPPED} ${ISOFORM_DENSE_STAR_BAM} ${ISOFORM_DENSE_STAR_LOGS} ${ISOFORM_DENSE_STAR_MERGED_BAM} ', 'pipeline_isoform_dense_star_align.py');
   M.add_step("ISOFORM_DENSE_CUFFLINKS_RABT", "${ISOFORM_DENSE_STAR_MERGED_BAM} ${ISOFORM_DENSE_SPLIT_GENOME_OUT}", ' '.join(cor(C.__isoform_dense_cufflinks_output__)),  'pipeline_isoform_dense_cufflinks_rabt.py');
-  M.add_step("ISOFORM_DENSE_UNSPLIT_GENOME", "${ISOFORM_DENSE_CUFFLINKS_RABT}", cor(C.__isoform_dense_genome_unsplit_output__), 'pipeline_isoform_dense_genome_unsplit.py');
+  M.add_step("ISOFORM_DENSE_UNSPLIT_GENOME", "${ISOFORM_DENSE_CUFFLINKS_RABT_OUT}", cor(C.__isoform_dense_genome_unsplit_output__), 'pipeline_isoform_dense_genome_unsplit.py');
   M.add_step("ISOFORM_DENSE_UNSPLIT_ANALYSIS", "${ISOFORM_DENSE_UNSPLIT_GENOME_OUT}", cor(C.__isoform_dense_genome_analysis_outdir__), 'pipeline_isoform_dense_analysis.py');
 #fi
 
-M.write(C.makefile, C.location, "${QUALITYREPORT} ${POSTANALYSIS}", C.outdir);
+M.write(C.makefile, C.location, "${QUALITYREPORT} ${POSTANALYSIS}", C.outdir, C.jobname);
 
 ###############################################################################
 

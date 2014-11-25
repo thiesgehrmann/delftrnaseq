@@ -5,7 +5,7 @@ C = init_conf()
 
 genome_annot = C.__genome_annot_format_output__();
 
-split_gff, split_fasta = cor(C.__isoform_dense_genome_split_output__);
+split_gff, split_fasta, split_info = cor(C.__isoform_dense_genome_split_output__);
 
 cuff_outputs = cor(C.__isoform_dense_cufflinks_output__);
 
@@ -15,7 +15,7 @@ out_gff     = cor(C.__isoform_dense_genome_unsplit_output__);
 
 cmds = [];
 
-cmds.append("%s/utilities/split_genome.py unsplit %s %s %s %s %s" % (C.inst_loc, genome_annot, split_fasta, cuff_outputs[-1], unsplit_gff));
+cmds.append("%s/utilities/split_genome.py unsplit %s %s %s %s" % (C.inst_loc, genome_annot, split_info, cuff_outputs[-1], unsplit_gff));
 cmds.append("gffread -EF %s -o %s" % (unsplit_gff, out_gff));
 cmds.append("rm %s" % unsplit_gff);
 

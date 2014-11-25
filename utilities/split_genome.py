@@ -67,21 +67,22 @@ def split_genome_smart(gff_file, fasta_file, readlen, IS_mean, IS_stdev):
   
   GEFSR = GEFS.To(_.start, Do=_.Get(_.start - Min(_.start) + 1) / ('start')).To(_.end, Do=_.Get(_.end - GEF.start.Min() + 1) / ('end'))
   
-  NF = GEFSR.Get(_.parent, _.left_padding, _.right_padding, _.seq).To(_.seq, Do=_.Cast('DNA'));
+  NF = GEFSR.Get(_.parent, _.seq).To(_.seq, Do=_.Cast('DNA'));
   NG = GEFSR.Get(_.parent / ('seqname'), _.source, _.id, _.parent, _.name, _.feature, (_.start + _.left_padding) / 'start', (_.end + _.left_padding) / 'end', _.score, _.strand, _.frame, _.attr).Flat();
+  SI = GEFSR.Get(_.parent, _.left_padding, _.right_padding)
 
-  return NG.Copy(), NF.Copy();
+  return NG.Copy(), NF.Copy(), SI.Copy();
 #edef
 
 
-def unsplit_smart(gff_file, fasta_file, created_gff):
+def unsplit_smart(gff_file, split_info_file, created_gff):
 
   G  = Read(gff_file);
-  NF = Read(fasta_file, sep=['|']) / ('parent', 'left_padding', 'right_padding', 'seq');
-  NF = NF.To(_.left_padding, Do=_.Cast(int)).To(_.right_padding, Do=_.Cast(int));
+  SI = Read(split_info_file) / ('parent', 'left_padding', 'right_padding');
+  SI = SI.To(_.left_padding, Do=_.Cast(int)).To(_.right_padding, Do=_.Cast(int));
   NG = Read(created_gff);
 
-  CNG = NG | Match(_.seqname, _.parent2) | NF.Get(_.parent / 'parent2', _.left_padding);
+  CNG = NG | Match(_.seqname, _.parent2) | SI.Get(_.parent / 'parent2', _.left_padding);
   CNG = CNG.To(_.start, Do=_.Get(CNG.start, CNG.left_padding).Each(lambda x, y: x - y) / 'start');
   CNG = CNG.To(_.end,   Do=_.Get(CNG.end, CNG.left_padding).Each(lambda x, y: x - y) / 'end');
   CNG = CNG.Without(_.left_padding, _.parent2);
@@ -124,8 +125,8 @@ def set_x2y(gff_file, x, xtype, y, ytype):
 
 def usage():
   print "Transform the genome and manipulate attributes";
-  print "%s split   <gff_file> <genome_fasta_file> <IS_mean> <IS_stdev> <split_output_gff> <split_output_fasta>" % sys.argv[0];
-  print "%s unsplit <gff_file> <split_fasta> <split_gff_file> <unsplit_output_gff>" % sys.argv[0];
+  print "%s split   <gff_file> <genome_fasta_file> <mean_readlength> <IS_mean> <IS_stdev> <split_output_gff> <split_output_fasta> <split_output_info>" % sys.argv[0];
+  print "%s unsplit <gff_file> <split_info> <unsplit_output_gff>" % sys.argv[0];
   print "%s setx2y  <split_gff_file> <x> <xtype name|attribute> <y> <ytype name|attribute> <output_gff>" % sys.argv[0];
 
   print '\n'.join(sys.argv);
@@ -134,11 +135,12 @@ def usage():
 ###############################################################################
 
 if __name__ == '__main__':
-  if sys.argv[1] == 'split' and (len(sys.argv) == 9):
-    print sys.argv[2], sys.argv[3];
-    G,F = split_genome_smart(sys.argv[2], sys.argv[3], int(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]));
+  if sys.argv[1] == 'split' and (len(sys.argv) == 10):
+    print '\n'.join(sys.argv);
+    G, F, SI = split_genome_smart(sys.argv[2], sys.argv[3], int(sys.argv[4]), float(sys.argv[5]), float(sys.argv[6]));
     Export(G, sys.argv[7]);
     Export(F, sys.argv[8]);
+    Export(SI, sys.argv[9]);
   elif sys.argv[1] == 'unsplit' and (len(sys.argv) == 6):
     G = unsplit_smart(sys.argv[2], sys.argv[3], sys.argv[4]);
     Export(G, sys.argv[5]);

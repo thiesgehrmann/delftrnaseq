@@ -430,10 +430,14 @@ class PIPELINECONF:
   # DENSE GENOME ISOFORM ANALYSIS STUFF                                       #
   #############################################################################
 
+  __isoform_dense_genome_split_is_mean__    = None; # If set to none, then estimate
+  __isoform_dense_genome_split_is_stdev__   = None;
+  __isoform_dense_genome_split_readlength__ = None;
+
   isoform_dense_build_splice_db = False;
 
   def __isoform_dense_genome_split_output__(self):
-    return [ self.outdir + "/isoform_dense_genome_split.gffread.gff", self.outdir + "/isoform_dense_genome_split.fasta" ];
+    return [ self.outdir + "/isoform_dense_genome_split.gffread.gff", self.outdir + "/isoform_dense_genome_split.fasta", self.outdir + '/isoform_dense_genome_split_info.tsv' ];
   #edef
 
   def __isoform_dense_star_pre_splice_output__(self):
@@ -495,13 +499,13 @@ class PIPELINECONF:
   #edef
  
   def __isoform_dense_cufflinks_output__(self):
-    return [ "%s/%s" % (cor(self.__isoform_dense_cufflinks_outdir__), f) for f in [ "genes.fpkm_tracking", "isoforms.fpkm_tracking", "transcripts.gtf", "skipped.gtf", "cleaned.transcripts.gtf" "geneids.cleaned.transcripts.gff" ] ];
+    return [ "%s/%s" % (cor(self.__isoform_dense_cufflinks_outdir__), f) for f in [ "genes.fpkm_tracking", "isoforms.fpkm_tracking", "transcripts.gtf", "skipped.gtf", "cleaned.transcripts.gff", "geneids.cleaned.transcripts.gff" ] ];
   #edef
 
   __isoform_dense_attr_name__ = "knownGeneID";
 
   def __isoform_dense_genome_unsplit_output__(self):
-    return self.outdir + "isoform_dense_genome_unsplit.gffread.gff";
+    return self.outdir + "/isoform_dense_genome_unsplit.gffread.gff";
   #edef
 
   def __isoform_dense_genome_analysis_outdir__(self):

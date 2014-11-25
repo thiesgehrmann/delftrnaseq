@@ -1,3 +1,5 @@
+#!/home/nfs/thiesgehrmann/src/ibidas/run
+
 import sys;
 from bx.intervals.intersection import IntervalTree
 import numpy as np;
@@ -174,7 +176,7 @@ def print_diagnosis(D):
 
 ###############################################################################
 
-def diagnose_annotation(IDX, GN, attr_name = 'unsplitGeneID'  display=False):
+def diagnose_annotation(IDX, GN, attr_name = 'unsplitGeneID',  display=False):
   ALT_R = GN.Get(_.attr / 'geneid', *GN.Names);
   ALT_R = ALT_R.To(_.geneid, Do=_.Each(lambda x: dict([ tuple([m.strip() for m in y.split('=')]) for y in x.split(';')])[attr_name]))[_.parent != ""];
   ALT_R = ALT_R.GroupBy(_.geneid);
@@ -485,24 +487,25 @@ def usage(arv0):
 
 ###############################################################################
 
-def gff_add_diagnosis(D, GN):
+def gff_add_diagnosis(D, NG):
 
-  F = D.Get(_.orig_gene, _.alt_gene, _.exon_start, _.exon_end, _.Get(_.retention, _.alt5, _.alt3, _.skipped, _.new_exon, _.identical).Each(lambda a, b, c, d, e, f: "retention=%s;alt5=%s;alt3=%s;skipped=%s;new_exon=%s;identical=%s" % tuple([str(x) for x in [a,b,c,d,e,f]])) / 'diagnosis').Detect();
-  GM = F | Match((_.alt_gene, _.exon_start, _.exon_end), (_.parent, _.start, _.end), merge_same=True, jointype='full') | GN
+  F = D.Get(_.orig_gene, _.alt_gene, _.exon_start, _.exon_end, _.Get(_.retention, _.alt5, _.alt3, _.skipped, _.new_exon, _.identical).Each(lambda a, b, c, d, e, f: "retention=%s;alt5=%s;alt3=%s;skipped=%s;new_exon=%s;identical=%s" % tuple([str(x) for x in [a,b,c,d,e,f]])) / 'diagnosis');
+  F = F.To(_.diagnosis, Do=_.Cast(bytes));
+  GD = F | Match((_.alt_gene, _.exon_start, _.exon_end), (_.parent, _.start, _.end), merge_same=True, jointype='right') | NG
 
-  FM.Get(_.seqname, _.source, _.id, _.parent, _.name, _.feature, _.start, _.end, _.score, _.strand, _.frame, (_.attr + _.diagnosis) / 'attr');
+  GD = GD.Get(_.seqname, _.source, _.id, _.parent, _.name, _.feature, _.start, _.end, _.score, _.strand, _.frame, (_.diagnosis + ';' + _.attr) / 'attr');
 
-  return FM;
-
+  return GD.Copy();
 #edef
 
 ###############################################################################
 
-if __name__ == 'main':
+if __name__ == '__main__':
 
   if len(sys.argv) < 5:
     usage(sys.argv[0]);
     sys.exit(1);
+  #fi
 
   orig_gff  = sys.argv[1];
   new_gff   = sys.argv[2];
@@ -515,13 +518,15 @@ if __name__ == 'main':
   IDX = index_gff3_id(GO);
 
     # For each exon in each isoform, classify what kind of variant it is
-  D = diagnose_annotation(IDX, NG, attr_name display=False);
+  D = diagnose_annotation(IDX, NG, attr_name, display=False);
     # Gather statistics
   S = gather_diagnosis_statistics(D);
     # Print the statistics
-  draw_statistics(S, outdir, outfmt='svg');
+  T = draw_statistics(S, outdir, outfmt='svg');
 
-  GD = Export(gff_add_diagnosis(D, GN), '%s/diagnosed_annotation.gff' % outdir);
+  Export(T, '%s/output_counts.tsv' % outdir);
+  Export(D, '%s/diagnosis.tsv' % outdir);
+  Export(gff_add_diagnosis(D, NG), '%s/diagnosed_annotation.gff' % outdir);
 
   sys.exit(0);
 #fi
