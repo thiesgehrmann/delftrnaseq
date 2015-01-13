@@ -58,20 +58,40 @@ def split_genome_smart(gff_file, fasta_file, readlen, IS_mean, IS_stdev):
   #efor
   N = Rep(N) / ('parent', 'left_padding', 'right_padding');
 
+    # Get only the exons, grouped by gene
   GE = G[_.feature!='mRNA'].GroupBy(_.parent).Get(_.seqname[0], _.source[0], _.id[0], _.parent, _.name[0], _.feature, _.start, _.end, _.score[0], _.strand[0], _.frame, _.attr)
-  
+
+    # Match the genes to their window sizes
   GE = GE | Match(_.parent, _.parent) | N;
 
+    # Match the sequences to the genes
   GEF = GE | Match(_.seqname, _.f0, merge_same=True) | F;
+    # Cut the gene windows out
   GEFS = GEF.To(_.seq, Do=_.Get(GEF.start.Min() - GEF.left_padding, GEF.end.Max() + GEF.right_padding, _.seq).Each(lambda x,y,z: z[x-1:y]) / ('seq'));
   
+    # Adjust the start and end sites
   GEFSR = GEFS.To(_.start, Do=_.Get(_.start - Min(_.start) + 1) / ('start')).To(_.end, Do=_.Get(_.end - GEF.start.Min() + 1) / ('end'))
-  
+
+    # The new FASTA file
   NF = GEFSR.Get(_.parent, _.seq).To(_.seq, Do=_.Cast('DNA'));
+    # The new GFF file
   NG = GEFSR.Get(_.parent / ('seqname'), _.source, _.id, _.parent, _.name, _.feature, (_.start + _.left_padding) / 'start', (_.end + _.left_padding) / 'end', _.score, _.strand, _.frame, _.attr).Flat();
+    # The UTRs
+  US = GEFSR.Get(_.parent, _.source, _.id, _.parent, _.name, _.start.Min(), _.end.Max(), _.strand, _.left_padding, _.right_padding)
+  #UTRs = [];
+  #for u in zip(*US()):
+  #  UTRs.append( ( u[0], u[1], u[2], u[3], u[4], 'five_prime_UTR' if u[7] == '+' else 'three_prime_UTR', u[5],            u[8],               '.', '.', u[7], '') );
+  #  UTRs.append( ( u[0], u[1], u[2], u[3], u[4], 'three_prime_UTR' if u[7] == '+' else 'five_prime_UTR', u[6] + u[8] + 1, u[6] + u[8] + u[9], '.', '.', u[7], '') )
+  ##efor
+  #annot = Rep(UTRs + zip(*NG())) / tuple(NG.Names);
+  annot = NG;
+  annot_types = [ NG.Type.getSubType(i) for (i,n) in enumerate(NG.Names) ];
+  annot.Cast(*annot_types);
+  annot = annot.Sort(_.parent, _.start);
+    # The Split Information file
   SI = GEFSR.Get(_.parent, _.left_padding, _.right_padding)
 
-  return NG.Copy(), NF.Copy(), SI.Copy();
+  return annot.Copy(), NF.Copy(), SI.Copy();
 #edef
 
 

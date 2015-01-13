@@ -47,6 +47,40 @@ def create_pca(data, filename, logfilter=False):
     pl.savefig(filename,dpi=200)
     #pl.show() 
 
+def create_pca2(data, filename, logfilter=False):
+    labels  = dict([ (n.split('_')[int(n.split('_')[-1])-1], n) for n in data.Names if '_value_' in n ]).items()
+    names   = [ i[1] for i in labels ];
+    samples = [ i[0] for i in labels ];
+
+    x = numpy.array(zip( *data.Get(*names)() ));
+    
+    if logfilter:
+        x = numpy.log2(x + 16)
+        x = x[numpy.std(x,axis=1) > 0.5,:]
+    
+    pca = PCA(n_components=2)
+    X_r = pca.fit(x.T).transform(x.T)
+    ratio = pca.explained_variance_ratio_
+    
+    fig = pl.figure()
+    ax = pl.subplot(111)
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    
+    for i, clabel in enumerate(samples):
+        t = X_r[i,:]
+        pl.scatter(t[0], t[1], c=pl.cm.jet(float(i)/(len(samples)-1)), s=250, label=clabel, alpha=0.7)
+    
+    ax.get_xaxis().set_ticks([])
+    ax.get_yaxis().set_ticks([])
+    pl.title('PCA plot of all samples')
+    pl.xlabel('Explained variance: {0:.2f}'.format(ratio[0]))
+    pl.ylabel('Explained variance: {0:.2f}'.format(ratio[1]))
+    
+    pl.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    pl.savefig(filename,dpi=200)
+    #pl.show() 
+
 
 def create_cluster(data, filename):
     x = data.external_scaled_frags()
