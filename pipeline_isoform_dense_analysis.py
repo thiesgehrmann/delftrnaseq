@@ -139,7 +139,7 @@ for filter, filter_name in zip(cor(C.isoform_dense_genome_analysis_filter) , cor
 
   for annot, annot_name in zip(cor(C.isoform_dense_genome_annotation_files), cor(C.isoform_dense_genome_annotation_names) ):
  
-    l.start_section('Enrichment of GO terms in sets of genes');
+    l.start_section('Enrichment of %s in sets of genes' % annot_name);
  
     annot_table = Read(annot);
   
