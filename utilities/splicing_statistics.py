@@ -328,7 +328,7 @@ def draw_statistics(S, odir, normed_hist=True, suffix="", outfmt='svg'):
 
   # Distribution of retention sizes
     x, y = S['intron_retention_size']();
-    o = draw_lineplot(x, y, 'Length (in exons) of intron retentions', 'Number of exons', 'Occurances', odir, outfmt=outfmt)
+    o = draw_lineplot(x, y, 'Length (in exons) of intron retentions (%s)' % suffix, 'Number of exons', 'Occurances', odir, outfmt=outfmt)
     figures.append(o);
 
   # Distribution of the length of alternative 5' splicing sites
