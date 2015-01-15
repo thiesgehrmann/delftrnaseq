@@ -115,6 +115,7 @@ class config(PIPELINECONF):
     # cuffdiff test to perform. =  cds|gene|isoform|tss
   #cuffdiff_test_type         = 'isoform';
 
+    # Modify the options given to cuffdiff
   #cuffdiff_opts = "";
    
   #############################################################################
@@ -124,11 +125,14 @@ class config(PIPELINECONF):
   #############################################################################
   # ANALYSIS OPTIONS                                                          #
   #############################################################################
+
+    # Create a quality report?
   #perform_quality_report     = True;
-  #perform_analysis           = True;
+    # Check for a contamination?
   #check_contamination        = False;
-
-
+    # Perform some basic analysis on the results?
+  #perform_analysis           = True;
+    
     # Enrichment analysis annotation files
   annotation_files = [ '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/Schco3_GeneCatalog_proteins_20130812_GO_CUT.tab',  '/home/nfs/thiesgehrmann/groups/w/phd/data/schco3/IPR_annot.tsv' ];
     # Enrichmeny analysis annotation names
@@ -149,6 +153,19 @@ class config(PIPELINECONF):
   # DENSE GENOME ISOFORM ANALYSIS                                             #
   #############################################################################
 
+    # perform dense isoform analysis?
   isoform_dense_analysis = True;
+    # In aligning the reads, build a splice db?
   isoform_dense_build_splice_db = True;
+
+    # Draw isoform figures for specific genes.
+    # Put gene ids in array
+  isoform_dense_genome_analysis_genes_of_interest = None; # [ ('gene_name', gene_id) ]
+
+    # By default, the annotations used for enrichment of isoforms is the same as in the postanalysis
+    # Also the filters
+  #isoform_dense_genome_analysis_filter = [];
+  #isoform_dense_genome_analysis_filter_names = [];
+  #isoform_dense_genome_annotation_files = [];
+  #isoform_dense_genome_annotation_names = [];
 #eclass

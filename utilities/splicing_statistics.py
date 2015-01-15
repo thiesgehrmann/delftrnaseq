@@ -287,47 +287,59 @@ def gather_per_gene_statistics(D, func=lambda d: any(d)):
 
 ###############################################################################
 
-def draw_statistics(S, odir, normed_hist=True, outfmt='svg'):
+def draw_statistics(S, odir, normed_hist=True, suffix="", outfmt='svg'):
+
+    figures = [];
 
   # Plot skipped exon number
     x, y = S['n_skipped_exon_p_exon_position']();
-    draw_lineplot(x, y, "How often an exon at position n is skipped", "exon position", "number of times skipped", odir, outfmt=outfmt);
+    o = draw_lineplot(x, y, "How often an exon at position n is skipped (%s)" % suffix, "exon position", "number of times skipped", odir, outfmt=outfmt);
+    figures.append(o);
 
   # Plot probability of skipping exon n
     x, y = S['n_skipped_exon_p_exon_position_norm']();
-    draw_lineplot(x, y, "Probability of skipping exon at position n", "Exon position", "Fraction skipped", odir, outfmt=outfmt);
+    o = draw_lineplot(x, y, "Probability of skipping exon at position n (%s)" % suffix, "Exon position", "Fraction skipped", odir, outfmt=outfmt);
+    figures.append(o);
 
   # Plot the length distribution of skipped exons
     x = S['length_of_skipped_exons']();
-    draw_hist(x, "Length distribution of skipped exons", "Exon length", "Skipping frequency", normed_hist, odir, nbins=100, outfmt=outfmt);
+    o = draw_hist(x, "Length distribution of skipped exons (%s)" % suffix, "Exon length", "Skipping frequency", normed_hist, odir, nbins=100, outfmt=outfmt);
+    figures.append(o);
 
   # Plot the length distribution of exons in gene with known isoforms
     x = S['length_exon_known_isoforms']();
-    draw_hist(x, "Length distribution of exons in genes with known isoforms", "Exon length", "Frequency", normed_hist, odir, nbins=100, outfmt=outfmt);
+    o = draw_hist(x, "Length distribution of exons in genes with known isoforms (%s)" % suffix, "Exon length", "Frequency", normed_hist, odir, nbins=100, outfmt=outfmt);
+    figures.append(o);
 
   # Plot the length distribution of exons in all genes (no isoforms)
     x = S['length_exon_known_no_isoforms']();
-    draw_hist(x, "Length distribution of exons in genes", "Exon length", "Frequency", normed_hist, odir, nbins=100, outfmt=outfmt);
+    o = draw_hist(x, "Length distribution of exons in genes (%s)" % suffix, "Exon length", "Frequency", normed_hist, odir, nbins=100, outfmt=outfmt);
+    figures.append(o);
 
   # Plot the length distribution of exons in isoforms (not including skipped exons)
     x = S['length_exon_isoforms']();
-    draw_hist(x, "Length distribution of exons in isoforms", "Exon length", "Frequency", normed_hist, odir, nbins=100, outfmt=outfmt);
+    o = draw_hist(x, "Length distribution of exons in isoforms (%s)" % suffix, "Exon length", "Frequency", normed_hist, odir, nbins=100, outfmt=outfmt);
+    figures.append(o);
 
   # Plot isoform distribution (Number of isoforms per gene)
     x, y = S['n_isoforms_p_gene'].GroupBy(_.alt_gene).Get(_.alt_gene, _.orig_gene.Count())();
-    draw_lineplot(x, y, "Number of isoforms per gene", "Number of isoforms", "Frequency", odir, outfmt=outfmt);
+    o = draw_lineplot(x, y, "Number of isoforms per gene (%s)" % suffix, "Number of isoforms", "Frequency", odir, outfmt=outfmt);
+    figures.append(o);
 
   # Distribution of retention sizes
     x, y = S['intron_retention_size']();
-    draw_lineplot(x, y, 'Length (in exons) of intron retentions', 'Number of exons', 'Occurances', odir, outfmt=outfmt)
+    o = draw_lineplot(x, y, 'Length (in exons) of intron retentions', 'Number of exons', 'Occurances', odir, outfmt=outfmt)
+    figures.append(o);
 
   # Distribution of the length of alternative 5' splicing sites
     x = S['length_alt5']();
-    draw_hist(x, "Length of alternative 5' splicing sites", "Length (bp)", "Occurances", normed_hist, odir, 100, outfmt=outfmt);
+    o = draw_hist(x, "Length of alternative 5' splicing sites (%s)" % suffix, "Length (bp)", "Occurances", normed_hist, odir, 100, outfmt=outfmt);
+    figures.append(o);
 
   # Distribution of the length of alternative 3' splicing sites
     x = S['length_alt3']();
-    draw_hist(x, "Length of alternative 3' splicing sites", "Length (bp)", "Occurances", normed_hist, odir, 100, outfmt=outfmt);
+    o = draw_hist(x, "Length of alternative 3' splicing sites (%s)" % suffix, "Length (bp)", "Occurances", normed_hist, odir, 100, outfmt=outfmt);
+    figures.append(o);
 
   # Draw table of numbers
     keys = sorted([ k for k in S.keys() if 'feat_p_' in k]);
@@ -342,7 +354,7 @@ def draw_statistics(S, odir, normed_hist=True, outfmt='svg'):
       T.append(tuple(r));
     #efor
 
-    return Rep(T) / (('count',) + tuple(vals));
+    return Rep(T) / (('count',) + tuple(vals)), figures;
 
 #edef
 
@@ -365,6 +377,8 @@ def draw_hist(x, title="title", xlab="x", ylab="y", normed=True, odir="", nbins=
   plt.title(title);
 
   plt.savefig('%s%s.%s' % (odir + ('/' if odir else ""), '_'.join(title.split(None)), outfmt), format=outfmt);
+
+  return '%s.%s' % ('_'.join(title.split(None)), outfmt), title;
 
 #edef
 
@@ -398,6 +412,8 @@ def draw_lineplot(x, y, title="title", xlab="x", ylab="y", odir="", xlim=None, y
   plt.ylim(ylim);
 
   plt.savefig('%s%s.%s' % (odir + ('/' if odir else ""), '_'.join(title.split(None)), outfmt), format=outfmt);
+
+  return '%s.%s' % ('_'.join(title.split(None)), outfmt), title;
 #edef
 
 def draw_gene_isoforms_color(retention, alt5, alt3, skipped, new, ident):
@@ -413,7 +429,7 @@ def draw_gene_isoforms_color(retention, alt5, alt3, skipped, new, ident):
     return 'k';
 #edef
 
-def draw_gene_isoforms(D, gene_id, odir='./', outfmt='eps'):
+def draw_gene_isoforms(D, gene_id, outfile, outfmt):
 
   import matplotlib.patches as mpatches;
   from matplotlib.collections import PatchCollection;
@@ -462,7 +478,7 @@ def draw_gene_isoforms(D, gene_id, odir='./', outfmt='eps'):
   plt.gca().spines['left'].set_color('none');
   plt.gca().spines['right'].set_color('none');
   plt.tick_params(axis='x', which='both', top='off', bottom='on');
-  plt.savefig('%s/isoforms_of_%s.%s' % (odir, gene_id, outfmt), format=outfmt);
+  plt.savefig(outfile, format=outfmt);
 
   return ISO;
 
@@ -522,10 +538,12 @@ if __name__ == '__main__':
     # Gather statistics
   S = gather_diagnosis_statistics(D);
     # Print the statistics
-  T = draw_statistics(S, outdir, outfmt='svg');
+  T, F = draw_statistics(S, outdir, outfmt='svg');
 
   Export(T, '%s/output_counts.tsv' % outdir);
+  Export(T, '%s/output_counts.dat' % outdir);
   Export(D, '%s/diagnosis.tsv' % outdir);
+  Save(D,   '%s/diagnosis.dat' % outdir);
   Export(gff_add_diagnosis(D, NG), '%s/diagnosed_annotation.gff' % outdir);
 
   sys.exit(0);

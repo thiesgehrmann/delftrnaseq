@@ -305,8 +305,6 @@ class PIPELINECONF:
 
   merge_annotation_files = []
 
-  annotation_files = [];
-  annotation_names = [];
   def __cuffdiff_combine_output__(self):
     return [ self.outdir + '/cuffdiff_combine.dat', self.outdir + '/cuffdiff_combine.csv'];
   #edef
@@ -314,6 +312,9 @@ class PIPELINECONF:
   #############################################################################
   # ANALYSIS STUFF                                                            #
   #############################################################################
+
+  annotation_files = [];
+  annotation_names = [];
 
   perform_quality_report     = True;
   perform_analysis           = True;
@@ -506,6 +507,28 @@ class PIPELINECONF:
 
   def __isoform_dense_genome_unsplit_output__(self):
     return self.outdir + "/isoform_dense_genome_unsplit.gffread.gff";
+  #edef
+
+  def isoform_dense_genome_analysis_filter(self):
+    return self.analysis_filter
+  #edef
+
+  def isoform_dense_genome_analysis_filter_names(self):
+    return self.analysis_filter_names;
+  #edef
+
+  isoform_dense_genome_analysis_genes_of_interest = None;
+
+  def isoform_dense_genome_annotation_files(self):
+    return self.annotation_files;
+  #edef
+
+  def isoform_dense_genome_annotation_names(self):
+    return self.annotation_names;
+  #edef
+
+  def __isoform_dense_genome_analysis_enrichment_alpha__(self):
+    return self.__analysis_enrichment_alpha__;
   #edef
 
   def __isoform_dense_genome_analysis_outdir__(self):
